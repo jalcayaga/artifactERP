@@ -1,0 +1,104 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Syntax Light Theme Inspired by Tailwind UI "Syntax" Template */
+    --background: 220 17% 97%; /* slate-50 (Main page background) */
+    --foreground: 222 47% 11%; /* slate-900 (Main text) */
+
+    --card: 0 0% 100%; /* white (Card background) */
+    --card-foreground: 222 47% 11%; /* slate-900 (Text on cards) */
+
+    --popover: 0 0% 100%; /* white */
+    --popover-foreground: 222 47% 11%; /* slate-900 */
+
+    --primary: 201.4 89.1% 54.3%; /* sky-500 (Primary accent) */
+    --primary-foreground: 0 0% 100%; /* white (Text on primary elements) */
+    
+    --secondary: 220 14% 93%; /* slate-100 (Secondary background elements) */
+    --secondary-foreground: 222 47% 11%; /* slate-900 (Text on secondary elements) */
+
+    --muted: 220 14% 93%; /* slate-100 (Muted backgrounds, e.g., table headers) */
+    --muted-foreground: 221 30% 57%; /* slate-500 (Muted text) */
+
+    --accent: 220 14% 93%; /* slate-100 (Background for hovered/active subtle elements) */
+    --accent-foreground: 222 47% 11%; /* slate-900 (Text for accent elements) */
+
+    --destructive: 0 84.2% 60.2%; /* red-500 (Errors) */
+    --destructive-foreground: 0 0% 98%; /* white (Text on destructive elements) */
+
+    --border: 220 13% 88%; /* slate-300 (Borders for cards, inputs) */
+    --input: 220 13% 88%; /* slate-300 (Input borders. BG of inputs often white or very light gray) */
+    --ring: 201.4 89.1% 54.3%; /* sky-500 (Focus rings, matching primary) */
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* Syntax Dark Theme Inspired by Tailwind UI "Syntax" Template */
+    --background: 222 47% 11%; /* slate-900 (Main page background) */
+    --foreground: 220 17% 97%; /* slate-50 (Main text) */
+
+    --card: 222 40% 16%; /* slate-800 (Card background) */
+    --card-foreground: 220 17% 97%; /* slate-50 (Text on cards) */
+
+    --popover: 222 40% 16%; /* slate-800 */
+    --popover-foreground: 220 17% 97%; /* slate-50 */
+
+    --primary: 200.4 95.8% 62%; /* sky-400 (Lighter blue for dark mode primary accent) */
+    --primary-foreground: 203 100% 12.9%; /* sky-950 (Very dark blue for text on lighter blue primary) */
+
+    --secondary: 222 40% 20%; /* slate-700 (Secondary background elements) */
+    --secondary-foreground: 220 17% 97%; /* slate-50 (Text on secondary elements) */
+
+    --muted: 222 40% 20%; /* slate-700 (Muted backgrounds) */
+    --muted-foreground: 220 14% 60%; /* slate-400 (Muted text) */
+
+    --accent: 222 40% 20%; /* slate-700 (Background for hovered/active subtle elements) */
+    --accent-foreground: 220 17% 97%; /* slate-50 (Text for accent elements) */
+
+    --destructive: 0 72% 51%; /* red-600 (Errors in dark mode) */
+    --destructive-foreground: 0 0% 98%; /* white */
+
+    --border: 222 40% 30%; /* slate-600 (Borders for cards, inputs) */
+    --input: 222 40% 30%; /* slate-600 (Input borders. BG for inputs often slate-700/slate-800) */
+    --ring: 200.4 95.8% 62%; /* sky-400 (Focus rings, matching primary) */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Scrollbar styling for webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent; /* Or bg-background if needed */
+}
+html.dark ::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted)); /* Using muted for scrollbar thumb */
+  border-radius: 4px;
+}
+html.light ::-webkit-scrollbar-thumb {
+  background: hsl(var(--border)); /* Using border for light scrollbar thumb */
+  border-radius: 4px;
+}
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground)); /* Slightly more prominent on hover */
+}
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground)); /* Slightly more prominent on hover */
+}
