@@ -4,13 +4,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto'; // Placeholder
 import * as bcrypt from 'bcrypt';
-import { Prisma } from '@prisma/client'; // Changed to import Prisma namespace
+import { User, UserRole } from '@prisma/client'; // Import User and UserRole types
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<Omit<Prisma.User, 'password'>> { // Changed User to Prisma.User
+  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> { // Use User type
     const existingUser = await this.prisma.client.user.findUnique({
       where: { email: createUserDto.email },
     });
@@ -22,9 +22,10 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     
     const roleKey = createUserDto.role?.toUpperCase();
-    const userRoleValue: Prisma.UserRole = roleKey && roleKey in Prisma.UserRole 
-        ? Prisma.UserRole[roleKey as keyof typeof Prisma.UserRole] 
-        : Prisma.UserRole.VIEWER; 
+    // Ensure UserRole is correctly referenced
+    const userRoleValue: UserRole = roleKey && roleKey in UserRole 
+        ? UserRole[roleKey as keyof typeof UserRole] 
+        : UserRole.VIEWER; 
 
     const user = await this.prisma.client.user.create({
       data: {
@@ -39,18 +40,18 @@ export class UsersService {
     return result;
   }
 
-  async findAll(): Promise<Omit<Prisma.User, 'password'>[]> { // Changed User to Prisma.User
+  async findAll(): Promise<Omit<User, 'password'>[]> { // Use User type
     const users = await this.prisma.client.user.findMany();
     return users.map(({ password, ...user }) => user);
   }
 
-  async findOneByEmail(email: string): Promise<Prisma.User | null> { // Changed User to Prisma.User
+  async findOneByEmail(email: string): Promise<User | null> { // Use User type
     return this.prisma.client.user.findUnique({
       where: { email },
     });
   }
   
-  async findOneById(id: string): Promise<Omit<Prisma.User, 'password'> | null> { // Changed User to Prisma.User
+  async findOneById(id: string): Promise<Omit<User, 'password'> | null> { // Use User type
     const user = await this.prisma.client.user.findUnique({
       where: { id },
     });

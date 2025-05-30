@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card'; // Importar Card de shadcn/ui
-import { CreditCardIcon } from '@/components/Icons';
+import { Card, CardContent } from '@/components/ui/card'; 
+import { CreditCardIcon } from '@/icons';
 
 const FinanceView: React.FC = () => {
   return (

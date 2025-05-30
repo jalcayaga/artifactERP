@@ -1,7 +1,7 @@
 
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client'; // Changed to import Prisma namespace
+import { Product, ProductType } from '@prisma/client'; // Import Product and ProductType types
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -9,7 +9,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Prisma.Product> { // Changed to Prisma.Product
+  async create(createProductDto: CreateProductDto): Promise<Product> { // Use Product type
     if (createProductDto.sku) {
       const existingBySku = await this.prisma.client.product.findUnique({
         where: { sku: createProductDto.sku },
@@ -27,11 +27,11 @@ export class ProductsService {
     });
   }
 
-  async findAll(): Promise<Prisma.Product[]> { // Changed to Prisma.Product
+  async findAll(): Promise<Product[]> { // Use Product type
     return this.prisma.client.product.findMany();
   }
 
-  async findAllPublished(page: number = 1, limit: number = 10, category?: string): Promise<{ data: Prisma.Product[], total: number, pages: number }> { // Changed to Prisma.Product
+  async findAllPublished(page: number = 1, limit: number = 10, category?: string): Promise<{ data: Product[], total: number, pages: number }> { // Use Product type
     const whereClause: any = { isPublished: true };
     if (category) {
       whereClause.category = category;
@@ -47,7 +47,7 @@ export class ProductsService {
     return { data, total, pages: Math.ceil(total / limit) };
   }
   
-  async findOne(id: string): Promise<Prisma.Product | null> { // Changed to Prisma.Product
+  async findOne(id: string): Promise<Product | null> { // Use Product type
     const product = await this.prisma.client.product.findUnique({ where: { id } });
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
@@ -55,7 +55,7 @@ export class ProductsService {
     return product;
   }
 
-  async findOnePublished(id: string): Promise<Prisma.Product | null> { // Changed to Prisma.Product
+  async findOnePublished(id: string): Promise<Product | null> { // Use Product type
     const product = await this.prisma.client.product.findFirst({
       where: { id, isPublished: true },
     });
@@ -65,29 +65,27 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<Prisma.Product> { // Changed to Prisma.Product
+  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> { // Use Product type
     await this.findOne(id); 
-    if (updateProductDto.sku) { // Accessing sku directly
+    if (updateProductDto.sku) { 
         const existingBySku = await this.prisma.client.product.findFirst({
-            where: { sku: updateProductDto.sku, NOT: { id } }, // Accessing sku directly
+            where: { sku: updateProductDto.sku, NOT: { id } }, 
         });
         if (existingBySku) {
-            throw new ConflictException(`Another product with SKU ${updateProductDto.sku} already exists.`); // Accessing sku directly
+            throw new ConflictException(`Another product with SKU ${updateProductDto.sku} already exists.`); 
         }
     }
     return this.prisma.client.product.update({
       where: { id },
       data: {
         ...updateProductDto,
-        // Ensure price and unitPrice are explicitly passed if they exist in DTO
-        // Prisma expects Decimal for price fields, number conversion handled by Prisma Client
         ...(updateProductDto.price !== undefined && { price: updateProductDto.price }),
         ...(updateProductDto.unitPrice !== undefined && { unitPrice: updateProductDto.unitPrice }),
       },
     });
   }
 
-  async remove(id: string): Promise<Prisma.Product> { // Changed to Prisma.Product
+  async remove(id: string): Promise<Product> { // Use Product type
     await this.findOne(id); 
     return this.prisma.client.product.delete({ where: { id } });
   }
@@ -101,35 +99,38 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found for stock check.`);
     }
-    if (product.productType === Prisma.ProductType.SERVICE) { // Changed to Prisma.ProductType
+    if (product.productType === ProductType.SERVICE) { // Use ProductType enum directly
       return true; 
     }
     return product.currentStock !== null && product.currentStock >= quantityNeeded;
   }
 
-  async decreaseStock(productId: string, quantityToDecrease: number): Promise<Prisma.Product> { // Changed to Prisma.Product
+  async decreaseStock(productId: string, quantityToDecrease: number): Promise<Product> { // Use Product type
     const product = await this.prisma.client.product.findUnique({ where: { id: productId } });
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found for stock decrease.`);
     }
-
-    if (product.productType === Prisma.ProductType.SERVICE || product.currentStock === null) { // Changed to Prisma.ProductType
-      return product; 
+    
+    if (product.productType === ProductType.SERVICE || (product.productType === ProductType.PRODUCT && product.currentStock === null)) { // Use ProductType enum
+        return product;
     }
+    
+    if (product.productType === ProductType.PRODUCT && product.currentStock !== null) { // Use ProductType enum
+        if (product.currentStock < quantityToDecrease) {
+          throw new ConflictException(
+            `Not enough stock for product ${product.name} (ID: ${productId}). Available: ${product.currentStock}, Requested: ${quantityToDecrease}`,
+          );
+        }
 
-    if (product.currentStock < quantityToDecrease) {
-      throw new ConflictException(
-        `Not enough stock for product ${product.name} (ID: ${productId}). Available: ${product.currentStock}, Requested: ${quantityToDecrease}`,
-      );
+        return this.prisma.client.product.update({
+          where: { id: productId },
+          data: {
+            currentStock: {
+              decrement: quantityToDecrease,
+            },
+          },
+        });
     }
-
-    return this.prisma.client.product.update({
-      where: { id: productId },
-      data: {
-        currentStock: {
-          decrement: quantityToDecrease,
-        },
-      },
-    });
+    return product;
   }
 }

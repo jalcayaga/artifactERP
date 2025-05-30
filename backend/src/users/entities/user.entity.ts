@@ -1,12 +1,12 @@
 
-import { Prisma } from '@prisma/client'; // Changed to import Prisma namespace
+import { UserRole } from '@prisma/client'; // Import UserRole enum
 
 export class UserEntity {
   id: string;
   email: string;
   firstName?: string | null;
   lastName?: string | null;
-  role: Prisma.UserRole; // Use Prisma.UserRole
+  role: UserRole; // Use UserRole directly
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

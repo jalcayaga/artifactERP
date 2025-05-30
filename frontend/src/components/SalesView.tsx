@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Importar Card de shadcn/ui
-import SaleForm from '@/components/SaleForm';
-import SaleDetailModal from '@/components/SaleDetailModal';
-import { PlusIcon, ShoppingCartIcon, EyeIcon } from '@/components/Icons';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; 
+import SaleForm from '@/custom-components/SaleForm';
+import SaleDetailModal from '@/custom-components/SaleDetailModal';
+import { PlusIcon, ShoppingCartIcon, EyeIcon } from '@/icons';
 import { Sale } from '@/types';
 
 const FIXED_VAT_RATE_PERCENT_DISPLAY = 19;

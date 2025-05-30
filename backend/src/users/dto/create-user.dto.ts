@@ -1,13 +1,13 @@
 
 import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
-import { Prisma } from '@prisma/client'; // Changed to import Prisma namespace
+import { UserRole } from '@prisma/client'; // Import UserRole enum
 
 // Frontend UserRole values are 'Admin', 'Editor', 'Visor'
 // Prisma UserRole enum keys are 'ADMIN', 'EDITOR', 'VIEWER'
 // The DTO receives the string from frontend, validation ensures it's one of the expected strings.
 // The service layer is responsible for mapping this string to Prisma's UserRole enum type.
 const validFrontendRoles = ['Admin', 'Editor', 'Visor']; // For IsEnum validation based on frontend values
-const prismaUserRoleKeys = Object.keys(Prisma.UserRole); // Changed to use Prisma.UserRole
+const prismaUserRoleKeys = Object.keys(UserRole); // Use UserRole directly
 
 export class CreateUserDto {
   @IsEmail({}, { message: 'Please provide a valid email address.' })

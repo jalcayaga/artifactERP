@@ -2,7 +2,7 @@
 'use client'; // Mark as a Client Component
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Theme, ThemeContextType } from '@/lib/types'; // Adjusted path
+import { Theme, ThemeContextType } from '@/types'; 
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 

@@ -1,0 +1,29 @@
+# docker-compose.yml (at the root of SubRed-ERP project)
+version: "3.8"
+
+services:
+  postgres_db:
+    image: postgres:15 # Or your preferred PostgreSQL version
+    container_name: subred_erp_postgres_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-subred_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-subred_password}
+      POSTGRES_DB: ${POSTGRES_DB:-subred_erp_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - subred_erp_postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-subred_user} -d ${POSTGRES_DB:-subred_erp_db}",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  subred_erp_postgres_data:
+    driver: local

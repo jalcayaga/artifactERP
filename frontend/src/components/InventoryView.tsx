@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Importar Card de shadcn/ui
-import { ArchiveBoxIcon } from '@/components/Icons';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; 
+import { ArchiveBoxIcon } from '@/icons';
 
 const InventoryView: React.FC = () => {
   return (

@@ -1,7 +1,6 @@
-
 // lib/constants.ts
 import { NavItem } from './types'; 
-import { HomeIcon, BriefcaseIcon, ShoppingCartIcon, TruckIcon, ArchiveBoxIcon, CreditCardIcon, ChartPieIcon, CogIcon } from '@/components/Icons'; // Adjusted path
+import { HomeIcon, BriefcaseIcon, ShoppingCartIcon, TruckIcon, ArchiveBoxIcon, CreditCardIcon, ChartPieIcon, CogIcon } from '@/icons';
 
 export const NAVIGATION_ITEMS: NavItem[] = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: HomeIcon }, 
@@ -15,6 +14,6 @@ export const NAVIGATION_ITEMS: NavItem[] = [
 ];
 
 // App name for the ERP Admin part
-export const ERP_APP_NAME = "SubRed ERP"; // Updated Name
+export const ERP_APP_NAME = "SubRed ERP";
 // App name for the public E-commerce part
 export const ECOMMERCE_APP_NAME = "SubRed Tienda";

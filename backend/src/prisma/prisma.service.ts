@@ -1,13 +1,13 @@
 
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { Prisma } from '@prisma/client'; // Changed to import Prisma namespace
+import { PrismaClient } from '@prisma/client'; // Changed to named import
 
 @Injectable()
 export class PrismaService implements OnModuleInit, OnModuleDestroy {
-  public readonly client: Prisma.PrismaClient; // Changed to Prisma.PrismaClient
+  public readonly client: PrismaClient; // Use PrismaClient type
 
   constructor() {
-    this.client = new Prisma.PrismaClient({ // Changed to new Prisma.PrismaClient()
+    this.client = new PrismaClient({ // Instantiate PrismaClient directly
       // log: ['query', 'info', 'warn', 'error'], // Optional: configure logging
     });
   }

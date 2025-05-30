@@ -1,18 +1,19 @@
 // components/Header.tsx
+'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import { useTheme } from '@/contexts/ThemeContext'; // Import useTheme
-import { useAuth } from '@/contexts/AuthContext';   // Import useAuth
-import { SearchIcon, BellIcon, SunIcon, MoonIcon, MenuIcon, UserCircleIcon, CogIcon, LogoutIcon, ChevronDownIcon } from '@/components/Icons';
+import { useRouter } from 'next/navigation'; 
+import { useTheme } from '@/contexts/ThemeContext'; 
+import { useAuth } from '@/contexts/AuthContext';   
+import { SearchIcon, BellIcon, SunIcon, MoonIcon, MenuIcon, UserCircleIcon, CogIcon, LogoutIcon, ChevronDownIcon } from '@/icons';
 
 interface HeaderProps {
   appName: string;
   onToggleMobileSidebar: () => void;
   sidebarCollapsed: boolean;
-  onNavigateToPage: (page: string) => void; // For Profile/Settings navigation
 }
 
 const ThemeToggle: React.FC = () => {
-  const { theme, setTheme } = useTheme(); // Use the hook
+  const { theme, setTheme } = useTheme(); 
 
   return (
     <button
@@ -25,14 +26,11 @@ const ThemeToggle: React.FC = () => {
   );
 };
 
-interface UserMenuProps {
-  onNavigateToPage: (page: string) => void;
-}
-
-const UserMenu: React.FC<UserMenuProps> = ({ onNavigateToPage }) => {
+const UserMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const auth = useAuth(); // Get auth context
+  const auth = useAuth(); 
+  const router = useRouter(); 
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -48,16 +46,17 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigateToPage }) => {
 
   const handleLogout = () => {
     auth.logout();
-    setIsOpen(false); // Close menu on logout
+    setIsOpen(false); 
+    router.push('/login'); 
   };
 
   const handleProfileClick = () => {
-    onNavigateToPage('profile');
+    router.push('/admin/profile'); 
     setIsOpen(false);
   };
 
   const handleSettingsClick = () => {
-    onNavigateToPage('settings');
+    router.push('/admin/settings'); 
     setIsOpen(false);
   };
 
@@ -109,9 +108,9 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigateToPage }) => {
   );
 }
 
-const Header: React.FC<HeaderProps> = ({ appName, onToggleMobileSidebar, sidebarCollapsed, onNavigateToPage }) => {
+const Header: React.FC<HeaderProps> = ({ appName, onToggleMobileSidebar, sidebarCollapsed }) => {
   return (
-    <header className="bg-card text-card-foreground shadow-sm sticky top-0 z-30 border-b"> {/* Use card for bg, add border-b */}
+    <header className="bg-card text-card-foreground shadow-sm sticky top-0 z-30 border-b">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -148,7 +147,7 @@ const Header: React.FC<HeaderProps> = ({ appName, onToggleMobileSidebar, sidebar
             >
               <BellIcon className="w-6 h-6" />
             </button>
-            <UserMenu onNavigateToPage={onNavigateToPage} />
+            <UserMenu />
           </div>
         </div>
       </div>

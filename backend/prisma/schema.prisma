@@ -1,1 +1,131 @@
-ˇˆ⁄rGßw˙kä…ö¸
+// backend/prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// --------------------
+// Enums
+// --------------------
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  VIEWER
+  CLIENT // Rol para clientes del e-commerce
+}
+
+enum ProductType {
+  PRODUCT // Bien f√≠sico con stock
+  SERVICE // Servicio sin stock
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT // Esperando pago
+  PROCESSING      // Pago recibido, pedido en preparaci√≥n
+  SHIPPED         // Pedido enviado
+  DELIVERED       // Pedido entregado
+  CANCELLED       // Pedido cancelado
+  REFUNDED        // Pedido devuelto/reembolsado
+}
+
+enum PaymentStatus {
+  PENDING // Pago pendiente
+  PAID    // Pago completado exitosamente
+  FAILED  // Pago fallido
+  REFUNDED // Pago reembolsado
+}
+
+// --------------------
+// Models
+// --------------------
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String?
+  lastName  String?
+  role      UserRole @default(VIEWER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders Order[] // Un usuario puede tener muchos pedidos
+
+  @@map("users")
+}
+
+model Product {
+  id               String      @id @default(cuid())
+  name             String
+  productType      ProductType @default(PRODUCT)
+  sku              String?     @unique // Stock Keeping Unit
+  description      String?
+  longDescription  String?     @db.Text
+  images           String[]    @default([]) // URLs de las im√°genes
+  category         String?
+  price            Decimal // Precio de venta al p√∫blico (usado en pedidos)
+  unitPrice        Decimal? // Podr√≠a ser el costo del producto para el ERP
+  currentStock     Int? // Null si es un servicio o no se gestiona stock
+  reorderLevel     Int?
+  isPublished      Boolean     @default(false) // Si el producto es visible en el e-commerce
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  orderItems OrderItem[] // Un producto puede estar en muchos items de pedido
+
+  @@index([category])
+  @@index([isPublished])
+  @@map("products")
+}
+
+model Order {
+  id                String        @id @default(cuid())
+  userId            String
+  status            OrderStatus   @default(PENDING_PAYMENT)
+  paymentStatus     PaymentStatus @default(PENDING)
+  subTotalAmount    Decimal // Suma de totalItemPrice de OrderItems
+  vatAmount         Decimal // IVA total del pedido
+  vatRatePercent    Float         @default(19.0) // Tasa de IVA aplicada, ej. 19.0 para 19%
+  discountAmount    Decimal       @default(0)
+  shippingAmount    Decimal       @default(0)
+  grandTotalAmount  Decimal // (subTotalAmount + vatAmount + shippingAmount) - discountAmount
+  currency          String        @default("CLP")
+  shippingAddress   String?       @db.Text // JSON string de la direcci√≥n de env√≠o
+  billingAddress    String?       @db.Text // JSON string de la direcci√≥n de facturaci√≥n
+  customerNotes     String?       @db.Text
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  user       User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  orderItems OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                  String   @id @default(cuid())
+  orderId             String
+  productId           String
+  productNameSnapshot String // Nombre del producto al momento de la compra
+  productSkuSnapshot  String?  // SKU del producto al momento de la compra
+  quantity            Int
+  unitPriceSnapshot   Decimal  // Precio unitario del producto al momento de la compra (sin IVA)
+  totalItemPrice      Decimal  // quantity * unitPriceSnapshot
+  itemVatAmount       Decimal  // IVA calculado para este item espec√≠fico
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict) // Restrict para no borrar productos si est√°n en pedidos
+
+  @@map("order_items")
+}

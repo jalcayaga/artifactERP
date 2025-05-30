@@ -1,8 +1,8 @@
 // frontend/src/pages/LoginPage.tsx
 import React, { useState, FormEvent } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { ERP_APP_NAME as APP_NAME } from '@/constants'; // Using ERP_APP_NAME for admin/login context
-import { LockClosedIcon } from '@/components/Icons';
+import { ERP_APP_NAME as APP_NAME } from '@/constants'; 
+import { LockClosedIcon } from '@/icons';
 
 interface LoginPageProps {
   onSwitchToRegister: () => void;

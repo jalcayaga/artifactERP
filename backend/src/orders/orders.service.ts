@@ -2,7 +2,7 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto, OrderItemDto } from './dto/create-order.dto';
-import { Prisma } from '@prisma/client'; // Changed to import Prisma namespace
+import { Order, ProductType, OrderStatus, PaymentStatus, Product } from '@prisma/client'; // Import necessary types
 import { ProductsService } from '../products/products.service';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class OrdersService {
     private productsService: ProductsService,
   ) {}
 
-  async createOrder(createOrderDto: CreateOrderDto, userId: string): Promise<Prisma.Order> { // Changed to Prisma.Order
+  async createOrder(createOrderDto: CreateOrderDto, userId: string): Promise<Order> { // Use Order type
     if (!createOrderDto.items || createOrderDto.items.length === 0) {
       throw new BadRequestException('Order must contain at least one item.');
     }
@@ -31,7 +31,7 @@ export class OrdersService {
             throw new BadRequestException(`Product "${product.name}" is not available for purchase.`);
         }
 
-        if (product.productType === Prisma.ProductType.PRODUCT && product.currentStock !== null) { // Changed to Prisma.ProductType
+        if (product.productType === ProductType.PRODUCT && product.currentStock !== null) { // Use ProductType enum
           if (product.currentStock < itemDto.quantity) {
             throw new ConflictException(
               `Not enough stock for product "${product.name}". Requested: ${itemDto.quantity}, Available: ${product.currentStock}.`
@@ -57,7 +57,7 @@ export class OrdersService {
           itemVatAmount: itemVat,
         });
 
-        if (product.productType === Prisma.ProductType.PRODUCT && product.currentStock !== null) { // Changed to Prisma.ProductType
+        if (product.productType === ProductType.PRODUCT && product.currentStock !== null) { // Use ProductType enum
           await tx.product.update({
             where: { id: product.id },
             data: { currentStock: { decrement: itemDto.quantity } },
@@ -72,8 +72,8 @@ export class OrdersService {
       const newOrder = await tx.order.create({
         data: {
           userId,
-          status: Prisma.OrderStatus.PENDING_PAYMENT, // Changed to Prisma.OrderStatus
-          paymentStatus: Prisma.PaymentStatus.PENDING, // Changed to Prisma.PaymentStatus
+          status: OrderStatus.PENDING_PAYMENT, // Use OrderStatus enum
+          paymentStatus: PaymentStatus.PENDING, // Use PaymentStatus enum
           subTotalAmount,
           vatAmount: totalVatAmount,
           vatRatePercent: createOrderDto.vatRatePercent !== undefined ? createOrderDto.vatRatePercent : 19.0,
@@ -95,7 +95,7 @@ export class OrdersService {
     });
   }
 
-  async findUserOrders(userId: string, page: number = 1, limit: number = 10): Promise<{data: Prisma.Order[], total: number, pages: number}> { // Changed to Prisma.Order
+  async findUserOrders(userId: string, page: number = 1, limit: number = 10): Promise<{data: Order[], total: number, pages: number}> { // Use Order type
     const skip = (page - 1) * limit;
     const total = await this.prisma.client.order.count({ where: { userId } });
     const data = await this.prisma.client.order.findMany({
@@ -118,7 +118,7 @@ export class OrdersService {
     return {data, total, pages: Math.ceil(total/limit)};
   }
 
-  async findOneUserOrder(orderId: string, userId: string): Promise<Prisma.Order | null> { // Changed to Prisma.Order
+  async findOneUserOrder(orderId: string, userId: string): Promise<Order | null> { // Use Order type
     const order = await this.prisma.client.order.findFirst({
       where: { id: orderId, userId },
       include: {

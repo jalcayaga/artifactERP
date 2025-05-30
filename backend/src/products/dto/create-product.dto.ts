@@ -1,7 +1,7 @@
 
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, IsBoolean, Min, IsPositive, MaxLength, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { Prisma } from '@prisma/client'; // Changed to import Prisma namespace
+import { ProductType } from '@prisma/client'; // Import ProductType enum
 
 export class CreateProductDto {
   @IsString()
@@ -9,8 +9,8 @@ export class CreateProductDto {
   @MaxLength(255)
   name: string;
 
-  @IsEnum(Prisma.ProductType) // Changed to Prisma.ProductType
-  productType: Prisma.ProductType; // Changed to Prisma.ProductType
+  @IsEnum(ProductType) // Use ProductType enum directly
+  productType: ProductType; // Use ProductType type
 
   @IsOptional()
   @IsString()

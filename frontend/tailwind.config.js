@@ -2,18 +2,11 @@
 export default {
   darkMode: "class",
   content: [
-    // Next.js App Router paths
     './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './pages/**/*.{js,ts,jsx,tsx,mdx}', // If using pages router alongside app router
-    './components/**/*.{js,ts,jsx,tsx,mdx}', // Common components directory
-    
-    // Paths from the previous Vite setup (if any components are directly in src)
-    // './src/**/*.{js,ts,jsx,tsx}', // This might be less relevant with Next.js app dir
-
-    // Explicitly include files that were in src/
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}', // For any components that might remain in src temporarily
-    './contexts/**/*.{js,ts,jsx,tsx,mdx}', // If contexts are outside app dir
-    './lib/**/*.{js,ts,jsx,tsx,mdx}', // For lib files
+    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/contexts/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/lib/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/pages/**/*.{js,ts,jsx,tsx,mdx}', // Kept for LoginPage/RegisterPage components if they are used by app router pages
   ],
   theme: {
     container: {

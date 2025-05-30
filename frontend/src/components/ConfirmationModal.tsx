@@ -1,6 +1,6 @@
 // Importaciones de React e iconos necesarios.
-import React, { useEffect } from 'react';
-import { XIcon } from '@/components/Icons'; // Icono para el botón de cerrar.
+import React, { useEffect } from "react";
+import { XIcon } from "@/icons"; // Icono para el botón de cerrar.
 
 // Props que espera el componente ConfirmationModal.
 interface ConfirmationModalProps {
@@ -22,9 +22,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onConfirm,
   title,
   message,
-  confirmText = 'Confirmar', // Valor por defecto para el texto del botón de confirmación.
-  cancelText = 'Cancelar', // Valor por defecto para el texto del botón de cancelación.
-  confirmButtonClass = 'bg-primary hover:bg-primary/90 text-primary-foreground', // Clases por defecto para el botón de confirmación.
+  confirmText = "Confirmar", // Valor por defecto para el texto del botón de confirmación.
+  cancelText = "Cancelar", // Valor por defecto para el texto del botón de cancelación.
+  confirmButtonClass = "bg-primary hover:bg-primary/90 text-primary-foreground", // Clases por defecto para el botón de confirmación.
   icon,
 }) => {
   // useEffect para manejar efectos secundarios: cerrar con Escape y bloquear scroll del body.
@@ -33,17 +33,17 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
     // Manejador para la tecla Escape.
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         onClose(); // Cierra el modal.
       }
     };
-    window.addEventListener('keydown', handleEsc); // Añade el listener.
-    document.body.style.overflow = 'hidden'; // Previene el scroll del body cuando el modal está abierto.
+    window.addEventListener("keydown", handleEsc); // Añade el listener.
+    document.body.style.overflow = "hidden"; // Previene el scroll del body cuando el modal está abierto.
 
     // Función de limpieza: se ejecuta al desmontar o antes de re-ejecutar el efecto.
     return () => {
-      window.removeEventListener('keydown', handleEsc); // Limpia el listener.
-      document.body.style.overflow = 'unset'; // Restaura el scroll del body.
+      window.removeEventListener("keydown", handleEsc); // Limpia el listener.
+      document.body.style.overflow = "unset"; // Restaura el scroll del body.
     };
   }, [isOpen, onClose]); // Dependencias: se re-ejecuta si isOpen o onClose cambian.
 
@@ -64,12 +64,16 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     >
       <div
         className="bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-md flex flex-col overflow-hidden border"
-        onClick={e => e.stopPropagation()} // Evita que el clic dentro del modal lo cierre.
+        onClick={(e) => e.stopPropagation()} // Evita que el clic dentro del modal lo cierre.
       >
         {/* Cabecera del modal */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b">
-          <h2 id="confirmation-modal-title" className="text-lg sm:text-xl font-semibold text-foreground flex items-center">
-            {icon && <span className="mr-2">{icon}</span>} {/* Icono opcional */}
+          <h2
+            id="confirmation-modal-title"
+            className="text-lg sm:text-xl font-semibold text-foreground flex items-center"
+          >
+            {icon && <span className="mr-2">{icon}</span>}{" "}
+            {/* Icono opcional */}
             {title} {/* Título del modal */}
           </h2>
           <button
@@ -83,7 +87,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
         {/* Cuerpo del modal con el mensaje de confirmación. */}
         <div className="p-4 sm:p-5">
-          <p id="confirmation-modal-message" className="text-sm text-foreground">
+          <p
+            id="confirmation-modal-message"
+            className="text-sm text-foreground"
+          >
             {message} {/* Mensaje del modal. */}
           </p>
         </div>

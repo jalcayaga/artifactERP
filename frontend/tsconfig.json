@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "esnext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -21,9 +21,26 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"] // Adjusted for Next.js project root where app, components, lib live
+      "@/components/*": ["./src/components/*"],
+      "@/custom-components/*": ["./src/components/*"],
+      "@/contexts/*": ["./src/contexts/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/pages/*": ["./src/pages/*"],
+      "@/app/*": ["./app/*"],
+      "@/types": ["./lib/types.ts"],
+      "@/constants": ["./lib/constants.ts"],
+      "@/icons": ["./src/components/Icons.tsx"],
+      "@/services/*": ["./lib/services/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "backend"
+  ]
 }

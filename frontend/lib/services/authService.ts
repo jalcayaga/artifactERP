@@ -1,6 +1,6 @@
 // lib/services/authService.ts
 import axios from 'axios';
-import { UserCredentials, NewUserCredentials, CreateUserDto, AuthenticatedUser } from '@/lib/types'; // Adjusted path
+import { UserCredentials, NewUserCredentials, CreateUserDto, AuthenticatedUser } from '@/types'; // Adjusted path
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3001';
 

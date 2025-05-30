@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card'; // Importar Card de shadcn/ui
-import { ChartPieIcon } from '@/components/Icons';
+import { Card, CardContent } from '@/components/ui/card'; 
+import { ChartPieIcon } from '@/icons';
 
 const ReportsView: React.FC = () => {
   return (

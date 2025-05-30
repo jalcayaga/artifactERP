@@ -1,7 +1,7 @@
 // frontend/src/components/SplashScreen.tsx
 import React from 'react';
 import { ERP_APP_NAME as APP_NAME } from '@/constants';
-import { CogIcon } from '@/components/Icons'; // Using CogIcon as a generic loading indicator
+import { CogIcon } from '@/icons'; 
 
 const SplashScreen: React.FC = () => {
   return (

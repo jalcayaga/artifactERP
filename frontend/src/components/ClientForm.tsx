@@ -1,7 +1,7 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import { Client } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'; // Importar Card de shadcn/ui
-import { UsersIcon } from '@/components/Icons';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'; 
+import { UsersIcon } from '@/icons';
 
 interface ClientFormProps {
   clientData: Client | null;
