@@ -2,8 +2,8 @@
 'use client'; // Mark as a Client Component
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { UserCredentials, AuthenticatedUser, AuthContextType, NewUserCredentials } from '@/types'; 
-import { AuthService } from '@/services/authService'; 
+import { UserCredentials, AuthenticatedUser, AuthContextType, NewUserCredentials } from '@/lib/types'; // Adjusted path
+import { AuthService } from '@/lib/services/authService'; // Adjusted path
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

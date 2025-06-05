@@ -2,11 +2,11 @@
 export default {
   darkMode: "class",
   content: [
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/contexts/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/lib/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}', // Kept for LoginPage/RegisterPage components if they are used by app router pages
+    './app/**/*.{js,ts,jsx,tsx,mdx}', // For Next.js App Router
+    // './pages/**/*.{js,ts,jsx,tsx,mdx}', // Removed as pages directory is no longer used
+    './components/**/*.{js,ts,jsx,tsx,mdx}', // For components at frontend/components
+    './contexts/**/*.{js,ts,jsx,tsx,mdx}', 
+    './lib/**/*.{js,ts,jsx,tsx,mdx}', 
   ],
   theme: {
     container: {
@@ -18,7 +18,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'], 
       },
       colors: {
         border: "hsl(var(--border))",
@@ -70,15 +70,11 @@ export default {
           to: { height: "0" },
         },
       },
-      animation: {
+      animation: { // Added this section
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
-      boxShadow: {
-        'subtle': '0 1px 3px 0 rgba(0, 0, 0, 0.07), 0 1px 2px -1px rgba(0, 0, 0, 0.05)',
-        'subtle-dark': '0 1px 3px 0 rgba(0, 0, 0, 0.15), 0 1px 2px -1px rgba(0, 0, 0, 0.1)',
-      },
     },
   },
-  plugins: [require("tailwindcss-animate")],
-}
+  plugins: [require("tailwindcss-animate")], // Added this line
+};

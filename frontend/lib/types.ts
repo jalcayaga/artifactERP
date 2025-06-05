@@ -26,11 +26,12 @@ export interface Client {
 
 export interface SaleItem {
   id: string; 
+  productId?: string; // Optional: to link back to a product if needed
   productName: string; 
   quantity: number; 
-  unitPrice: number; 
-  totalItemPrice: number; 
-  itemVatAmount: number; 
+  unitPrice: number; // Price at which it was sold (without VAT)
+  totalItemPrice: number; // quantity * unitPrice
+  itemVatAmount: number; // VAT for this line item
 }
 
 export interface Sale {
@@ -40,9 +41,9 @@ export interface Sale {
   observations?: string; 
   items: SaleItem[]; 
   vatRatePercent: number; 
-  subTotal: number; 
-  totalVatAmount: number; 
-  grandTotal: number; 
+  subTotal: number; // Sum of totalItemPrice for all items
+  totalVatAmount: number; // Sum of itemVatAmount for all items
+  grandTotal: number; // subTotal + totalVatAmount
 }
 
 export interface Supplier {
@@ -50,14 +51,31 @@ export interface Supplier {
   name: string; 
 }
 
+export interface Product {
+  id: string;
+  name: string;
+  productType: 'Producto' | 'Servicio'; // User-friendly for frontend display
+  sku?: string;
+  description?: string;
+  longDescription?: string;
+  images?: string[]; // Array of image URLs/paths
+  category?: string;
+  price: number; // Selling price (corresponds to 'price' on backend Product model, without VAT)
+  unitPrice?: number; // Cost price (corresponds to 'unitPrice' on backend Product model, without VAT)
+  currentStock?: number | null; // Allow null for services or untracked products
+  reorderLevel?: number | null;
+  isPublished: boolean; // Default to false or true based on preference
+}
+
 export interface PurchaseOrderItem {
-  id: string; 
-  productName: string; 
-  quantity: number; 
-  unitPrice: number; 
-  totalPrice: number; 
-  itemVatAmount: number; 
-  totalPriceWithVat: number; 
+  id: string;
+  productId?: string; // Optional: to link back to a product
+  productName: string; // Snapshot of product name at time of order
+  quantity: number;
+  unitPrice: number; // Cost per unit from supplier (without VAT)
+  totalPrice: number; // quantity * unitPrice (subtotal for this item, without VAT)
+  itemVatAmount: number; // VAT for this line item
+  totalPriceWithVat: number; // totalPrice + itemVatAmount
 }
 
 export interface PurchaseOrder {
@@ -69,23 +87,11 @@ export interface PurchaseOrder {
   items: PurchaseOrderItem[]; 
   observations?: string; 
   vatRatePercent: number; 
-  subTotal: number; 
-  totalVatAmount: number; 
-  grandTotal: number; 
+  subTotal: number; // Sum of totalPrice for all items
+  totalVatAmount: number; // Sum of itemVatAmount for all items
+  grandTotal: number; // subTotal + totalVatAmount
 }
 
-export interface Product {
-  id: string; 
-  name: string; 
-  productType: 'Producto' | 'Servicio'; 
-  sku?: string; 
-  description?: string; 
-  category?: string; 
-  currentStock?: number; 
-  unitPrice: number; // Cost price for product, base rate for service (without VAT)
-  reorderLevel?: number; 
-  lastStockUpdate: string; 
-}
 
 export type QuoteStatus = 'Borrador' | 'Enviada' | 'Aceptada' | 'Rechazada' | 'Expirada' | 'Facturada';
 

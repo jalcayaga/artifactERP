@@ -1,36 +1,30 @@
-// app/layout.tsx
-import React from 'react';
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+'use client';
+import React, { ReactNode } from 'react';
+import Script from 'next/script';
 import './globals.css'; // Import global styles
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { AuthProvider } from '@/contexts/AuthContext';
-import Script from 'next/script';
+import { ERP_APP_NAME } from '@/lib/constants';
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
-
-export const metadata: Metadata = {
-  title: 'SubRed ERP & E-commerce',
-  description: 'Plataforma integral ERP y E-commerce para SubRed.',
-};
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es">
       <head>
-        {/* Chart.js CDN kept for now, can be componentized later if needed */}
-        <Script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" strategy="beforeInteractive" />
+        <meta charSet="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{ERP_APP_NAME}</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet" />
+        <meta name="description" content="Plataforma integral ERP y E-commerce para SubRed." />
       </head>
-      <body className={`${inter.variable} font-sans`}>
+      <body className="font-sans">
         <ThemeProvider>
           <AuthProvider>
             {children}
           </AuthProvider>
         </ThemeProvider>
+        <Script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js" strategy="lazyOnload" />
       </body>
     </html>
   );
