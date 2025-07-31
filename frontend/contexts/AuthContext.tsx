@@ -1,3 +1,4 @@
+
 // contexts/AuthContext.tsx
 'use client'; // Mark as a Client Component
 

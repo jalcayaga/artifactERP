@@ -1,26 +1,57 @@
-import React, { useState, FormEvent, useMemo, useCallback } from 'react';
+
+import React, { useState, FormEvent, useMemo, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'; 
 import { TruckIcon, PlusIcon, TrashIcon } from '@/components/Icons';
 import { PurchaseOrderItem, PurchaseOrder } from '@/lib/types'; 
+import { formatCurrencyChilean } from '@/lib/utils';
 
 interface PurchaseOrderFormProps {
+  orderData?: PurchaseOrder | null; // Datos de la orden para edición (opcional)
   onSave: (orderData: PurchaseOrder) => void;
   onCancel: () => void;
 }
 
 const FIXED_VAT_RATE_PERCENT_PURCHASES = 19;
 
-const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ onSave, onCancel }) => {
+const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ orderData, onSave, onCancel }) => {
   const [supplierName, setSupplierName] = useState('');
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
   const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
   const [observations, setObservations] = useState('');
+  const [status, setStatus] = useState<'Pendiente' | 'Aprobada' | 'Recibida' | 'Cancelada'>('Pendiente');
   const [items, setItems] = useState<PurchaseOrderItem[]>([]);
+  
   const [newItemName, setNewItemName] = useState('');
   const [newItemQuantity, setNewItemQuantity] = useState('');
   const [newItemPrice, setNewItemPrice] = useState('');
+  
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [itemErrors, setItemErrors] = useState<{ [key: string]: string }>({});
+
+  const isEditing = useMemo(() => !!orderData, [orderData]);
+
+  useEffect(() => {
+    if (orderData) {
+      setSupplierName(orderData.supplierName);
+      setOrderDate(new Date(orderData.orderDate).toISOString().split('T')[0]);
+      setExpectedDeliveryDate(orderData.expectedDeliveryDate ? new Date(orderData.expectedDeliveryDate).toISOString().split('T')[0] : '');
+      setObservations(orderData.observations || '');
+      setStatus(orderData.status);
+      setItems(orderData.items || []);
+    } else {
+      setSupplierName('');
+      setOrderDate(new Date().toISOString().split('T')[0]);
+      setExpectedDeliveryDate('');
+      setObservations('');
+      setStatus('Pendiente');
+      setItems([]);
+    }
+    setErrors({});
+    setItemErrors({});
+    setNewItemName('');
+    setNewItemQuantity('');
+    setNewItemPrice('');
+  }, [orderData]);
 
   const { subTotal, totalVatAmount, grandTotal } = useMemo(() => {
     const currentSubTotal = items.reduce((total, item) => total + item.totalPrice, 0);
@@ -72,24 +103,31 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ onSave, onCancel 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!validateMainForm()) return;
-    const orderId = `PO-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const currentId = isEditing && orderData?.id ? orderData.id : `po-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const orderDetails: PurchaseOrder = {
-      id: orderId, supplierName: supplierName.trim(), orderDate,
+      id: currentId, 
+      supplierName: supplierName.trim(), 
+      orderDate,
       expectedDeliveryDate: expectedDeliveryDate || undefined,
-      observations: observations.trim() || undefined, status: 'Pendiente',
-      items, vatRatePercent: FIXED_VAT_RATE_PERCENT_PURCHASES,
+      observations: observations.trim() || undefined, 
+      status, // Usar el estado actual del formulario
+      items, 
+      vatRatePercent: FIXED_VAT_RATE_PERCENT_PURCHASES,
       subTotal, totalVatAmount, grandTotal,
     };
     onSave(orderDetails);
   };
   
   const inputBaseClass = "mt-1 block w-full px-3 py-2 border rounded-md shadow-sm text-sm transition-colors duration-150 bg-background border-border placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-foreground";
+  const selectBaseClass = `${inputBaseClass} pr-8`;
   const errorTextClass = "mt-1 text-xs text-destructive";
 
   return (
     <Card className="max-w-4xl mx-auto border">
       <CardHeader>
-        <CardTitle className="text-xl">Crear Nueva Orden de Compra</CardTitle>
+        <CardTitle className="text-xl">
+          {isEditing ? `Editar Orden de Compra: ${orderData?.id.substring(0,8)}...` : 'Crear Nueva Orden de Compra'}
+        </CardTitle>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-6 pt-6">
@@ -116,7 +154,26 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ onSave, onCancel 
             </div>
           </div>
 
-          <div className="space-y-4 p-4 border border-border rounded-md bg-card"> {/* Use card for item section bg */}
+          {isEditing && (
+            <div>
+              <label htmlFor="po-status" className="block text-sm font-medium text-foreground">
+                Estado de la Orden
+              </label>
+              <select 
+                id="po-status" 
+                value={status} 
+                onChange={(e) => setStatus(e.target.value as PurchaseOrder['status'])} 
+                className={selectBaseClass}
+              >
+                <option value="Pendiente">Pendiente</option>
+                <option value="Aprobada">Aprobada</option>
+                <option value="Recibida">Recibida</option>
+                <option value="Cancelada">Cancelada</option>
+              </select>
+            </div>
+          )}
+
+          <div className="space-y-4 p-4 border border-border rounded-md bg-card"> 
             <h3 className="text-md font-semibold text-foreground">Artículos de la Orden (IVA {FIXED_VAT_RATE_PERCENT_PURCHASES}%)</h3>
             <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end">
               <div className="sm:col-span-5">
@@ -159,10 +216,10 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ onSave, onCancel 
                       <tr key={item.id}>
                         <td className="px-3 py-2 whitespace-nowrap text-sm text-foreground">{item.productName}</td>
                         <td className="px-3 py-2 whitespace-nowrap text-sm text-muted-foreground text-right">{item.quantity}</td>
-                        <td className="px-3 py-2 whitespace-nowrap text-sm text-muted-foreground text-right">{item.unitPrice.toFixed(2)}</td>
-                        <td className="px-3 py-2 whitespace-nowrap text-sm text-foreground text-right">{item.totalPrice.toFixed(2)}</td>
-                        <td className="px-3 py-2 whitespace-nowrap text-sm text-muted-foreground text-right hidden sm:table-cell">{item.itemVatAmount.toFixed(2)}</td>
-                        <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-foreground text-right">{item.totalPriceWithVat.toFixed(2)}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-muted-foreground text-right">{formatCurrencyChilean(item.unitPrice)}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-foreground text-right">{formatCurrencyChilean(item.totalPrice)}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm text-muted-foreground text-right hidden sm:table-cell">{formatCurrencyChilean(item.itemVatAmount)}</td>
+                        <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-foreground text-right">{formatCurrencyChilean(item.totalPriceWithVat)}</td>
                         <td className="px-3 py-2 whitespace-nowrap text-center">
                           <button type="button" onClick={() => handleRemoveItem(item.id)} title="Eliminar Artículo" className="text-destructive hover:text-destructive/80 p-1 rounded-md hover:bg-destructive/10 transition-colors">
                             <TrashIcon className="w-4 h-4" />
@@ -178,9 +235,9 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ onSave, onCancel 
           </div>
 
           <div className="mt-6 pt-4 border-t border-border space-y-2">
-            <div className="flex justify-end items-center"><span className="text-md font-medium text-muted-foreground">Subtotal (sin IVA):</span><span className="ml-4 text-md font-semibold text-foreground w-32 text-right">${subTotal.toFixed(2)}</span></div>
-            <div className="flex justify-end items-center"><span className="text-md font-medium text-muted-foreground">IVA ({FIXED_VAT_RATE_PERCENT_PURCHASES}%):</span><span className="ml-4 text-md font-semibold text-foreground w-32 text-right">${totalVatAmount.toFixed(2)}</span></div>
-            <div className="flex justify-end items-center mt-1 pt-1 border-t border-border/50"><span className="text-lg font-bold text-foreground">Total Orden:</span><span className="ml-4 text-2xl font-bold text-primary w-32 text-right">${grandTotal.toFixed(2)}</span></div>
+            <div className="flex justify-end items-center"><span className="text-md font-medium text-muted-foreground">Subtotal (sin IVA):</span><span className="ml-4 text-md font-semibold text-foreground w-32 text-right">{formatCurrencyChilean(subTotal)}</span></div>
+            <div className="flex justify-end items-center"><span className="text-md font-medium text-muted-foreground">IVA ({FIXED_VAT_RATE_PERCENT_PURCHASES}%):</span><span className="ml-4 text-md font-semibold text-foreground w-32 text-right">{formatCurrencyChilean(totalVatAmount)}</span></div>
+            <div className="flex justify-end items-center mt-1 pt-1 border-t border-border/50"><span className="text-lg font-bold text-foreground">Total Orden:</span><span className="ml-4 text-2xl font-bold text-primary w-32 text-right">{formatCurrencyChilean(grandTotal)}</span></div>
           </div>
 
           <div>
@@ -191,7 +248,8 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ onSave, onCancel 
         <CardFooter className="flex flex-col sm:flex-row justify-end items-center gap-3 pt-6">
           <button type="button" onClick={onCancel} className="w-full sm:w-auto order-2 sm:order-1 px-4 py-2.5 border border-border text-sm font-medium rounded-md text-foreground bg-background hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring dark:focus:ring-offset-card transition-colors duration-150">Cancelar</button>
           <button type="submit" className="w-full sm:w-auto order-1 sm:order-2 bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center space-x-2">
-            <TruckIcon className="w-5 h-5" /> <span>Guardar Orden</span>
+            <TruckIcon className="w-5 h-5" /> 
+            <span>{isEditing ? 'Actualizar Orden' : 'Guardar Orden'}</span>
           </button>
         </CardFooter>
       </form>

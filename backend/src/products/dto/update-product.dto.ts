@@ -1,7 +1,7 @@
 
 import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, IsBoolean, Min, MaxLength, IsArray } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ProductType } from '@prisma/client'; // Import ProductType enum
+import { ProductType } from '@prisma/client';
 
 // Explicitly defining UpdateProductDto to ensure properties are recognized
 export class UpdateProductDto {
@@ -12,8 +12,8 @@ export class UpdateProductDto {
   name?: string;
 
   @IsOptional()
-  @IsEnum(ProductType) // Use ProductType enum directly
-  productType?: ProductType; // Use ProductType type
+  @IsEnum(ProductType)
+  productType?: ProductType;
 
   @IsOptional()
   @IsString()

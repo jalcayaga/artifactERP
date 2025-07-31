@@ -1,4 +1,7 @@
+
+// frontend/components/SettingsView.tsx
 import React from 'react';
+import Link from 'next/link'; // Import Link for navigation
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; 
 import { CogIcon, PaintBrushIcon, ShieldCheckIcon, UsersIcon } from '@/components/Icons';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -44,16 +47,27 @@ const SettingsView: React.FC = () => {
 
       <Card className="max-w-2xl border">
         <CardHeader>
-            <CardTitle className="text-lg">Gestión de Cuenta</CardTitle>
+            <CardTitle className="text-lg flex items-center">
+                <UsersIcon className="w-6 h-6 mr-3 text-primary" />
+                Gestión de Cuenta
+            </CardTitle>
         </CardHeader>
-         <CardContent className="space-y-3 pt-3">
-            <button className="w-full text-left flex items-center p-3 -m-3 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+         <CardContent className="space-y-1 pt-3">
+            <Link 
+              href="/admin/settings/users" 
+              className="w-full text-left flex items-center p-3 -m-3 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+              aria-label="Gestionar usuarios del sistema"
+            >
                 <UsersIcon className="w-5 h-5 mr-3 text-muted-foreground" />
-                <span className="text-foreground">Gestionar Usuarios (Admin)</span>
-            </button>
-            <button className="w-full text-left flex items-center p-3 -m-3 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors">
+                <span className="text-foreground">Gestionar Usuarios</span>
+            </Link>
+            <button 
+              onClick={() => alert('Funcionalidad de Roles y Permisos en desarrollo.')}
+              className="w-full text-left flex items-center p-3 -m-3 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+              aria-label="Gestionar roles y permisos de los usuarios"
+            >
                 <ShieldCheckIcon className="w-5 h-5 mr-3 text-muted-foreground" />
-                <span className="text-foreground">Roles y Permisos (Admin)</span>
+                <span className="text-foreground">Roles y Permisos</span>
             </button>
          </CardContent>
       </Card>

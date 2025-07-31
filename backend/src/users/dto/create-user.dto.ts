@@ -1,6 +1,6 @@
 
 import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsEnum } from 'class-validator';
-import { UserRole } from '@prisma/client'; // Import UserRole enum
+import { UserRole } from '@prisma/client';
 
 // Frontend UserRole values are 'Admin', 'Editor', 'Visor'
 // Prisma UserRole enum keys are 'ADMIN', 'EDITOR', 'VIEWER'

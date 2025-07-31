@@ -2,6 +2,7 @@
 import React, { useEffect } from 'react';
 import { Sale, SaleItem } from '@/lib/types'; // Tipos de datos para la venta y sus artículos.
 import { XIcon, ShoppingCartIcon, CalendarIcon, ChatBubbleLeftEllipsisIcon } from '@/components/Icons'; // Iconos para la UI del modal.
+import { formatCurrencyChilean } from '@/lib/utils';
 
 // Props que espera el componente SaleDetailModal.
 interface SaleDetailModalProps {
@@ -61,11 +62,11 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
       aria-labelledby="sale-detail-modal-title"
     >
       <div
-        className="bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border"
+        className="bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-border"
         onClick={e => e.stopPropagation()} // Evita que el clic dentro del modal lo cierre.
       >
         {/* Cabecera del modal */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
           <h2 id="sale-detail-modal-title" className="text-lg sm:text-xl font-semibold text-foreground flex items-center">
             <ShoppingCartIcon className="w-6 h-6 mr-2 text-primary" />
             Detalle de Venta (ID: {sale.id.substring(0, 8)}...)
@@ -94,7 +95,7 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
 
           {/* Tabla de Artículos */}
           <h3 className="text-md font-semibold text-foreground mb-1.5">Artículos</h3>
-          <div className="overflow-x-auto border rounded-md">
+          <div className="overflow-x-auto border border-border rounded-md">
             <table className="min-w-full divide-y divide-border">
               <thead className="bg-muted/50">
                 <tr>
@@ -111,10 +112,10 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
                   <tr key={item.id}>
                     <td className="px-3 py-2.5 whitespace-nowrap text-sm text-foreground">{item.productName}</td>
                     <td className="px-3 py-2.5 whitespace-nowrap text-sm text-muted-foreground text-right">{item.quantity}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-sm text-muted-foreground text-right hidden sm:table-cell">${item.unitPrice.toFixed(2)}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-sm text-foreground text-right">${item.totalItemPrice.toFixed(2)}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-sm text-muted-foreground text-right hidden md:table-cell">${item.itemVatAmount.toFixed(2)}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-sm font-medium text-foreground text-right">${calculateItemTotalWithVat(item).toFixed(2)}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-sm text-muted-foreground text-right hidden sm:table-cell">{formatCurrencyChilean(item.unitPrice)}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-sm text-foreground text-right">{formatCurrencyChilean(item.totalItemPrice)}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-sm text-muted-foreground text-right hidden md:table-cell">{formatCurrencyChilean(item.itemVatAmount)}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-sm font-medium text-foreground text-right">{formatCurrencyChilean(calculateItemTotalWithVat(item))}</td>
                   </tr>
                 ))}
               </tbody>
@@ -125,21 +126,21 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
           <div className="mt-4 pt-3 border-t border-border space-y-1.5">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-muted-foreground">Subtotal (sin IVA):</span>
-              <span className="text-sm font-semibold text-foreground">${sale.subTotal.toFixed(2)}</span>
+              <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(sale.subTotal)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-muted-foreground">Total IVA ({sale.vatRatePercent}%):</span>
-              <span className="text-sm font-semibold text-foreground">${sale.totalVatAmount.toFixed(2)}</span>
+              <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(sale.totalVatAmount)}</span>
             </div>
             <div className="flex justify-between items-center pt-1.5 border-t border-border/50">
               <span className="text-md font-bold text-foreground">Gran Total:</span>
-              <span className="text-lg font-bold text-primary">${sale.grandTotal.toFixed(2)}</span>
+              <span className="text-lg font-bold text-primary">{formatCurrencyChilean(sale.grandTotal)}</span>
             </div>
           </div>
         </div>
 
         {/* Pie del modal */}
-        <div className="px-4 py-3 sm:p-4 bg-muted/50 border-t flex justify-end">
+        <div className="px-4 py-3 sm:p-4 bg-muted/50 border-t border-border flex justify-end">
           <button
             type="button"
             onClick={onClose}

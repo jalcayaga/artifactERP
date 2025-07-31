@@ -1,3 +1,4 @@
+
 // Importaciones de React, tipos e iconos necesarios.
 import React, { useEffect } from 'react';
 import { Client } from '@/lib/types'; // Tipo de dato para un cliente.
@@ -67,16 +68,16 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ client, onClose }
       aria-labelledby="client-detail-modal-title" // Asocia el título para accesibilidad.
     >
       <div 
-        className="bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden border"
+        className="bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden border border-border"
         onClick={e => e.stopPropagation()} // Evita que el clic dentro del modal lo cierre.
       >
         {/* Cabecera del modal */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
           <h2 id="client-detail-modal-title" className="text-lg sm:text-xl font-semibold text-foreground flex items-center">
             {/* Icono según el tipo de cliente */}
             {client.type === 'Empresa' ? 
               <BriefcaseIcon className="w-6 h-6 mr-2 text-primary" /> : 
-              <PersonIcon className="w-6 h-6 mr-2 text-green-500" /> // Keeping green for Persona type, adjust if needed
+              <PersonIcon className="w-6 h-6 mr-2 text-secondary" /> 
             }
             {client.name} {/* Nombre del cliente */}
           </h2>
@@ -99,7 +100,7 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ client, onClose }
               label="Tipo" 
               value={ // Muestra el tipo de cliente con una etiqueta coloreada.
                 <span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                  client.type === 'Empresa' ? 'bg-primary/10 text-primary' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                  client.type === 'Empresa' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary-foreground'
                 }`}>
                   {client.type}
                 </span>
@@ -109,7 +110,7 @@ const ClientDetailModal: React.FC<ClientDetailModalProps> = ({ client, onClose }
         </div>
 
         {/* Pie del modal */}
-        <div className="px-4 py-3 sm:px-5 bg-muted/50 border-t flex justify-end">
+        <div className="px-4 py-3 sm:px-5 bg-muted/50 border-t border-border flex justify-end">
           <button
             type="button" // Botón normal, no de envío.
             onClick={onClose}

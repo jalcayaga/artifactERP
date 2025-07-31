@@ -1,38 +1,22 @@
 // components/Header.tsx
 import React, { useState, useRef, useEffect } from 'react';
-import { useTheme } from '@/contexts/ThemeContext'; 
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';   
-import { SearchIcon, BellIcon, SunIcon, MoonIcon, MenuIcon, UserCircleIcon, CogIcon, LogoutIcon, ChevronDownIcon } from '@/components/Icons';
+import ThemeToggle from '@/components/ThemeToggle'; 
+import { SearchIcon, BellIcon, MenuIcon, UserCircleIcon, CogIcon, LogoutIcon, ChevronDownIcon } from '@/components/Icons';
 
 interface HeaderProps {
   appName: string;
   onToggleMobileSidebar: () => void;
   sidebarCollapsed: boolean;
-  onNavigateToPage: (page: string) => void; // For Profile/Settings navigation
 }
 
-const ThemeToggle: React.FC = () => {
-  const { theme, setTheme } = useTheme(); // Use the hook
+interface UserMenuProps {}
 
-  return (
-    <button
-      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-      className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-accent-foreground transition-colors"
-      aria-label={theme === 'light' ? "Cambiar a tema oscuro" : "Cambiar a tema claro"}
-    >
-      {theme === 'light' ? <MoonIcon className="w-6 h-6" /> : <SunIcon className="w-6 h-6" />}
-    </button>
-  );
-};
-
-interface UserMenuProps {
-  onNavigateToPage: (page: string) => void;
-}
-
-const UserMenu: React.FC<UserMenuProps> = ({ onNavigateToPage }) => {
+const UserMenu: React.FC<UserMenuProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const auth = useAuth(); // Get auth context
+  const auth = useAuth(); 
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -48,18 +32,10 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigateToPage }) => {
 
   const handleLogout = () => {
     auth.logout();
-    setIsOpen(false); // Close menu on logout
+    setIsOpen(false); 
   };
 
-  const handleProfileClick = () => {
-    onNavigateToPage('profile');
-    setIsOpen(false);
-  };
-
-  const handleSettingsClick = () => {
-    onNavigateToPage('settings');
-    setIsOpen(false);
-  };
+  const closeMenu = () => setIsOpen(false);
 
   return (
     <div className="relative" ref={menuRef}>
@@ -68,12 +44,18 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigateToPage }) => {
         className="flex items-center p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-accent-foreground transition-colors"
         aria-expanded={isOpen}
         aria-haspopup="true"
+        id="user-menu-button"
       >
         <UserCircleIcon className="w-7 h-7" />
         <ChevronDownIcon className="w-4 h-4 ml-1 opacity-70" />
       </button>
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-popover text-popover-foreground rounded-md shadow-lg py-1 z-50 border">
+        <div 
+          className="absolute right-0 mt-2 w-56 bg-popover text-popover-foreground rounded-md shadow-lg py-1 z-50 border"
+          role="menu"
+          aria-orientation="vertical"
+          aria-labelledby="user-menu-button"
+        >
           {auth.currentUser && (
             <div className="px-4 py-2 border-b">
               <p className="text-sm font-medium text-foreground truncate">
@@ -84,22 +66,27 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigateToPage }) => {
               </p>
             </div>
           )}
-          <button
-            onClick={handleProfileClick}
+          <Link
+            href="/admin/profile"
+            onClick={closeMenu}
             className="w-full text-left flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground"
+            role="menuitem"
           >
             <UserCircleIcon className="w-5 h-5 mr-2 opacity-70" /> Perfil
-          </button>
-          <button
-            onClick={handleSettingsClick}
+          </Link>
+          <Link
+            href="/admin/settings"
+            onClick={closeMenu}
             className="w-full text-left flex items-center px-4 py-2 text-sm text-foreground hover:bg-accent hover:text-accent-foreground"
+            role="menuitem"
           >
             <CogIcon className="w-5 h-5 mr-2 opacity-70" /> Ajustes
-          </button>
+          </Link>
           <hr className="border-border my-1" />
           <button
             onClick={handleLogout}
             className="w-full text-left flex items-center px-4 py-2 text-sm text-destructive hover:bg-destructive/10 hover:text-destructive"
+            role="menuitem"
           >
              <LogoutIcon className="w-5 h-5 mr-2 opacity-70" /> Salir
           </button>
@@ -109,9 +96,9 @@ const UserMenu: React.FC<UserMenuProps> = ({ onNavigateToPage }) => {
   );
 }
 
-const Header: React.FC<HeaderProps> = ({ appName, onToggleMobileSidebar, sidebarCollapsed, onNavigateToPage }) => {
+const Header: React.FC<HeaderProps> = ({ appName, onToggleMobileSidebar, sidebarCollapsed }) => {
   return (
-    <header className="bg-card text-card-foreground shadow-sm sticky top-0 z-30 border-b"> {/* Use card for bg, add border-b */}
+    <header className="bg-background text-foreground sticky top-0 z-30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
@@ -131,24 +118,27 @@ const Header: React.FC<HeaderProps> = ({ appName, onToggleMobileSidebar, sidebar
                 <SearchIcon className="h-5 w-5 text-muted-foreground" />
               </div>
               <input
-                className="block w-full pl-10 pr-3 py-2 border rounded-md leading-5 bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring sm:text-sm transition-colors"
+                className="block w-full pl-10 pr-16 py-2 border border-input rounded-md leading-5 bg-white dark:bg-slate-800 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring sm:text-sm transition-colors"
                 placeholder="Buscar..."
                 type="search"
                 name="search"
                 aria-label="Campo de búsqueda"
               />
+              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                <kbd className="kbd kbd-sm">Ctrl K</kbd>
+              </div>
             </div>
           </div>
 
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <ThemeToggle />
             <button 
               className="p-2 rounded-full hover:bg-accent text-muted-foreground hover:text-accent-foreground transition-colors"
               aria-label="Notificaciones"
             >
               <BellIcon className="w-6 h-6" />
             </button>
-            <UserMenu onNavigateToPage={onNavigateToPage} />
+            <ThemeToggle /> {/* Moved ThemeToggle here */}
+            <UserMenu />
           </div>
         </div>
       </div>

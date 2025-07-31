@@ -63,11 +63,11 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
       aria-describedby="confirmation-modal-message" // Asocia el mensaje para accesibilidad.
     >
       <div
-        className="bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-md flex flex-col overflow-hidden border"
+        className="bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-md flex flex-col overflow-hidden border border-border"
         onClick={e => e.stopPropagation()} // Evita que el clic dentro del modal lo cierre.
       >
         {/* Cabecera del modal */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
           <h2 id="confirmation-modal-title" className="text-lg sm:text-xl font-semibold text-foreground flex items-center">
             {icon && <span className="mr-2">{icon}</span>} {/* Icono opcional */}
             {title} {/* Título del modal */}
@@ -89,7 +89,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         </div>
 
         {/* Pie del modal con los botones de acción. */}
-        <div className="px-4 py-3 sm:p-5 bg-muted/50 border-t flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 space-y-2 sm:space-y-0 space-y-reverse">
+        <div className="px-4 py-3 sm:p-5 bg-muted/50 border-t border-border flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 space-y-2 sm:space-y-0 space-y-reverse">
           <button
             type="button" // Botón normal, no de envío.
             onClick={onClose}

@@ -6,11 +6,12 @@ import ProductForm from '@/components/ProductForm';
 import ProductDetailModal from '@/components/ProductDetailModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { PencilIcon, TrashIcon, EyeIcon, ArchiveBoxIcon, PlusIcon, CubeIcon } from '@/components/Icons';
+import { formatCurrencyChilean } from '@/lib/utils';
 
 const initialMockProducts: Product[] = [
-  { id: 'prod_1', name: 'Laptop Pro 15"', productType: 'Producto', sku: 'LP15-001', description: 'Laptop de alto rendimiento para profesionales.', price: 1200.00, unitPrice: 950.00, currentStock: 50, category: 'Electrónica', isPublished: true, images: ['https://picsum.photos/seed/laptop1/400/300'] },
+  { id: 'prod_1', name: 'Laptop Pro 15"', productType: 'Producto', sku: 'LP15-001', description: 'Laptop de alto rendimiento para profesionales.', price: 1200.00, unitPrice: 950.00, currentStock: 50, category: 'Electrónica', isPublished: true, images: ['https://placehold.co/400x300/EFEFEF/31343C?text=Laptop+Pro'] },
   { id: 'prod_2', name: 'Servicio de Consultoría Tech', productType: 'Servicio', sku: 'CONSULT-01', description: 'Consultoría especializada en soluciones TI.', price: 75.00, unitPrice: undefined, currentStock: null, category: 'Servicios', isPublished: true },
-  { id: 'prod_3', name: 'Mouse Inalámbrico Ergo', productType: 'Producto', sku: 'ME-004', description: 'Mouse ergonómico para mayor comodidad.', price: 25.00, unitPrice: 15.00, currentStock: 150, category: 'Accesorios', isPublished: true, images: ['https://picsum.photos/seed/mouse1/400/300'] },
+  { id: 'prod_3', name: 'Mouse Inalámbrico Ergo', productType: 'Producto', sku: 'ME-004', description: 'Mouse ergonómico para mayor comodidad.', price: 25.00, unitPrice: 15.00, currentStock: 150, category: 'Accesorios', isPublished: true, images: ['https://placehold.co/400x300/EFEFEF/31343C?text=Mouse+Ergo'] },
   { id: 'prod_4', name: 'Teclado Mecánico RGB', productType: 'Producto', sku: 'TM-RGB-07', description: 'Teclado mecánico con iluminación RGB personalizable.', price: 89.99, unitPrice: 60.00, currentStock: 0, category: 'Accesorios', isPublished: false },
   { id: 'prod_5', name: 'Soporte Técnico Remoto (Hora)', productType: 'Servicio', sku: 'SUP-REM-HR', description: 'Soporte técnico remoto por hora.', price: 50.00, unitPrice: undefined, currentStock: null, category: 'Servicios', isPublished: true },
 ];
@@ -159,12 +160,12 @@ const InventoryView: React.FC = () => {
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground hidden sm:table-cell">{product.sku || '-'}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                product.productType === 'Producto' ? 'bg-sky-500/10 text-sky-700 dark:text-sky-300' : 'bg-lime-500/10 text-lime-700 dark:text-lime-300'
+                                product.productType === 'Producto' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary-foreground'
                             }`}>
                                 {product.productType}
                             </span>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground text-right">${product.price.toFixed(2)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground text-right">{formatCurrencyChilean(product.price)}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground text-right hidden md:table-cell">
                             {product.productType === 'Producto' ? (product.currentStock ?? 'N/A') : 'N/A'}
                         </td>

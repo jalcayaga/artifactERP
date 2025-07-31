@@ -1,12 +1,12 @@
 
-import { UserRole } from '@prisma/client'; // Import UserRole enum
+import { UserRole } from '@prisma/client';
 
 export class UserEntity {
   id: string;
   email: string;
   firstName?: string | null;
   lastName?: string | null;
-  role: UserRole; // Use UserRole directly
+  role: UserRole; 
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

@@ -1,8 +1,8 @@
-
 // Importaciones de React y componentes/iconos necesarios.
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; 
-import { UsersIcon, ShoppingCartIcon, ArchiveBoxIcon, CreditCardIcon, ChartPieIcon } from '@/components/Icons';
+import { UsersIcon, ShoppingCartIcon, ArchiveBoxIcon, CreditCardIcon } from '@/components/Icons';
+import SalesChart from '@/components/SalesChart'; // Importar el nuevo componente de gráfico
 
 // Interfaz para una tarea
 interface Task {
@@ -23,7 +23,7 @@ interface StatCardProps {
 const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon }) => {
   return (
     <Card className="overflow-hidden">
-      <CardContent className="p-4">
+      <CardContent className="p-5"> {/* Using default p-5 from CardContent */}
         <div className="flex items-center">
           <div className={`p-3 rounded-lg bg-primary/10 dark:bg-primary/20 mr-4`}>
             <Icon className={`w-6 h-6 text-primary`} />
@@ -85,14 +85,14 @@ const DashboardView: React.FC = () => {
   
   // Datos de ejemplo para la actividad reciente (esto se conectará al backend más adelante).
   const recentActivities = [
-    { id: 1, user: 'Ana Pérez', action: 'creó una nueva cotización', time: 'Hace 25 minutos', avatar: `https://picsum.photos/seed/ana/40/40` },
-    { id: 2, user: 'Carlos Ruiz', action: 'actualizó el cliente "Tech Solutions"', time: 'Hace 1 hora', avatar: `https://picsum.photos/seed/carlos/40/40` },
-    { id: 3, user: 'Laura Gómez', action: 'registró una nueva compra', time: 'Hace 3 horas', avatar: `https://picsum.photos/seed/laura/40/40` },
-    { id: 4, user: 'Pedro Marín', action: 'agregó 50 unidades de "Producto X"', time: 'Ayer', avatar: `https://picsum.photos/seed/pedro/40/40` },
+    { id: 1, user: 'Ana Pérez', action: 'creó una nueva cotización', time: 'Hace 25 minutos', avatar: `https://placehold.co/40x40/EFEFEF/31343C?text=A` },
+    { id: 2, user: 'Carlos Ruiz', action: 'actualizó el cliente "Tech Solutions"', time: 'Hace 1 hora', avatar: `https://placehold.co/40x40/EFEFEF/31343C?text=C` },
+    { id: 3, user: 'Laura Gómez', action: 'registró una nueva compra', time: 'Hace 3 horas', avatar: `https://placehold.co/40x40/EFEFEF/31343C?text=L` },
+    { id: 4, user: 'Pedro Marín', action: 'agregó 50 unidades de "Producto X"', time: 'Ayer', avatar: `https://placehold.co/40x40/EFEFEF/31343C?text=P` },
   ];
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 lg:space-y-8">
       <h1 className="text-3xl font-semibold text-foreground">Dashboard General</h1>
       
       {/* Sección de Tarjetas de Estadísticas */}
@@ -104,14 +104,14 @@ const DashboardView: React.FC = () => {
         <StatCard title="Facturas Pendientes" value="12" icon={CreditCardIcon} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Sección de Actividad Reciente */}
         {/* TODO: Conectar esta lista a datos reales del backend. */}
         <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle className="text-lg">Actividad Reciente</CardTitle>
+          <CardHeader> {/* Uses default p-5 */}
+            <CardTitle className="text-xl text-primary">Actividad Reciente</CardTitle>
           </CardHeader>
-          <CardContent className="pt-2">
+          <CardContent> {/* Uses default p-5 pt-0 */}
             <ul className="space-y-4">
               {recentActivities.map(activity => (
                 <li key={activity.id} className="flex items-start space-x-3">
@@ -125,9 +125,9 @@ const DashboardView: React.FC = () => {
                 </li>
               ))}
             </ul>
-            <div className="mt-4 text-right">
+            <div className="mt-6 text-right"> 
                 <button className="text-sm font-medium text-primary hover:text-primary/80 dark:hover:text-primary/70">
-                    Ver todo
+                    Ver toda la actividad
                 </button>
             </div>
           </CardContent>
@@ -135,10 +135,10 @@ const DashboardView: React.FC = () => {
 
         {/* Sección de Tareas Pendientes (Ahora interactiva y persistente) */}
         <Card>
-          <CardHeader>
+          <CardHeader> {/* Uses default p-5 */}
             <CardTitle className="text-lg">Tareas Pendientes</CardTitle>
           </CardHeader>
-          <CardContent className="pt-2">
+          <CardContent> {/* Uses default p-5 pt-0. If less top padding is desired for content right after header, add pt-2 or similar */}
             {tasks.length > 0 ? (
               <ul className="space-y-3">
                 {tasks.map(task => (
@@ -175,24 +175,12 @@ const DashboardView: React.FC = () => {
       </div>
 
       {/* Sección de Resumen de Ventas */}
-      {/* TODO: Implementar gráfico de ventas y conectar a datos reales. */}
       <Card>
-        <CardHeader>
+        <CardHeader> {/* Uses default p-5 */}
           <CardTitle className="text-lg">Resumen de Ventas</CardTitle>
         </CardHeader>
-        <CardContent className="pt-2">
-          <div className="text-center py-12 px-4">
-            <ChartPieIcon className="mx-auto h-16 w-16 text-muted-foreground opacity-40" />
-            <h3 className="mt-3 text-xl font-semibold text-foreground">
-              Gráfico de Ventas
-            </h3>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              Visualización de datos de ventas y tendencias.
-            </p>
-            <p className="mt-1 text-sm text-muted-foreground italic">
-              (Funcionalidad de gráfico próximamente)
-            </p>
-          </div>
+        <CardContent className="p-5"> {/* Use default p-5 for chart content area */}
+          <SalesChart />
         </CardContent>
       </Card>
     </div>

@@ -1,12 +1,12 @@
 // components/Sidebar.tsx
 import React from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { NavItem } from '@/lib/types';
 import { ChevronLeftIcon, ChevronRightIcon, XIcon } from '@/components/Icons';
 
 interface SidebarProps {
   navItems: NavItem[];
-  activePage: string;
-  onNavigateToPage: (path: string) => void; // Changed from onNavigate
   appName: string;
   isMobileOpen: boolean;
   setMobileOpen: (isOpen: boolean) => void;
@@ -15,15 +15,18 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ 
-  navItems, activePage, onNavigateToPage, appName, 
+  navItems, appName, 
   isMobileOpen, setMobileOpen, isCollapsed, toggleCollapsed 
 }) => {
+  const pathname = usePathname();
   
   const sidebarContent = (
     <>
       <div className={`flex items-center mb-8 px-4 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
         {!isCollapsed && (
-          <span className="text-2xl font-bold text-primary">{appName}</span>
+          <Link href="/admin/dashboard" className="text-2xl font-bold text-primary" onClick={() => setMobileOpen(false)}>
+            {appName}
+          </Link>
         )}
         <button 
             onClick={toggleCollapsed} 
@@ -44,18 +47,19 @@ const Sidebar: React.FC<SidebarProps> = ({
         <ul>
           {navItems.map((item) => (
             <li key={item.path} className="mb-1">
-              <button
-                onClick={() => onNavigateToPage(item.path)}
+              <Link
+                href={item.path}
+                onClick={() => setMobileOpen(false)} // Close mobile sidebar on navigation
                 className={`w-full flex items-center py-3 px-4 rounded-md transition-all duration-200 ease-in-out
-                            ${activePage === item.path
+                            ${pathname === item.path
                                 ? 'bg-primary text-primary-foreground shadow-md' 
                                 : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'}
                             ${isCollapsed ? 'justify-center' : ''}`}
-                aria-current={activePage === item.path ? 'page' : undefined}
+                aria-current={pathname === item.path ? 'page' : undefined}
               >
-                <item.icon className={`w-6 h-6 ${!isCollapsed ? 'mr-3' : ''}`} />
+                <item.icon className={`w-6 h-6 ${!isCollapsed ? 'mr-3' : ''} flex-shrink-0`} />
                 {!isCollapsed && <span className="font-medium">{item.name}</span>}
-              </button>
+              </Link>
             </li>
           ))}
         </ul>
@@ -73,20 +77,20 @@ const Sidebar: React.FC<SidebarProps> = ({
         aria-modal="true"
         aria-hidden={!isMobileOpen}
       >
-        <div className="w-64 bg-card text-card-foreground flex flex-col p-4 shadow-lg"> {/* Use card for mobile bg */}
+        <div className="w-64 bg-card text-card-foreground flex flex-col p-4 shadow-lg border-r border-border">
           {sidebarContent}
         </div>
         <div 
-          className="flex-1 bg-black opacity-50" 
+          className="flex-1 bg-black/50" 
           onClick={() => setMobileOpen(false)}
           aria-hidden="true"
         ></div>
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className={`hidden md:flex flex-col bg-card text-card-foreground p-4 shadow-lg transition-all duration-300 ease-in-out
+      <aside className={`hidden md:flex flex-col bg-card text-card-foreground p-4 shadow-lg border-r border-border transition-all duration-300 ease-in-out
                          ${isCollapsed ? 'w-20' : 'w-64'}`}
-      > {/* Use card for desktop bg */}
+      > 
         {sidebarContent}
       </aside>
     </>

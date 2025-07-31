@@ -1,3 +1,4 @@
+
 // Importaciones de React, tipos y componentes/iconos necesarios.
 import React, { useState, useCallback, useEffect } from 'react';
 import { Client } from '@/lib/types'; 
@@ -147,7 +148,7 @@ const ClientView: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground hidden md:table-cell">{client.phone || '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground hidden sm:table-cell">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            client.type === 'Empresa' ? 'bg-sky-500/10 text-sky-700 dark:text-sky-300' : 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300'
+                            client.type === 'Empresa' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary-foreground'
                           }`}>
                             {client.type}
                           </span>

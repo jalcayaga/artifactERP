@@ -1,105 +1,158 @@
 
+/* Define CSS custom properties at the very top, before @tailwind directives */
+:root {
+  /* Light Theme - Refined Palette */
+  --background: 0 0% 98%; /* Very light grey, almost white */
+  --foreground: 220 20% 10%; /* Very dark, slightly cool grey for text */
+
+  --card: 0 0% 100%; /* White */
+  --card-foreground: 220 20% 10%; 
+
+  --popover: 0 0% 100%; 
+  --popover-foreground: 220 20% 10%;
+
+  /* --- Primary is Lime Green (SubRed Logo) --- */
+  --primary: 79 65% 47%; /* Lime Green from INGENIERÍA: #95C828 */
+  --primary-foreground: 0 0% 100%; /* White for contrast on lime green */
+  
+  /* --- Secondary is Cyan (SubRed Logo) --- */
+  --secondary: 189 100% 45%; /* Cyan from SUBRED: #00DFFC - slightly desaturated/darkened for better UI use */
+  --secondary-foreground: 220 20% 10%; /* Dark text for contrast on cyan */
+
+  --muted: 220 20% 94%; /* Light grey */
+  --muted-foreground: 220 15% 45%; /* Medium grey for muted text */
+
+  --accent: 220 20% 90%; /* Very light grey, for subtle hover effects or backgrounds */
+  --accent-foreground: 220 20% 25%; /* Darker grey for text on accent */
+
+  --destructive: 0 84% 60%; 
+  --destructive-foreground: 0 0% 98%; 
+
+  --border: 220 15% 88%; /* Light grey border */
+  --input: 220 15% 88%; 
+  --ring: 79 65% 50%; /* Lime green for focus rings, slightly brighter */
+
+  --radius: 0.5rem;
+
+  /* HSL Value components (if needed by JS, e.g., for charts) */
+  --primary-hsl-values: 79 65% 47%;
+  --card-foreground-hsl-values: 220 20% 10%;
+  --muted-foreground-hsl-values: 220 15% 45%;
+  --border-hsl-values: 220 15% 88%;
+  --card-hsl-values: 0 0% 100%;
+
+  /* Orb Colors for Light Theme */
+  --orb-primary: 79 65% 47%; 
+  --orb-secondary: 189 100% 45%; 
+  --orb-accent: 270 70% 60%; /* A pleasant, medium purple */
+}
+
+html.dark { 
+  /* Dark Theme - Refined Palette for Elegance */
+  --background: 220 16% 10%; /* Darker, more neutral grey for background */
+  --foreground: 220 15% 92%; /* Light grey for text */
+
+  --card: 220 16% 15%; /* Slightly lighter dark grey for card backgrounds for better separation */
+  --card-foreground: 220 15% 92%; 
+
+  --popover: 220 18% 10%; 
+  --popover-foreground: 220 15% 92%;
+
+  /* --- Primary is Lime Green --- */
+  --primary: 79 65% 50%; /* Lime Green, slightly lighter for dark mode */
+  --primary-foreground: 79 65% 90%; /* Lighter green for text on dark primary elements */
+
+  /* --- Secondary is Cyan --- */
+  --secondary: 189 100% 50%; /* Cyan, kept bright for dark mode accents */
+  --secondary-foreground: 189 95% 90%; /* Lighter cyan for text on dark secondary elements */
+
+  --muted: 220 15% 20%; /* Darker grey for muted elements, to complement new background */
+  --muted-foreground: 220 10% 65%; /* Lighter grey for muted text */
+
+  --accent: 220 15% 25%; /* Dark grey for subtle hover effects, to complement new background */
+  --accent-foreground: 220 15% 85%; /* Light grey for text on dark accent */
+  
+  --destructive: 0 70% 55%; 
+  --destructive-foreground: 0 0% 98%; 
+
+  --border: 220 15% 25%; /* Dark grey border, adjusted for new card/background */
+  --input: 220 15% 25%; 
+  --ring: 79 65% 55%; /* Lime green for focus rings, slightly brighter for dark */
+
+  /* HSL Value components for dark theme - for Charts */
+  --primary-hsl-values: 79 65% 50%;
+  --card-foreground-hsl-values: 220 15% 92%;
+  --muted-foreground-hsl-values: 220 10% 65%;
+  --border-hsl-values: 220 15% 25%;
+  --card-hsl-values: 220 16% 15%;
+
+  /* Orb Colors for Dark Theme */
+  --orb-primary: 79 65% 40%; /* Darker Lime Green */
+  --orb-secondary: 189 100% 40%; /* Darker Cyan */
+  --orb-accent: 270 60% 50%; /* Darker Purple */
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
-  :root {
-    /* Syntax Light Theme Inspired by Tailwind UI "Syntax" Template */
-    --background: 220 17% 97%; /* slate-50 (Main page background) */
-    --foreground: 222 47% 11%; /* slate-900 (Main text) */
-
-    --card: 0 0% 100%; /* white (Card background) */
-    --card-foreground: 222 47% 11%; /* slate-900 (Text on cards) */
-
-    --popover: 0 0% 100%; /* white */
-    --popover-foreground: 222 47% 11%; /* slate-900 */
-
-    --primary: 201.4 89.1% 54.3%; /* sky-500 (Primary accent) */
-    --primary-foreground: 0 0% 100%; /* white (Text on primary elements) */
-    
-    --secondary: 220 14% 93%; /* slate-100 (Secondary background elements) */
-    --secondary-foreground: 222 47% 11%; /* slate-900 (Text on secondary elements) */
-
-    --muted: 220 14% 93%; /* slate-100 (Muted backgrounds, e.g., table headers) */
-    --muted-foreground: 221 30% 57%; /* slate-500 (Muted text) */
-
-    --accent: 220 14% 93%; /* slate-100 (Background for hovered/active subtle elements) */
-    --accent-foreground: 222 47% 11%; /* slate-900 (Text for accent elements) */
-
-    --destructive: 0 84.2% 60.2%; /* red-500 (Errors) */
-    --destructive-foreground: 0 0% 98%; /* white (Text on destructive elements) */
-
-    --border: 220 13% 88%; /* slate-300 (Borders for cards, inputs) */
-    --input: 220 13% 88%; /* slate-300 (Input borders. BG of inputs often white or very light gray) */
-    --ring: 201.4 89.1% 54.3%; /* sky-500 (Focus rings, matching primary) */
-
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    /* Syntax Dark Theme Inspired by Tailwind UI "Syntax" Template */
-    --background: 222 47% 11%; /* slate-900 (Main page background) */
-    --foreground: 220 17% 97%; /* slate-50 (Main text) */
-
-    --card: 222 40% 16%; /* slate-800 (Card background) */
-    --card-foreground: 220 17% 97%; /* slate-50 (Text on cards) */
-
-    --popover: 222 40% 16%; /* slate-800 */
-    --popover-foreground: 220 17% 97%; /* slate-50 */
-
-    --primary: 200.4 95.8% 62%; /* sky-400 (Lighter blue for dark mode primary accent) */
-    --primary-foreground: 203 100% 12.9%; /* sky-950 (Very dark blue for text on lighter blue primary) */
-
-    --secondary: 222 40% 20%; /* slate-700 (Secondary background elements) */
-    --secondary-foreground: 220 17% 97%; /* slate-50 (Text on secondary elements) */
-
-    --muted: 222 40% 20%; /* slate-700 (Muted backgrounds) */
-    --muted-foreground: 220 14% 60%; /* slate-400 (Muted text) */
-
-    --accent: 222 40% 20%; /* slate-700 (Background for hovered/active subtle elements) */
-    --accent-foreground: 220 17% 97%; /* slate-50 (Text for accent elements) */
-
-    --destructive: 0 72% 51%; /* red-600 (Errors in dark mode) */
-    --destructive-foreground: 0 0% 98%; /* white */
-
-    --border: 222 40% 30%; /* slate-600 (Borders for cards, inputs) */
-    --input: 222 40% 30%; /* slate-600 (Input borders. BG for inputs often slate-700/slate-800) */
-    --ring: 200.4 95.8% 62%; /* sky-400 (Focus rings, matching primary) */
-  }
-}
-
-@layer base {
-  /* * {
-    @apply border-border;
-  } */
   body {
-    @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif; /* Ensure Inter font is applied */
+    @apply bg-gradient-to-br from-background to-muted/30 text-foreground; /* Subtle gradient background */
+    font-family: 'Inter', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight text-foreground; /* Base heading styles */
+  }
+  h1 { @apply text-4xl md:text-5xl; }
+  h2 { @apply text-3xl md:text-4xl; }
+  h3 { @apply text-2xl md:text-3xl; }
+  /* Add more if needed */
+
+  .prose { /* Basic prose styling for long descriptions */
+    @apply text-foreground;
+  }
+  .prose code {
+    @apply text-primary;
+  }
+  html.dark .prose {
+    @apply text-foreground;
+  }
+  html.dark .prose code {
+    @apply text-primary;
   }
 }
 
 /* Scrollbar styling for webkit browsers */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px; /* Slightly wider for better grab */
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent; /* Or bg-background if needed */
+  @apply bg-transparent;
 }
-html.dark ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted)); /* Using muted for scrollbar thumb */
-  border-radius: 4px;
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full border-2 border-transparent bg-clip-content;
 }
-html.light ::-webkit-scrollbar-thumb {
-  background: hsl(var(--border)); /* Using border for light scrollbar thumb */
-  border-radius: 4px;
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/70;
 }
-html.dark ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground)); /* Slightly more prominent on hover */
+/* For Firefox */
+/* html {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--border)) transparent;
 }
-html.light ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground)); /* Slightly more prominent on hover */
+html:hover {
+    scrollbar-color: hsl(var(--muted-foreground)) transparent;
+} */
+
+
+@layer components {
+  .kbd {
+    @apply inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-mono
+           rounded border border-border bg-muted/30 text-muted-foreground;
+  }
 }

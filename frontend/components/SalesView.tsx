@@ -1,25 +1,80 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; 
+import { Card, CardContent } from '@/components/ui/card'; 
 import SaleForm from '@/components/SaleForm';
 import SaleDetailModal from '@/components/SaleDetailModal';
-import { PlusIcon, ShoppingCartIcon, EyeIcon } from '@/components/Icons';
+import ConfirmationModal from '@/components/ConfirmationModal';
+import { PlusIcon, ShoppingCartIcon, EyeIcon, PencilIcon, TrashIcon } from '@/components/Icons';
 import { Sale } from '@/lib/types'; 
+import { formatCurrencyChilean } from '@/lib/utils';
 
 const FIXED_VAT_RATE_PERCENT_DISPLAY = 19;
 const LOCAL_STORAGE_KEY_SALES = 'wolfflow_sales';
+
+const initialMockSales: Sale[] = [
+  {
+    id: 'sale-mock-1',
+    clientName: 'Cliente Ejemplo Ltda.',
+    saleDate: '2023-10-15T10:30:00Z',
+    observations: 'Entrega prioritaria solicitada.',
+    items: [
+      { id: 'item-mock-1a', productName: 'Laptop Pro 15"', quantity: 1, unitPrice: 1000, totalItemPrice: 1000, itemVatAmount: 190 },
+      { id: 'item-mock-1b', productName: 'Mouse Inalámbrico Ergo', quantity: 2, unitPrice: 20, totalItemPrice: 40, itemVatAmount: 7.6 },
+    ],
+    vatRatePercent: 19,
+    subTotal: 1040,
+    totalVatAmount: 197.6,
+    grandTotal: 1237.6,
+  },
+  {
+    id: 'sale-mock-2',
+    clientName: 'Ana Pérez',
+    saleDate: '2023-10-20T14:45:00Z',
+    items: [
+      { id: 'item-mock-2a', productName: 'Servicio de Consultoría Tech (5hrs)', quantity: 5, unitPrice: 70, totalItemPrice: 350, itemVatAmount: 66.5 },
+    ],
+    vatRatePercent: 19,
+    subTotal: 350,
+    totalVatAmount: 66.5,
+    grandTotal: 416.5,
+  },
+  {
+    id: 'sale-mock-3',
+    clientName: 'Comercializadora Rápida SpA',
+    saleDate: '2023-11-01T09:00:00Z',
+    observations: 'Pago confirmado. Despachar a bodega central.',
+    items: [
+      { id: 'item-mock-3a', productName: 'Teclado Mecánico RGB', quantity: 10, unitPrice: 80, totalItemPrice: 800, itemVatAmount: 152 },
+      { id: 'item-mock-3b', productName: 'Monitor Curvo 32"', quantity: 2, unitPrice: 350, totalItemPrice: 700, itemVatAmount: 133 },
+    ],
+    vatRatePercent: 19,
+    subTotal: 1500,
+    totalVatAmount: 285,
+    grandTotal: 1785,
+  },
+];
+
 
 const SalesView: React.FC = () => {
   const [showSaleForm, setShowSaleForm] = useState<boolean>(false);
   const [savedSales, setSavedSales] = useState<Sale[]>(() => {
     try {
       const storedSales = localStorage.getItem(LOCAL_STORAGE_KEY_SALES);
-      return storedSales ? JSON.parse(storedSales) : [];
+      if (storedSales) {
+        const parsedSales = JSON.parse(storedSales) as Sale[];
+        if (Array.isArray(parsedSales) && parsedSales.length > 0) {
+          return parsedSales;
+        }
+      }
     } catch (error) {
       console.error("Error loading sales from localStorage:", error);
-      return [];
     }
+    return initialMockSales; 
   }); 
   const [viewingSale, setViewingSale] = useState<Sale | null>(null);
+  const [editingSale, setEditingSale] = useState<Sale | null>(null);
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
+  const [saleToDelete, setSaleToDelete] = useState<Sale | null>(null);
 
   useEffect(() => {
     try {
@@ -30,16 +85,48 @@ const SalesView: React.FC = () => {
   }, [savedSales]);
 
   const handleCreateNewSale = useCallback(() => {
+    setEditingSale(null); // Asegurarse de que no hay una venta en edición
     setShowSaleForm(true);
   }, []);
 
-  const handleSaveSale = useCallback((saleData: Sale) => {
-    setSavedSales(prevSales => [...prevSales, saleData]); 
-    setShowSaleForm(false);
+  const handleEditSale = useCallback((sale: Sale) => {
+    setEditingSale(sale);
+    setShowSaleForm(true);
   }, []);
+
+  const handleDeleteSaleRequest = useCallback((sale: Sale) => {
+    setSaleToDelete(sale);
+    setShowDeleteConfirmModal(true);
+  }, []);
+
+  const handleConfirmDeleteSale = useCallback(() => {
+    if (saleToDelete) {
+      setSavedSales(prevSales => prevSales.filter(s => s.id !== saleToDelete.id));
+      setSaleToDelete(null);
+      setShowDeleteConfirmModal(false);
+    }
+  }, [saleToDelete]);
+
+  const handleCloseDeleteConfirmModal = useCallback(() => {
+    setSaleToDelete(null);
+    setShowDeleteConfirmModal(false);
+  }, []);
+  
+  const handleSaveSale = useCallback((saleData: Sale) => {
+    setSavedSales(prevSales => {
+      if (editingSale) { 
+        return prevSales.map(s => (s.id === saleData.id ? saleData : s));
+      } else { 
+        return [...prevSales, saleData];
+      }
+    });
+    setShowSaleForm(false);
+    setEditingSale(null); 
+  }, [editingSale]);
 
   const handleCancelSaleForm = useCallback(() => {
     setShowSaleForm(false);
+    setEditingSale(null);
   }, []);
 
   const handleViewSale = useCallback((sale: Sale) => {
@@ -53,6 +140,7 @@ const SalesView: React.FC = () => {
   if (showSaleForm) {
     return (
       <SaleForm 
+        saleData={editingSale} // Pasar la venta en edición
         onSave={handleSaveSale}
         onCancel={handleCancelSaleForm}
       />
@@ -98,14 +186,14 @@ const SalesView: React.FC = () => {
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-muted-foreground">{sale.id.substring(0, 8)}...</td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="text-sm font-medium text-foreground">{sale.clientName}</div>
-                          <div className="text-xs text-muted-foreground sm:hidden">{new Date(sale.saleDate).toLocaleDateString()} - Total: ${sale.grandTotal.toFixed(2)}</div>
+                          <div className="text-xs text-muted-foreground sm:hidden">{new Date(sale.saleDate).toLocaleDateString()} - Total: {formatCurrencyChilean(sale.grandTotal)}</div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground hidden sm:table-cell">{new Date(sale.saleDate).toLocaleDateString()}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground text-right hidden md:table-cell">${sale.subTotal.toFixed(2)}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground text-right hidden lg:table-cell">${sale.totalVatAmount.toFixed(2)}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-primary text-right">${sale.grandTotal.toFixed(2)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground text-right hidden md:table-cell">{formatCurrencyChilean(sale.subTotal)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground text-right hidden lg:table-cell">{formatCurrencyChilean(sale.totalVatAmount)}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-primary text-right">{formatCurrencyChilean(sale.grandTotal)}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                          <div className="flex items-center justify-center space-x-1 sm:space-x-3">
+                          <div className="flex items-center justify-center space-x-1 sm:space-x-2">
                             <button 
                               onClick={() => handleViewSale(sale)} 
                               title="Ver Detalles de Venta" 
@@ -113,6 +201,22 @@ const SalesView: React.FC = () => {
                               aria-label={`Ver detalles de venta ${sale.id.substring(0,8)}`}
                             >
                               <EyeIcon className="w-5 h-5" />
+                            </button>
+                            <button 
+                              onClick={() => handleEditSale(sale)} 
+                              title="Editar Venta" 
+                              className="text-primary hover:text-primary/80 dark:hover:text-primary/70 transition-colors p-1 rounded-md hover:bg-primary/10"
+                              aria-label={`Editar venta ${sale.id.substring(0,8)}`}
+                            >
+                              <PencilIcon className="w-5 h-5" />
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteSaleRequest(sale)} 
+                              title="Eliminar Venta" 
+                              className="text-destructive hover:text-destructive/80 dark:hover:text-destructive/70 transition-colors p-1 rounded-md hover:bg-destructive/10"
+                              aria-label={`Eliminar venta ${sale.id.substring(0,8)}`}
+                            >
+                              <TrashIcon className="w-5 h-5" />
                             </button>
                           </div>
                         </td>
@@ -149,6 +253,18 @@ const SalesView: React.FC = () => {
         <SaleDetailModal 
           sale={viewingSale}
           onClose={handleCloseSaleDetailModal}
+        />
+      )}
+      {showDeleteConfirmModal && saleToDelete && (
+        <ConfirmationModal
+          isOpen={showDeleteConfirmModal}
+          onClose={handleCloseDeleteConfirmModal}
+          onConfirm={handleConfirmDeleteSale}
+          title="Confirmar Eliminación de Venta"
+          message={<>¿Estás seguro de que quieres eliminar la venta <strong>ID: {saleToDelete.id.substring(0,8)}...</strong> para el cliente <strong>{saleToDelete.clientName}</strong>? Esta acción no se puede deshacer.</>}
+          confirmText="Eliminar Venta"
+          confirmButtonClass="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+          icon={<TrashIcon className="w-5 h-5 mr-2" />}
         />
       )}
     </>

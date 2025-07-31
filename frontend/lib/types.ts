@@ -1,3 +1,4 @@
+
 // lib/types.ts
 import React from 'react';
 
@@ -26,12 +27,12 @@ export interface Client {
 
 export interface SaleItem {
   id: string; 
-  productId?: string; // Optional: to link back to a product if needed
+  productId?: string; 
   productName: string; 
   quantity: number; 
-  unitPrice: number; // Price at which it was sold (without VAT)
-  totalItemPrice: number; // quantity * unitPrice
-  itemVatAmount: number; // VAT for this line item
+  unitPrice: number; 
+  totalItemPrice: number; 
+  itemVatAmount: number; 
 }
 
 export interface Sale {
@@ -41,9 +42,9 @@ export interface Sale {
   observations?: string; 
   items: SaleItem[]; 
   vatRatePercent: number; 
-  subTotal: number; // Sum of totalItemPrice for all items
-  totalVatAmount: number; // Sum of itemVatAmount for all items
-  grandTotal: number; // subTotal + totalVatAmount
+  subTotal: number; 
+  totalVatAmount: number; 
+  grandTotal: number; 
 }
 
 export interface Supplier {
@@ -51,31 +52,38 @@ export interface Supplier {
   name: string; 
 }
 
+// Definición de Product compatible con el backend y frontend
+// Aligned with backend's Prisma.ProductType which is 'PRODUCT' or 'SERVICE'
+export type ProductType = 'Producto' | 'Servicio';
+
 export interface Product {
   id: string;
   name: string;
-  productType: 'Producto' | 'Servicio'; // User-friendly for frontend display
-  sku?: string;
-  description?: string;
-  longDescription?: string;
-  images?: string[]; // Array of image URLs/paths
-  category?: string;
-  price: number; // Selling price (corresponds to 'price' on backend Product model, without VAT)
-  unitPrice?: number; // Cost price (corresponds to 'unitPrice' on backend Product model, without VAT)
-  currentStock?: number | null; // Allow null for services or untracked products
+  productType: ProductType; // Explicitly using the defined type
+  sku?: string | null; 
+  description?: string | null;
+  longDescription?: string | null;
+  images?: string[] | null; 
+  category?: string | null;
+  price: number; 
+  unitPrice?: number | null; 
+  currentStock?: number | null; 
   reorderLevel?: number | null;
-  isPublished: boolean; // Default to false or true based on preference
+  isPublished: boolean; 
+  createdAt?: string;
+  updatedAt?: string;
 }
+
 
 export interface PurchaseOrderItem {
   id: string;
-  productId?: string; // Optional: to link back to a product
-  productName: string; // Snapshot of product name at time of order
+  productId?: string; 
+  productName: string; 
   quantity: number;
-  unitPrice: number; // Cost per unit from supplier (without VAT)
-  totalPrice: number; // quantity * unitPrice (subtotal for this item, without VAT)
-  itemVatAmount: number; // VAT for this line item
-  totalPriceWithVat: number; // totalPrice + itemVatAmount
+  unitPrice: number; 
+  totalPrice: number; 
+  itemVatAmount: number; 
+  totalPriceWithVat: number; 
 }
 
 export interface PurchaseOrder {
@@ -87,9 +95,9 @@ export interface PurchaseOrder {
   items: PurchaseOrderItem[]; 
   observations?: string; 
   vatRatePercent: number; 
-  subTotal: number; // Sum of totalPrice for all items
-  totalVatAmount: number; // Sum of itemVatAmount for all items
-  grandTotal: number; // subTotal + totalVatAmount
+  subTotal: number; 
+  totalVatAmount: number; 
+  grandTotal: number; 
 }
 
 
@@ -125,7 +133,6 @@ export enum UserRole {
   ADMIN = 'Admin',
   EDITOR = 'Editor',
   VIEWER = 'Visor',
-  // Add CLIENT role if you differentiate e-commerce customers from ERP users
   CLIENT = 'Client', 
 }
 
@@ -176,5 +183,29 @@ export interface CreateUserDto {
     password: string;
     firstName?: string;
     lastName?: string;
-    role?: UserRole | string; // Allow string for DTO from frontend, backend maps to enum
+    role?: UserRole | string; 
+}
+
+// --- Tipos para E-commerce ---
+export interface CartItem {
+  productId: string;
+  name: string;
+  price: number;
+  quantity: number;
+  image?: string; // Optional image for cart display
+  installationService?: {
+    id: string; // ID of the installation service product
+    name: string;
+    price: number; // Price of the installation for this item
+  } | null;
+}
+
+export interface CartContextType {
+  items: CartItem[];
+  addItem: (product: Product, quantity: number, includeInstallation?: boolean) => void;
+  removeItem: (productId: string) => void;
+  updateItemQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
+  cartTotal: number;
+  itemCount: number;
 }

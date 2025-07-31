@@ -1,7 +1,7 @@
 
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Product, ProductType } from '@prisma/client'; // Import Product and ProductType types
+import { Product, ProductType } from '@prisma/client';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -9,7 +9,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createProductDto: CreateProductDto): Promise<Product> { // Use Product type
+  async create(createProductDto: CreateProductDto): Promise<Product> {
     if (createProductDto.sku) {
       const existingBySku = await this.prisma.client.product.findUnique({
         where: { sku: createProductDto.sku },
@@ -27,11 +27,11 @@ export class ProductsService {
     });
   }
 
-  async findAll(): Promise<Product[]> { // Use Product type
+  async findAll(): Promise<Product[]> {
     return this.prisma.client.product.findMany();
   }
 
-  async findAllPublished(page: number = 1, limit: number = 10, category?: string): Promise<{ data: Product[], total: number, pages: number }> { // Use Product type
+  async findAllPublished(page: number = 1, limit: number = 10, category?: string): Promise<{ data: Product[], total: number, pages: number }> {
     const whereClause: any = { isPublished: true };
     if (category) {
       whereClause.category = category;
@@ -47,7 +47,7 @@ export class ProductsService {
     return { data, total, pages: Math.ceil(total / limit) };
   }
   
-  async findOne(id: string): Promise<Product | null> { // Use Product type
+  async findOne(id: string): Promise<Product | null> {
     const product = await this.prisma.client.product.findUnique({ where: { id } });
     if (!product) {
       throw new NotFoundException(`Product with ID ${id} not found`);
@@ -55,7 +55,7 @@ export class ProductsService {
     return product;
   }
 
-  async findOnePublished(id: string): Promise<Product | null> { // Use Product type
+  async findOnePublished(id: string): Promise<Product | null> {
     const product = await this.prisma.client.product.findFirst({
       where: { id, isPublished: true },
     });
@@ -65,7 +65,7 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> { // Use Product type
+  async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
     await this.findOne(id); 
     if (updateProductDto.sku) { 
         const existingBySku = await this.prisma.client.product.findFirst({
@@ -85,7 +85,7 @@ export class ProductsService {
     });
   }
 
-  async remove(id: string): Promise<Product> { // Use Product type
+  async remove(id: string): Promise<Product> {
     await this.findOne(id); 
     return this.prisma.client.product.delete({ where: { id } });
   }
@@ -99,23 +99,23 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found for stock check.`);
     }
-    if (product.productType === ProductType.SERVICE) { // Use ProductType enum directly
+    if (product.productType === ProductType.SERVICE) { 
       return true; 
     }
     return product.currentStock !== null && product.currentStock >= quantityNeeded;
   }
 
-  async decreaseStock(productId: string, quantityToDecrease: number): Promise<Product> { // Use Product type
+  async decreaseStock(productId: string, quantityToDecrease: number): Promise<Product> {
     const product = await this.prisma.client.product.findUnique({ where: { id: productId } });
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found for stock decrease.`);
     }
     
-    if (product.productType === ProductType.SERVICE || (product.productType === ProductType.PRODUCT && product.currentStock === null)) { // Use ProductType enum
+    if (product.productType === ProductType.SERVICE || (product.productType === ProductType.PRODUCT && product.currentStock === null)) {
         return product;
     }
     
-    if (product.productType === ProductType.PRODUCT && product.currentStock !== null) { // Use ProductType enum
+    if (product.productType === ProductType.PRODUCT && product.currentStock !== null) {
         if (product.currentStock < quantityToDecrease) {
           throw new ConflictException(
             `Not enough stock for product ${product.name} (ID: ${productId}). Available: ${product.currentStock}, Requested: ${quantityToDecrease}`,

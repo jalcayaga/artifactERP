@@ -2,23 +2,23 @@
 export default {
   darkMode: "class",
   content: [
-    './app/**/*.{js,ts,jsx,tsx,mdx}', // For Next.js App Router
+    "./app/**/*.{js,ts,jsx,tsx,mdx}", // For Next.js App Router
     // './pages/**/*.{js,ts,jsx,tsx,mdx}', // Removed as pages directory is no longer used
-    './components/**/*.{js,ts,jsx,tsx,mdx}', // For components at frontend/components
-    './contexts/**/*.{js,ts,jsx,tsx,mdx}', 
-    './lib/**/*.{js,ts,jsx,tsx,mdx}', 
+    "./components/**/*.{js,ts,jsx,tsx,mdx}", // For components at frontend/components
+    "./contexts/**/*.{js,ts,jsx,tsx,mdx}",
+    "./lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
     container: {
       center: true,
       padding: "2rem",
       screens: {
-        "2xl": "1400px",
+        "2xl": "1600px", // Changed from 1400px to 1600px
       },
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'sans-serif'], 
+        sans: ["Inter", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -70,7 +70,8 @@ export default {
           to: { height: "0" },
         },
       },
-      animation: { // Added this section
+      animation: {
+        // Added this section
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
