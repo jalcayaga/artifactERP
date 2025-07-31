@@ -1,8 +1,10 @@
 // components/ProductDetailModal.tsx
-import React, { useEffect } from 'react';
-import { Product } from '@/lib/types';
-import { XIcon, CubeIcon, ArchiveBoxIcon, TagIcon, CheckCircleIcon, XCircleIcon, CreditCardIcon } from '@/components/Icons'; // Added CreditCardIcon
-import { formatCurrencyChilean } from '@/lib/utils';
+import React, { useEffect, useState } from 'react';
+import { Product, Lot } from '@/lib/types';
+import { XIcon, CubeIcon, ArchiveBoxIcon, TagIcon, CheckCircleIcon, XCircleIcon, CreditCardIcon, CalendarIcon, InboxIcon, PencilIcon } from '@/components/Icons';
+import { formatCurrencyChilean, formatDate } from '@/lib/utils';
+import { api } from '@/lib/api'; // Assuming you have an api helper
+import LotEditModal from './LotEditModal';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -37,7 +39,36 @@ const DetailItem: React.FC<{ label: string; value?: string | number | boolean | 
   );
 };
 
+import ProductPurchaseHistory from './ProductPurchaseHistory';
+
 const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClose }) => {
+  const [lots, setLots] = useState<Lot[]>([]);
+  const [isLoadingLots, setIsLoadingLots] = useState(false);
+  const [editingLot, setEditingLot] = useState<Lot | null>(null);
+
+  const handleSaveLot = (updatedLot: Lot) => {
+    setLots(prevLots => prevLots.map(l => l.id === updatedLot.id ? updatedLot : l));
+  };
+
+  useEffect(() => {
+    if (product && product.productType === 'PRODUCT') {
+      const fetchLots = async () => {
+        setIsLoadingLots(true);
+        try {
+          const response = await api.get(`/products/${product.id}/lots`);
+          console.log('Lotes recibidos:', response.data);
+          setLots(response.data);
+        } catch (error) {
+          console.error(`Error fetching lots for product ${product.id}:`, error);
+          setLots([]); // Clear lots on error
+        } finally {
+          setIsLoadingLots(false);
+        }
+      };
+      fetchLots();
+    }
+  }, [product]);
+
   useEffect(() => {
     if (!product) return;
     const handleEsc = (event: KeyboardEvent) => {
@@ -53,7 +84,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
 
   if (!product) return null;
 
-  const ProductTypeIcon = product.productType === 'Producto' ? CubeIcon : ArchiveBoxIcon;
+  const ProductTypeIcon = product.productType === 'PRODUCT' ? CubeIcon : ArchiveBoxIcon;
 
   return (
     <div
@@ -64,7 +95,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
       aria-labelledby="product-detail-modal-title"
     >
       <div
-        className="bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden border border-border"
+        className="bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden border border-border"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex items-start justify-between p-4 sm:p-5 border-b border-border">
@@ -81,7 +112,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
                     {product.name}
                 </h2>
                 <span className={`mt-1 px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    product.productType === 'Producto' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary-foreground'
+                    product.productType === 'PRODUCT' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary-foreground'
                 }`}>
                     {product.productType}
                 </span>
@@ -96,21 +127,59 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
           </button>
         </div>
 
-        <div className="p-4 sm:p-5 space-y-1 overflow-y-auto">
+        <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
           <dl className="divide-y divide-border/50">
             <DetailItem label="SKU" value={product.sku} icon={TagIcon} />
             <DetailItem label="Descripción" value={product.description} />
             <DetailItem label="Categoría" value={product.category} />
             <DetailItem label="Precio Venta (sin IVA)" value={product.price} icon={CreditCardIcon} isCurrency={true} />
-            {product.productType === 'Producto' && product.unitPrice !== undefined && (
+            {product.productType === 'PRODUCT' && product.unitPrice !== undefined && (
               <DetailItem label="Precio Costo (sin IVA)" value={product.unitPrice} icon={CreditCardIcon} isCurrency={true} />
             )}
-            {product.productType === 'Producto' && (
-              <DetailItem label="Stock Actual" value={product.currentStock} icon={ArchiveBoxIcon} />
+            {product.productType === 'PRODUCT' && (
+              <DetailItem label="Stock Actual" value={product.totalStock} icon={ArchiveBoxIcon} />
             )}
             <DetailItem label="Publicado" value={product.isPublished} />
              {product.longDescription && <DetailItem label="Descripción Larga" value={<p className="whitespace-pre-wrap">{product.longDescription}</p>} />}
           </dl>
+
+          {product.productType === 'PRODUCT' && (
+            <div>
+              <h3 className="text-md font-semibold text-foreground mb-2 flex items-center">
+                <InboxIcon className="w-5 h-5 mr-2 opacity-80" />
+                Lotes de Stock Activos
+              </h3>
+              {isLoadingLots ? (
+                <p className="text-sm text-muted-foreground">Cargando lotes...</p>
+              ) : lots.length > 0 ? (
+                <div className="border border-border rounded-lg overflow-hidden">
+                  <ul className="divide-y divide-border/50">
+                    {lots.map(lot => (
+                      <li key={lot.id} className="p-2.5 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
+                        <div className="font-medium">#{lot.lotNumber || 'N/A'}</div>
+                        <div><span className="font-semibold">Cant:</span> {lot.currentQuantity}</div>
+                        <div className="text-muted-foreground"><span className="font-semibold text-foreground">Costo:</span> {formatCurrencyChilean(lot.purchasePrice)}</div>
+                        <div className="text-muted-foreground"><span className="font-semibold text-foreground">Venc:</span> {lot.expirationDate ? formatDate(lot.expirationDate) : 'N/A'}</div>
+                        <div className="flex items-center justify-end">
+                          <button onClick={() => setEditingLot(lot)} className="p-1 text-muted-foreground hover:text-primary">
+                            <PencilIcon className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground italic">No hay lotes activos para este producto.</p>
+              )}
+            </div>
+          )}
+
+          {product.productType === 'PRODUCT' && (
+            <div className="mt-4">
+              <ProductPurchaseHistory productId={product.id} />
+            </div>
+          )}
         </div>
 
         <div className="px-4 py-3 sm:px-5 bg-muted/50 border-t border-border flex justify-end">
@@ -123,6 +192,13 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
           </button>
         </div>
       </div>
+      {editingLot && (
+        <LotEditModal
+          lot={editingLot}
+          onClose={() => setEditingLot(null)}
+          onSave={handleSaveLot}
+        />
+      )}
     </div>
   );
 };

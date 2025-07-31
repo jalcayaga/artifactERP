@@ -1,11 +1,11 @@
 // frontend/components/PurchaseOrderDetailModal.tsx
 import React, { useEffect } from 'react';
-import { PurchaseOrder, PurchaseOrderItem } from '@/lib/types';
+import { Purchase, PurchaseItem } from '@/lib/types';
 import { XIcon, TruckIcon, CalendarIcon, ChatBubbleLeftEllipsisIcon, TagIcon } from '@/components/Icons';
 import { formatCurrencyChilean } from '@/lib/utils';
 
 interface PurchaseOrderDetailModalProps {
-  order: PurchaseOrder | null;
+  order: Purchase | null;
   onClose: () => void;
 }
 
@@ -77,19 +77,14 @@ const PurchaseOrderDetailModal: React.FC<PurchaseOrderDetailModalProps> = ({ ord
 
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 mb-3">
-            <OrderInfoItem label="Proveedor" value={order.supplierName} />
-            <OrderInfoItem label="Fecha de Orden" value={new Date(order.orderDate).toLocaleDateString()} icon={CalendarIcon} />
+            <OrderInfoItem label="Proveedor" value={order.supplier?.name} />
+            <OrderInfoItem label="Fecha de Orden" value={new Date(order.purchaseDate).toLocaleDateString()} icon={CalendarIcon} />
             <OrderInfoItem 
               label="Estado" 
               value={<span className={`px-2.5 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClasses(order.status)}`}>{order.status}</span>}
               icon={TagIcon}
             />
-            {order.expectedDeliveryDate && <OrderInfoItem label="Fecha Entrega Estimada" value={new Date(order.expectedDeliveryDate).toLocaleDateString()} icon={CalendarIcon} />}
-            {order.observations && (
-                <div className="md:col-span-2 lg:col-span-3">
-                    <OrderInfoItem label="Observaciones" value={order.observations} icon={ChatBubbleLeftEllipsisIcon}/>
-                </div>
-            )}
+            
           </div>
 
           <h3 className="text-md font-semibold text-foreground mb-1.5">Artículos de la Orden</h3>
@@ -101,12 +96,12 @@ const PurchaseOrderDetailModal: React.FC<PurchaseOrderDetailModalProps> = ({ ord
                   <th className="px-3 py-2.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cant.</th>
                   <th className="px-3 py-2.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">P.Unit (s/IVA)</th>
                   <th className="px-3 py-2.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Subtotal (s/IVA)</th>
-                  <th className="px-3 py-2.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">IVA ({order.vatRatePercent}%)</th>
+                  <th className="px-3 py-2.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">IVA</th>
                   <th className="px-3 py-2.5 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Artículo</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {order.items.map(item => (
+                {order.items?.map(item => (
                   <tr key={item.id}>
                     <td className="px-3 py-2.5 whitespace-nowrap text-sm text-foreground">{item.productName}</td>
                     <td className="px-3 py-2.5 whitespace-nowrap text-sm text-muted-foreground text-right">{item.quantity}</td>
@@ -123,12 +118,9 @@ const PurchaseOrderDetailModal: React.FC<PurchaseOrderDetailModalProps> = ({ ord
           <div className="mt-4 pt-3 border-t border-border space-y-1.5">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-muted-foreground">Subtotal (sin IVA):</span>
-              <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(order.subTotal)}</span>
+              <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(order.subTotalAmount)}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-muted-foreground">Total IVA ({order.vatRatePercent}%):</span>
-              <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(order.totalVatAmount)}</span>
-            </div>
+            
             <div className="flex justify-between items-center pt-1.5 border-t border-border/50">
               <span className="text-md font-bold text-foreground">Gran Total:</span>
               <span className="text-lg font-bold text-primary">{formatCurrencyChilean(order.grandTotal)}</span>

@@ -31,7 +31,7 @@ const register = async (userData: NewUserCredentials): Promise<any> => {
     role: userData.role, 
   };
   try {
-    const response = await axios.post(`${API_BASE_URL}/users`, createUserDto); 
+    const response = await axios.post(`${API_BASE_URL}/auth/register`, createUserDto); 
     return response.data;
   } catch (error: any) {
     throw error; 

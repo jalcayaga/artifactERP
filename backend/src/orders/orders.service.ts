@@ -1,142 +1,99 @@
-
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateOrderDto, OrderItemDto } from './dto/create-order.dto';
-import { Order, Product, ProductType, OrderStatus, PaymentStatus } from '@prisma/client';
-import { ProductsService } from '../products/products.service';
+import { Order, Prisma } from '@prisma/client';
+import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrdersService {
-  constructor(
-    private prisma: PrismaService,
-    private productsService: ProductsService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async createOrder(createOrderDto: CreateOrderDto, userId: string): Promise<Order> {
-    if (!createOrderDto.items || createOrderDto.items.length === 0) {
-      throw new BadRequestException('Order must contain at least one item.');
-    }
-
-    return this.prisma.client.$transaction(async (tx) => {
-      let subTotalAmount = 0;
-      let totalVatAmount = 0;
-      const orderItemsData = [];
-
-      for (const itemDto of createOrderDto.items) {
-        const product: Product | null = await tx.product.findUnique({ where: { id: itemDto.productId } });
-        if (!product) {
-          throw new NotFoundException(`Product with ID ${itemDto.productId} not found.`);
-        }
-        if (!product.isPublished) {
-            throw new BadRequestException(`Product "${product.name}" is not available for purchase.`);
-        }
-
-        if (product.productType === ProductType.PRODUCT && product.currentStock !== null) {
-          if (product.currentStock < itemDto.quantity) {
-            throw new ConflictException(
-              `Not enough stock for product "${product.name}". Requested: ${itemDto.quantity}, Available: ${product.currentStock}.`
-            );
-          }
-        }
-        
-        const unitPrice = product.price;
-        const totalItemPrice = Number(unitPrice) * itemDto.quantity;
-        const vatRate = createOrderDto.vatRatePercent !== undefined ? createOrderDto.vatRatePercent : 19.0;
-        const itemVat = totalItemPrice * (vatRate / 100);
-
-        subTotalAmount += totalItemPrice;
-        totalVatAmount += itemVat;
-
-        orderItemsData.push({
-          productId: product.id,
-          productNameSnapshot: product.name,
-          productSkuSnapshot: product.sku,
-          quantity: itemDto.quantity,
-          unitPriceSnapshot: unitPrice,
-          totalItemPrice: totalItemPrice,
-          itemVatAmount: itemVat,
-        });
-
-        if (product.productType === ProductType.PRODUCT && product.currentStock !== null) {
-          await tx.product.update({
-            where: { id: product.id },
-            data: { currentStock: { decrement: itemDto.quantity } },
-          });
-        }
-      }
-
-      const shippingAmount = createOrderDto.shippingAmount || 0;
-      const discountAmount = createOrderDto.discountAmount || 0;
-      const grandTotalAmount = subTotalAmount + totalVatAmount + shippingAmount - discountAmount;
-
-      const newOrder = await tx.order.create({
-        data: {
-          userId,
-          status: OrderStatus.PENDING_PAYMENT,
-          paymentStatus: PaymentStatus.PENDING,
-          subTotalAmount,
-          vatAmount: totalVatAmount,
-          vatRatePercent: createOrderDto.vatRatePercent !== undefined ? createOrderDto.vatRatePercent : 19.0,
-          discountAmount,
-          shippingAmount,
-          grandTotalAmount,
-          currency: createOrderDto.currency || 'CLP',
-          shippingAddress: createOrderDto.shippingAddress ? JSON.stringify(createOrderDto.shippingAddress) : undefined,
-          billingAddress: createOrderDto.billingAddress ? JSON.stringify(createOrderDto.billingAddress) : undefined,
-          customerNotes: createOrderDto.customerNotes,
-          orderItems: {
-            create: orderItemsData,
-          },
+  async create(createOrderDto: CreateOrderDto, authenticatedUserId: string): Promise<Order> {
+    return this.prisma.order.create({
+      data: {
+        user: { connect: { id: authenticatedUserId } },
+        client: { connect: { id: createOrderDto.clientId } },
+        status: createOrderDto.status,
+        paymentStatus: createOrderDto.paymentStatus,
+        subTotalAmount: createOrderDto.subTotalAmount,
+        vatAmount: createOrderDto.vatAmount,
+        grandTotalAmount: createOrderDto.grandTotalAmount,
+        vatRatePercent: createOrderDto.vatRatePercent,
+        discountAmount: createOrderDto.discountAmount,
+        shippingAmount: createOrderDto.shippingAmount,
+        currency: createOrderDto.currency,
+        shippingAddress: createOrderDto.shippingAddress,
+        billingAddress: createOrderDto.billingAddress,
+        customerNotes: createOrderDto.customerNotes,
+        paymentMethod: createOrderDto.paymentMethod,
+        orderItems: {
+          create: createOrderDto.items.map(item => ({
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            totalPrice: item.totalPrice,
+            itemVatAmount: item.itemVatAmount,
+            totalPriceWithVat: item.totalPriceWithVat,
+            product: { connect: { id: item.productId } },
+          })),
         },
-        include: { orderItems: { include: {product: true} } },
-      });
-
-      return newOrder;
+      },
     });
   }
 
-  async findUserOrders(userId: string, page: number = 1, limit: number = 10): Promise<{data: Order[], total: number, pages: number}> {
-    const skip = (page - 1) * limit;
-    const total = await this.prisma.client.order.count({ where: { userId } });
-    const data = await this.prisma.client.order.findMany({
-      where: { userId },
-      include: {
-        orderItems: {
-          select: { 
-            id: true, 
-            productNameSnapshot: true, 
-            quantity: true, 
-            unitPriceSnapshot: true,
-            totalItemPrice: true, 
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: skip,
-      take: limit,
-    });
-    return {data, total, pages: Math.ceil(total/limit)};
+  async findAll(page: number, limit: number, userId: string): Promise<{ data: Order[], total: number, pages: number, currentPage: number }> {
+    const where: Prisma.OrderWhereInput = { userId };
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.order.findMany({ where, skip: (page - 1) * limit, take: limit, orderBy: { createdAt: 'desc' } }),
+      this.prisma.order.count({ where }),
+    ]);
+    return { data, total, pages: Math.ceil(total / limit), currentPage: page };
   }
 
-  async findOneUserOrder(orderId: string, userId: string): Promise<Order | null> {
-    const order = await this.prisma.client.order.findFirst({
-      where: { id: orderId, userId },
-      include: {
-        orderItems: {
-          include: {
-            product: { 
-              select: { id: true, name: true, sku: true, images: true, productType: true }
-            } 
-          }
-        },
-        user: { 
-            select: { firstName: true, lastName: true, email: true}
-        }
-      },
-    });
-    if (!order) {
-      throw new NotFoundException(`Order with ID ${orderId} not found or does not belong to the user.`);
+  async findOne(id: string): Promise<Order | null> {
+    return this.prisma.order.findUnique({ where: { id }, include: { orderItems: { include: { product: true } }, client: true } });
+  }
+
+  async update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
+    const data: Prisma.OrderUpdateInput = {};
+
+    if (updateOrderDto.status !== undefined) data.status = updateOrderDto.status;
+    if (updateOrderDto.paymentStatus !== undefined) data.paymentStatus = updateOrderDto.paymentStatus;
+    if (updateOrderDto.subTotalAmount !== undefined) data.subTotalAmount = updateOrderDto.subTotalAmount;
+    if (updateOrderDto.vatAmount !== undefined) data.vatAmount = updateOrderDto.vatAmount;
+    if (updateOrderDto.grandTotalAmount !== undefined) data.grandTotalAmount = updateOrderDto.grandTotalAmount;
+    if (updateOrderDto.vatRatePercent !== undefined) data.vatRatePercent = updateOrderDto.vatRatePercent;
+    if (updateOrderDto.discountAmount !== undefined) data.discountAmount = updateOrderDto.discountAmount;
+    if (updateOrderDto.shippingAmount !== undefined) data.shippingAmount = updateOrderDto.shippingAmount;
+    if (updateOrderDto.currency !== undefined) data.currency = updateOrderDto.currency;
+    if (updateOrderDto.shippingAddress !== undefined) data.shippingAddress = updateOrderDto.shippingAddress;
+    if (updateOrderDto.billingAddress !== undefined) data.billingAddress = updateOrderDto.billingAddress;
+    if (updateOrderDto.customerNotes !== undefined) data.customerNotes = updateOrderDto.customerNotes;
+    if (updateOrderDto.paymentMethod !== undefined) data.paymentMethod = updateOrderDto.paymentMethod;
+
+    if (updateOrderDto.userId !== undefined) {
+      data.user = { connect: { id: updateOrderDto.userId } };
     }
-    return order;
+    if (updateOrderDto.clientId !== undefined) {
+      data.client = { connect: { id: updateOrderDto.clientId } };
+    }
+
+    if (updateOrderDto.items !== undefined) {
+      data.orderItems = {
+        deleteMany: {},
+        create: updateOrderDto.items.map(item => ({
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+          totalPrice: item.totalPrice,
+          itemVatAmount: item.itemVatAmount,
+          totalPriceWithVat: item.totalPriceWithVat,
+          product: { connect: { id: item.productId } },
+        })),
+      };
+    }
+
+    return this.prisma.order.update({
+      where: { id },
+      data,
+    });
   }
 }

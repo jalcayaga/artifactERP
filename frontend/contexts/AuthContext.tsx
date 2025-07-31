@@ -56,11 +56,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const register = async (userData: NewUserCredentials): Promise<{ success: boolean; error?: string; data?: any }> => {
-    // setIsLoading(true); // No loader global para registro
+    setIsLoading(true);
     try {
       const response = await AuthService.register(userData);
+      if (response) {
+        // Automatically log in the user after successful registration
+        const loginResult = await login({ email: userData.email, password: userData.password });
+        setIsLoading(false);
+        return { success: loginResult.success, error: loginResult.error, data: response };
+      }
+      setIsLoading(false);
       return { success: true, data: response }; 
     } catch (error: any) {
+      setIsLoading(false);
       const errorMessage = error.response?.data?.message || error.message || 'An unknown error occurred during registration.';
       return { success: false, error: errorMessage };
     }

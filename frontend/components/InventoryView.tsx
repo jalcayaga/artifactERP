@@ -1,46 +1,66 @@
 // components/InventoryView.tsx
 import React, { useState, useCallback, useEffect } from 'react';
-import { Product } from '@/lib/types';
+import { Product, CreateProductDto, UpdateProductDto, UserRole } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ProductForm from '@/components/ProductForm';
 import ProductDetailModal from '@/components/ProductDetailModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { PencilIcon, TrashIcon, EyeIcon, ArchiveBoxIcon, PlusIcon, CubeIcon } from '@/components/Icons';
 import { formatCurrencyChilean } from '@/lib/utils';
-
-const initialMockProducts: Product[] = [
-  { id: 'prod_1', name: 'Laptop Pro 15"', productType: 'Producto', sku: 'LP15-001', description: 'Laptop de alto rendimiento para profesionales.', price: 1200.00, unitPrice: 950.00, currentStock: 50, category: 'Electrónica', isPublished: true, images: ['https://placehold.co/400x300/EFEFEF/31343C?text=Laptop+Pro'] },
-  { id: 'prod_2', name: 'Servicio de Consultoría Tech', productType: 'Servicio', sku: 'CONSULT-01', description: 'Consultoría especializada en soluciones TI.', price: 75.00, unitPrice: undefined, currentStock: null, category: 'Servicios', isPublished: true },
-  { id: 'prod_3', name: 'Mouse Inalámbrico Ergo', productType: 'Producto', sku: 'ME-004', description: 'Mouse ergonómico para mayor comodidad.', price: 25.00, unitPrice: 15.00, currentStock: 150, category: 'Accesorios', isPublished: true, images: ['https://placehold.co/400x300/EFEFEF/31343C?text=Mouse+Ergo'] },
-  { id: 'prod_4', name: 'Teclado Mecánico RGB', productType: 'Producto', sku: 'TM-RGB-07', description: 'Teclado mecánico con iluminación RGB personalizable.', price: 89.99, unitPrice: 60.00, currentStock: 0, category: 'Accesorios', isPublished: false },
-  { id: 'prod_5', name: 'Soporte Técnico Remoto (Hora)', productType: 'Servicio', sku: 'SUP-REM-HR', description: 'Soporte técnico remoto por hora.', price: 50.00, unitPrice: undefined, currentStock: null, category: 'Servicios', isPublished: true },
-];
-
-const LOCAL_STORAGE_KEY_PRODUCTS = 'wolfflow_products';
+import { ProductService } from '@/lib/services/productService';
+import { useAuth } from '@/contexts/AuthContext';
 
 const InventoryView: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>(() => {
-    try {
-      const storedProducts = localStorage.getItem(LOCAL_STORAGE_KEY_PRODUCTS);
-      return storedProducts ? JSON.parse(storedProducts) : initialMockProducts;
-    } catch (error) {
-      console.error("Error loading products from localStorage:", error);
-      return initialMockProducts;
-    }
-  });
+  const { token, isAuthenticated, currentUser } = useAuth();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showProductForm, setShowProductForm] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [viewingProduct, setViewingProduct] = useState<Product | null>(null);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY_PRODUCTS, JSON.stringify(products));
-    } catch (error) {
-      console.error("Error saving products to localStorage:", error);
+  const fetchProducts = useCallback(async (page: number = 1) => {
+    if (!isAuthenticated || !token || currentUser?.role !== UserRole.ADMIN) {
+      setError('No autorizado para ver esta página.');
+      setLoading(false);
+      return;
     }
-  }, [products]);
+    try {
+      setLoading(true);
+      const response = await ProductService.getAllProducts(token, page);
+      
+      const productsWithStock = await Promise.all(
+        response.data.map(async (product) => {
+          if (product.productType === 'PRODUCT') {
+            const lots = await ProductService.getProductLots(product.id, token);
+            const totalStock = lots.reduce((sum, lot) => sum + lot.currentQuantity, 0);
+            return { ...product, totalStock };
+          } else {
+            return { ...product, totalStock: undefined }; // Services don't have stock
+          }
+        })
+      );
+
+      setProducts(productsWithStock);
+      setTotalPages(response.pages);
+      setCurrentPage(response.currentPage);
+      setTotalProducts(response.total);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError('Error al cargar los productos.');
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, token, currentUser]);
+
+  useEffect(() => {
+    fetchProducts(currentPage);
+  }, [fetchProducts, currentPage]);
 
   const handleAddNewProduct = useCallback(() => {
     setEditingProduct(null);
@@ -57,13 +77,19 @@ const InventoryView: React.FC = () => {
     setShowDeleteConfirmModal(true);
   }, []);
   
-  const handleConfirmDeleteProduct = useCallback(() => {
-    if (productToDelete) {
-      setProducts(prevProducts => prevProducts.filter(product => product.id !== productToDelete.id));
-      setProductToDelete(null);
-      setShowDeleteConfirmModal(false);
+  const handleConfirmDeleteProduct = useCallback(async () => {
+    if (productToDelete && token) {
+      try {
+        await ProductService.deleteProduct(productToDelete.id, token);
+        fetchProducts(currentPage); // Re-fetch products after delete
+        setProductToDelete(null);
+        setShowDeleteConfirmModal(false);
+      } catch (err) {
+        console.error('Error deleting product:', err);
+        setError('Error al eliminar el producto.');
+      }
     }
-  }, [productToDelete]);
+  }, [productToDelete, token, fetchProducts, currentPage]);
 
   const handleCloseDeleteConfirmModal = useCallback(() => {
     setProductToDelete(null);
@@ -78,23 +104,43 @@ const InventoryView: React.FC = () => {
     setViewingProduct(null);
   }, []);
 
-  const handleSaveProduct = useCallback((productData: Product) => {
-    setProducts(prevProducts => {
+  const handleSaveProduct = useCallback(async (productData: Product) => {
+    if (!token) return;
+    try {
       if (editingProduct) {
-        return prevProducts.map(p => (p.id === productData.id ? productData : p));
+        await ProductService.updateProduct(productData.id, productData as UpdateProductDto, token);
       } else {
-        const newId = productData.id || `prod-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        return [...prevProducts, { ...productData, id: newId }];
+        await ProductService.createProduct(productData as CreateProductDto, token);
       }
-    });
-    setShowProductForm(false);
-    setEditingProduct(null);
-  }, [editingProduct]);
+      setShowProductForm(false);
+      setEditingProduct(null);
+      fetchProducts(currentPage); // Re-fetch products after save
+    } catch (err) {
+      console.error('Error saving product:', err);
+      setError('Error al guardar el producto.');
+    }
+  }, [editingProduct, token, fetchProducts, currentPage]);
 
   const handleCloseForm = useCallback(() => {
     setShowProductForm(false);
     setEditingProduct(null);
   }, []);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  if (loading) {
+    return <div className="text-center py-8">Cargando productos...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-8 text-destructive">{error}</div>;
+  }
+
+  if (!isAuthenticated || currentUser?.role !== UserRole.ADMIN) {
+    return <div className="text-center py-8 text-destructive">Acceso denegado. No tienes permisos de administrador.</div>;
+  }
 
   if (showProductForm) {
     return (
@@ -160,14 +206,14 @@ const InventoryView: React.FC = () => {
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground hidden sm:table-cell">{product.sku || '-'}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                product.productType === 'Producto' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary-foreground'
+                                product.productType === 'PRODUCT' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary-foreground'
                             }`}>
                                 {product.productType}
                             </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-foreground text-right">{formatCurrencyChilean(product.price)}</td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground text-right hidden md:table-cell">
-                            {product.productType === 'Producto' ? (product.currentStock ?? 'N/A') : 'N/A'}
+                            {product.productType === 'PRODUCT' ? (product.totalStock ?? 'N/A') : 'N/A'}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm hidden lg:table-cell">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
@@ -220,7 +266,7 @@ const InventoryView: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleAddNewProduct}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center space-x-2 mx-auto"
+                    className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center space-x-2 mx-auto"
                   >
                     <PlusIcon className="w-5 h-5" />
                     <span>Añadir Primer Producto/Servicio</span>
@@ -230,6 +276,33 @@ const InventoryView: React.FC = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Pagination Controls */}
+        {products.length > 0 && totalPages > 1 && (
+          <div className="flex justify-between items-center mt-4">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages} (Total: {totalProducts} productos)
+              </p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <button
+                className="px-4 py-2 border rounded-md text-sm font-medium bg-background hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage <= 1}
+              >
+                Anterior
+              </button>
+              <button
+                className="px-4 py-2 border rounded-md text-sm font-medium bg-background hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage >= totalPages}
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        )}
       </div>
       
       {viewingProduct && (

@@ -1,10 +1,7 @@
-
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
-import { LoginDto } from './dto/login.dto';
-import { User } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -13,36 +10,35 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, pass: string): Promise<Omit<User, 'password'> | null> {
-    const user = await this.usersService.findOneByEmail(email);
-    if (user && typeof user.password === 'string' && await bcrypt.compare(pass, user.password)) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async validateUser(email: string, pass: string): Promise<any> {
+    const user = await this.usersService.findByEmail(email);
+    if (user && await bcrypt.compare(pass, user.password)) {
       const { password, ...result } = user;
-      return result as Omit<User, 'password'>;
+      return result;
     }
     return null;
   }
 
-  async login(loginDto: LoginDto) {
-    const userValidationResult = await this.validateUser(loginDto.email, loginDto.password);
-    if (!userValidationResult) {
+  async login(loginDto: { email: string; password: string }) {
+    const user = await this.validateUser(loginDto.email, loginDto.password);
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
-    const fullUser = await this.usersService.findOneByEmail(userValidationResult.email);
-    if (!fullUser || !fullUser.isActive) {
-        throw new UnauthorizedException('User account is inactive or not found.');
-    }
-    const payload = { email: fullUser.email, sub: fullUser.id, role: fullUser.role };
+    const payload = { email: user.email, sub: user.id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
-      user: {
-        id: fullUser.id,
-        email: fullUser.email,
-        firstName: fullUser.firstName, 
-        lastName: fullUser.lastName,   
-        role: fullUser.role,
-      }
+      user: user,
     };
+  }
+
+  async getProfile(email: string) {
+    const fullUser = await this.usersService.findByEmail(
+      email,
+    );
+    if (!fullUser) {
+      throw new UnauthorizedException('Could not find user profile.');
+    }
+    const { password, ...profile } = fullUser;
+    return profile;
   }
 }

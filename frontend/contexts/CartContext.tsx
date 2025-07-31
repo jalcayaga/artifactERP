@@ -11,7 +11,7 @@ const LOCAL_STORAGE_CART_KEY = 'subred_ecommerce_cart';
 const MOCK_INSTALLATION_SERVICE_PRODUCT: Product = {
   id: 'serv-install-001',
   name: 'Servicio de Instalación Profesional',
-  productType: 'Servicio',
+  productType: 'SERVICE',
   price: 50000, // Precio base de instalación
   isPublished: true,
   // ...otros campos necesarios si es un producto completo
@@ -46,7 +46,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       let newItems = [...prevItems];
 
       // Define installationServiceDetails only if includeInstallation is true AND it's a 'Producto'
-      const installationServiceDetails = includeInstallation && product.productType === 'Producto' ? {
+      const installationServiceDetails = includeInstallation && product.productType === 'PRODUCT' ? {
         id: MOCK_INSTALLATION_SERVICE_PRODUCT.id,
         name: MOCK_INSTALLATION_SERVICE_PRODUCT.name,
         price: MOCK_INSTALLATION_SERVICE_PRODUCT.price, // This is the price of the service itself
@@ -80,7 +80,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const removeItem = (productId: string) => {
     setItems(prevItems => prevItems.filter(item => item.productId !== productId));
-     console.log(`Producto con ID ${productId} eliminado del carrito.`);
+     console.log(`PRODUCT with ID ${productId} removed from cart.`);
   };
 
   const updateItemQuantity = (productId: string, quantity: number) => {
@@ -93,7 +93,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         item.productId === productId ? { ...item, quantity } : item
       )
     );
-    console.log(`Cantidad del producto con ID ${productId} actualizada a ${quantity}.`);
+    console.log(`Quantity of PRODUCT with ID ${productId} updated to ${quantity}.`);
   };
 
   const clearCart = () => {

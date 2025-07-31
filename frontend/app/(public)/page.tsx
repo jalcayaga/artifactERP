@@ -161,7 +161,8 @@ const PublicHomePage: React.FC = () => {
   const [isLoadingAlarms, setIsLoadingAlarms] = useState(true);
   const [alarmsError, setAlarmsError] = useState<string | null>(null);
   const [accesoriesProducts, setAccesoriesProducts] = useState<Product[]>([]);
-  const [accesoriesError, setAccesoriesError] = useState<string | null>(null);
+  const [isLoadingAccessories, setIsLoadingAccessories] = useState(true);
+  const [accessoriesError, setAccessoriesError] = useState<string | null>(null);
   
   useEffect(() => {
     const fetchAlarmProducts = async () => {
@@ -181,7 +182,7 @@ const PublicHomePage: React.FC = () => {
           setAlarmProducts([]);
         } else {
           const productsWithDemoOffer = productsToDisplay.map((p, index) => {
-            if (index % 2 === 0 && p.price > 50000 && p.productType === 'Producto') { // Add offer to some products
+            if (index % 2 === 0 && p.price > 50000 && p.productType === 'PRODUCT') { // Add offer to some products
               return {
                 ...p,
                 oldPrice: p.price * 1.25, 
@@ -206,14 +207,14 @@ const PublicHomePage: React.FC = () => {
 
   useEffect(() => {
     const fetchAccesoriesProducts = async () => {
-      setIsLoadingAlarms(true);
-      setAlarmsError(null);
+      setIsLoadingAccessories(true);
+      setAccessoriesError(null);
       try {
         const accesoriesCategoryResponse = await ProductService.getPublishedProducts(1, 5, 'Accesorios');
         let productsToDisplay = accesoriesCategoryResponse.data;
         
         if (!productsToDisplay || productsToDisplay.length === 0) {
-          setAccesoriesError('No hay productos disponibles por el momento.');
+          setAccessoriesError('No hay productos disponibles por el momento.');
           setAccesoriesProducts([]);
         } else {
           setAccesoriesProducts(productsToDisplay);
@@ -221,10 +222,10 @@ const PublicHomePage: React.FC = () => {
 
       } catch (error) {
         console.error("Error fetching accesories products:", error);
-        setAccesoriesError('No se pudieron cargar los productos.');
+        setAccessoriesError('No se pudieron cargar los productos.');
         setAccesoriesProducts([]);
       } finally {
-        setIsLoadingAlarms(false);
+        setIsLoadingAccessories(false);
       }
     };
     fetchAccesoriesProducts();
@@ -342,9 +343,9 @@ const PublicHomePage: React.FC = () => {
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">Accesorios</h2>
             {/* Link "Ver todas las alarmas" is now below the product cards */}
           </div>
-          {isLoadingAlarms && <p className="text-center text-muted-foreground">Cargando Accesorios...</p>}
-          {accesoriesError && <p className="text-center text-destructive">{accesoriesError}</p>}
-          {!isLoadingAlarms && !accesoriesError && accesoriesProducts.length > 0 && (
+          {isLoadingAccessories && <p className="text-center text-muted-foreground">Cargando Accesorios...</p>}
+          {accessoriesError && <p className="text-center text-destructive">{accessoriesError}</p>}
+          {!isLoadingAccessories && !accessoriesError && accesoriesProducts.length > 0 && (
            <div className="flex justify-center w-full">
             <div className="inline-flex items-stretch space-x-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-muted-foreground/30 scrollbar-track-transparent max-w-full">
               {accesoriesProducts.map(product => (
@@ -353,10 +354,10 @@ const PublicHomePage: React.FC = () => {
             </div>
            </div>
           )}
-           {!isLoadingAlarms && !accesoriesError && accesoriesProducts.length === 0 && ( 
+           {!isLoadingAccessories && !accessoriesError && accesoriesProducts.length === 0 && ( 
              <p className="text-center text-muted-foreground">No hay productos de Accesorios disponibles en este momento.</p>
            )}
-           {!isLoadingAlarms && !accesoriesError && accesoriesProducts.length > 0 && (
+           {!isLoadingAccessories && !accessoriesError && accesoriesProducts.length > 0 && (
             <div className="mt-6 text-right">
                 <Link 
                     href="/products?category=Accesorios" 
@@ -367,6 +368,8 @@ const PublicHomePage: React.FC = () => {
                 </Link>
             </div>
            )}
+        </div>
+      </section>
       {/* ====== Updated "Por Qué Elegir SubRed" Section - Darker Background, Improved Icons ====== */}
       <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-r from-lime-700 via-teal-700 to-cyan-700 dark:from-lime-800 dark:via-teal-800 dark:to-cyan-800">
         <div className="container mx-auto px-4 text-center text-white">

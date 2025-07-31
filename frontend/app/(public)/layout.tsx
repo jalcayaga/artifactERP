@@ -1,6 +1,6 @@
 // frontend/app/(public)/layout.tsx
 'use client';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, Suspense } from 'react';
 import PublicHeader from '@/components/ecommerce/PublicHeader';
 import PublicFooter from '@/components/ecommerce/PublicFooter';
 
@@ -12,7 +12,9 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <PublicHeader />
       <main className="flex-grow">
-        {children}
+        <Suspense fallback={<div>Cargando...</div>}>
+          {children}
+        </Suspense>
       </main>
       <PublicFooter />
     </div>

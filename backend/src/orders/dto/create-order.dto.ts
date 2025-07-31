@@ -1,76 +1,88 @@
-
+import { IsString, IsNotEmpty, IsDateString, IsNumber, IsArray, ValidateNested, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
-import { IsArray, IsNotEmpty, IsString, ValidateNested, IsInt, Min, IsOptional, IsNumber, IsObject, MaxLength } from 'class-validator';
+import { OrderStatus, PaymentStatus, PaymentMethod } from '@prisma/client';
 
 export class OrderItemDto {
   @IsString()
   @IsNotEmpty()
   productId: string;
 
-  @IsInt()
-  @Min(1)
-  @Type(() => Number)
+  @IsNumber()
   quantity: number;
 
-  // Price is usually taken from the product on the backend to prevent tampering,
-  // but frontend might send it for display or if dynamic pricing per item is allowed.
-  // For now, backend will fetch product price.
-}
+  @IsNumber()
+  unitPrice: number;
 
-// Simplified Address DTO for now
-export class AddressDto {
-    @IsString() @IsNotEmpty() @MaxLength(100) name: string;
-    @IsString() @IsNotEmpty() @MaxLength(255) address1: string;
-    @IsOptional() @IsString() @MaxLength(255) address2?: string;
-    @IsString() @IsNotEmpty() @MaxLength(100) city: string;
-    @IsString() @IsNotEmpty() @MaxLength(20) postalCode: string;
-    @IsString() @IsNotEmpty() @MaxLength(50) country: string; // e.g., "Chile"
-    @IsOptional() @IsString() @MaxLength(20) phone?: string;
-}
+  @IsNumber()
+  totalPrice: number;
 
+  @IsNumber()
+  itemVatAmount: number;
+
+  @IsNumber()
+  totalPriceWithVat: number;
+}
 
 export class CreateOrderDto {
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OrderItemDto)
-  items: OrderItemDto[];
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  clientId: string;
 
   @IsOptional()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => AddressDto)
-  shippingAddress?: AddressDto; // Or JsonObject if not using specific DTO
+  @IsString()
+  status?: OrderStatus;
 
   @IsOptional()
-  @IsObject()
-  @ValidateNested()
-  @Type(() => AddressDto)
-  billingAddress?: AddressDto; // Or JsonObject
+  @IsString()
+  paymentStatus?: PaymentStatus;
+
+  @IsNumber()
+  subTotalAmount: number;
+
+  @IsNumber()
+  vatAmount: number;
+
+  @IsNumber()
+  grandTotalAmount: number;
+
+  @IsOptional()
+  @IsNumber()
+  vatRatePercent?: number;
+
+  @IsOptional()
+  @IsNumber()
+  discountAmount?: number;
+
+  @IsOptional()
+  @IsNumber()
+  shippingAmount?: number;
+
+  @IsOptional()
+  @IsString()
+  currency?: string;
+
+  @IsOptional()
+  @IsString()
+  shippingAddress?: string;
+
+  @IsOptional()
+  @IsString()
+  billingAddress?: string;
 
   @IsOptional()
   @IsString()
   customerNotes?: string;
 
   @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Type(() => Number)
-  shippingAmount?: number;
-
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Type(() => Number)
-  discountAmount?: number;
-  
-  @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(0)
-  @Type(() => Number)
-  vatRatePercent?: number; // e.g., 19.0 for 19%. If not provided, a default will be used.
-
-  @IsOptional()
   @IsString()
-  @MaxLength(10)
-  currency?: string; // e.g., CLP, USD. Defaults to CLP if not provided.
+  paymentMethod?: PaymentMethod;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OrderItemDto)
+  items: OrderItemDto[];
 }

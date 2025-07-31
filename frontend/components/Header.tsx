@@ -109,10 +109,10 @@ const Header: React.FC<HeaderProps> = ({ appName, onToggleMobileSidebar, sidebar
             >
               <MenuIcon className="w-6 h-6" />
             </button>
-             <div className={`text-xl font-semibold text-primary ${!sidebarCollapsed ? 'md:hidden' : 'block'}`}>{appName}</div>
+             <div className={`text-xl font-semibold text-primary ${sidebarCollapsed ? 'md:block' : 'block'}`}>{appName}</div>
           </div>
 
-          <div className="flex-1 max-w-xs ml-4 hidden sm:block">
+          <div className="flex-1 max-w-xs ml-4 hidden sm:block md:max-w-md lg:max-w-lg">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <SearchIcon className="h-5 w-5 text-muted-foreground" />

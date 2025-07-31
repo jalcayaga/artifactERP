@@ -1,12 +1,11 @@
-// backend/prisma/schema.prisma
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl"]
 }
 
 // --------------------
@@ -27,18 +26,26 @@ enum ProductType {
 
 enum OrderStatus {
   PENDING_PAYMENT // Esperando pago
-  PROCESSING      // Pago recibido, pedido en preparación
-  SHIPPED         // Pedido enviado
-  DELIVERED       // Pedido entregado
-  CANCELLED       // Pedido cancelado
-  REFUNDED        // Pedido devuelto/reembolsado
+  PROCESSING // Pago recibido, pedido en preparación
+  SHIPPED // Pedido enviado
+  DELIVERED // Pedido entregado
+  CANCELLED // Pedido cancelado
+  REFUNDED // Pedido devuelto/reembolsado
 }
 
 enum PaymentStatus {
   PENDING // Pago pendiente
-  PAID    // Pago completado exitosamente
-  FAILED  // Pago fallido
+  PAID // Pago completado exitosamente
+  FAILED // Pago fallido
   REFUNDED // Pago reembolsado
+}
+
+enum PaymentMethod {
+  CASH
+  DEBIT_CARD
+  CREDIT_CARD
+  BANK_TRANSFER
+  OTHER
 }
 
 // --------------------
@@ -56,76 +63,330 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  orders Order[] // Un usuario puede tener muchos pedidos
+  orders  Order[] // Un usuario puede tener muchos pedidos
+  clients Client[] // Un usuario puede tener muchos clientes asociados
+  quotes  Quote[] // NEW: Un usuario puede tener muchas cotizaciones
 
   @@map("users")
 }
 
-model Product {
-  id               String      @id @default(cuid())
-  name             String
-  productType      ProductType @default(PRODUCT)
-  sku              String?     @unique // Stock Keeping Unit
-  description      String?
-  longDescription  String?     @db.Text
-  images           String[]    @default([]) // URLs de las imágenes
-  category         String?
-  price            Decimal // Precio de venta al público (usado en pedidos)
-  unitPrice        Decimal? // Podría ser el costo del producto para el ERP
-  currentStock     Int? // Null si es un servicio o no se gestiona stock
-  reorderLevel     Int?
-  isPublished      Boolean     @default(false) // Si el producto es visible en el e-commerce
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+model Client {
+  id          String   @id @default(cuid())
+  userId      String // ID del usuario que creó/gestiona este cliente
+  name        String
+  rut         String?  @unique // RUT of the client
+  giro        String?  // Business activity of the client
+  contactName String?
+  email       String?  @unique
+  phone       String?
+  address     String?
+  city        String?
+  state       String?
+  zip         String?
+  type        String // e.g., "Empresa", "Persona"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  orderItems OrderItem[] // Un producto puede estar en muchos items de pedido
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quotes   Quote[] // NEW: Un cliente puede tener muchas cotizaciones
+  invoices Invoice[]
+  orders   Order[] // NEW: Un cliente puede tener muchas órdenes
+
+  @@index([userId])
+  @@map("clients")
+}
+
+model Product {
+  id              String      @id @default(cuid())
+  name            String
+  productType     ProductType @default(PRODUCT)
+  sku             String?     @unique // Stock Keeping Unit
+  description     String?
+  longDescription String?     @db.Text
+  images          String[]    @default([]) // URLs de las imágenes
+  category        String?
+  price           Decimal // Precio de venta al público (usado en pedidos)
+  unitPrice       Decimal? // Podría ser el costo del producto para el ERP
+  // currentStock     Int? // REMOVED: Stock now managed by Lots
+  reorderLevel    Int?
+  isPublished     Boolean     @default(false) // Si el producto es visible en el e-commerce
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  orderItems    OrderItem[] // Un producto puede estar en muchos items de pedido
+  purchaseItems PurchaseItem[] // Un producto puede estar en muchos items de compra
+  lots          Lot[] // NEW: A product can have many lots
+  quoteItems    QuoteItem[] // NEW: Un producto puede estar en muchos items de cotización
+  invoiceItems  InvoiceItem[]
 
   @@index([category])
   @@index([isPublished])
   @@map("products")
 }
 
-model Order {
-  id                String        @id @default(cuid())
-  userId            String
-  status            OrderStatus   @default(PENDING_PAYMENT)
-  paymentStatus     PaymentStatus @default(PENDING)
-  subTotalAmount    Decimal // Suma de totalItemPrice de OrderItems
-  vatAmount         Decimal // IVA total del pedido
-  vatRatePercent    Float         @default(19.0) // Tasa de IVA aplicada, ej. 19.0 para 19%
-  discountAmount    Decimal       @default(0)
-  shippingAmount    Decimal       @default(0)
-  grandTotalAmount  Decimal // (subTotalAmount + vatAmount + shippingAmount) - discountAmount
-  currency          String        @default("CLP")
-  shippingAddress   String?       @db.Text // JSON string de la dirección de envío
-  billingAddress    String?       @db.Text // JSON string de la dirección de facturación
-  customerNotes     String?       @db.Text
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @updatedAt
+model Lot {
+  id              String        @id @default(cuid())
+  productId       String
+  product         Product       @relation(fields: [productId], references: [id])
+  purchaseItemId  String? // Optional: Link to the specific purchase item that brought this lot in
+  purchaseItem    PurchaseItem? @relation(fields: [purchaseItemId], references: [id])
+  lotNumber       String        @unique // Unique identifier for this batch/lot (e.g., supplier batch, date code)
+  initialQuantity Int // The quantity received in this lot
+  currentQuantity Int // The remaining quantity in this lot
+  purchasePrice   Decimal       @db.Decimal(10, 2) // Unit price of this lot
+  entryDate       DateTime      @default(now())
+  expirationDate  DateTime? // Optional: for perishable goods
+  location        String? // Optional: physical location of the lot within warehouse
 
-  user       User          @relation(fields: [userId], references: [id], onDelete: Restrict)
+  orderItemLots OrderItemLot[] // NEW: A lot can be part of many order item lots
+
+  @@index([productId])
+  @@index([entryDate])
+  @@map("lots")
+}
+
+model Order {
+  id               String         @id @default(cuid())
+  userId           String
+  clientId         String         // The client this order belongs to
+  status           OrderStatus    @default(PENDING_PAYMENT)
+  paymentStatus    PaymentStatus  @default(PENDING)
+  subTotalAmount   Decimal // Suma de totalItemPrice de OrderItems
+  vatAmount        Decimal // IVA total del pedido
+  vatRatePercent   Float          @default(19.0) // Tasa de IVA aplicada, ej. 19.0 para 19%
+  discountAmount   Decimal        @default(0)
+  shippingAmount   Decimal        @default(0)
+  grandTotalAmount Decimal // (subTotalAmount + vatAmount + shippingAmount) - discountAmount
+  currency         String         @default("CLP")
+  shippingAddress  String?        @db.Text // JSON string de la dirección de envío
+  billingAddress   String?        @db.Text // JSON string de la dirección de facturación
+  customerNotes    String?        @db.Text
+  paymentMethod    PaymentMethod?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  client     Client      @relation(fields: [clientId], references: [id], onDelete: Restrict)
   orderItems OrderItem[]
+  invoice    Invoice? // An order can have one invoice
 
   @@index([userId])
+  @@index([clientId])
   @@index([status])
   @@map("orders")
 }
 
+// NEW: Supplier Model
+model Supplier {
+  id            String   @id @default(cuid())
+  name          String   @unique
+  contactPerson String?
+  email         String?  @unique
+  phone         String?
+  address       String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  purchases Purchase[] // A supplier can have many purchases
+
+  @@map("suppliers")
+}
+
+model Purchase {
+  id             String   @id @default(cuid())
+  supplierId     String // NEW: Link to Supplier
+  supplier       Supplier @relation(fields: [supplierId], references: [id]) // NEW: Relation to Supplier
+  // supplierName     String? // REMOVED: Now linked via supplierId
+  purchaseDate   DateTime @default(now())
+  status         String   @default("PENDING") // e.g., PENDING, RECEIVED, CANCELLED
+  subTotalAmount Decimal  @db.Decimal(10, 2)
+  totalVatAmount Decimal  @db.Decimal(10, 2)
+  grandTotal     Decimal  @db.Decimal(10, 2)
+
+  items PurchaseItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([supplierId]) // NEW: Index for supplierId
+  @@map("purchases")
+}
+
+model PurchaseItem {
+  id                String  @id @default(cuid())
+  purchaseId        String
+  productId         String
+  quantity          Int
+  unitPrice         Decimal @db.Decimal(10, 2) // Purchase unit price for this item
+  totalPrice        Decimal @db.Decimal(10, 2)
+  itemVatAmount     Decimal @db.Decimal(10, 2)
+  totalPriceWithVat Decimal @db.Decimal(10, 2)
+
+  purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id])
+
+  lots Lot[] // NEW: A purchase item can create one or more lots
+
+  @@index([purchaseId])
+  @@index([productId])
+  @@map("purchase_items")
+}
+
 model OrderItem {
-  id                  String   @id @default(cuid())
-  orderId             String
-  productId           String
-  productNameSnapshot String // Nombre del producto al momento de la compra
-  productSkuSnapshot  String?  // SKU del producto al momento de la compra
-  quantity            Int
-  unitPriceSnapshot   Decimal  // Precio unitario del producto al momento de la compra (sin IVA)
-  totalItemPrice      Decimal  // quantity * unitPriceSnapshot
-  itemVatAmount       Decimal  // IVA calculado para este item específico
-  createdAt           DateTime @default(now())
-  updatedAt           DateTime @updatedAt
+  id                String  @id @default(cuid())
+  orderId           String
+  productId         String
+  quantity          Int
+  unitPrice         Decimal @db.Decimal(10, 2) // Selling unit price for this item
+  totalPrice        Decimal @db.Decimal(10, 2)
+  itemVatAmount     Decimal @db.Decimal(10, 2)
+  totalPriceWithVat Decimal @db.Decimal(10, 2)
 
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Restrict) // Restrict para no borrar productos si están en pedidos
+  product Product @relation(fields: [productId], references: [id])
 
+  orderItemLots OrderItemLot[] // NEW: Link to the specific lots from which this item was sold
+
+  @@index([orderId])
+  @@index([productId])
   @@map("order_items")
+}
+
+// NEW: Join table for OrderItem and Lot
+model OrderItemLot {
+  id            String @id @default(cuid())
+  orderItemId   String
+  lotId         String
+  quantityTaken Int // Quantity taken from this specific lot for this order item
+
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+  lot       Lot       @relation(fields: [lotId], references: [id], onDelete: Restrict) // Restrict deletion of lot if it's linked to an order item
+
+  @@unique([orderItemId, lotId]) // An order item can only take from a specific lot once
+  @@map("order_item_lots")
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  INVOICED
+}
+
+model Quote {
+  id             String      @id @default(cuid())
+  clientId       String
+  client         Client      @relation(fields: [clientId], references: [id])
+  userId         String
+  user           User        @relation(fields: [userId], references: [id])
+  status         QuoteStatus @default(DRAFT)
+  quoteDate      DateTime    @default(now())
+  expirationDate DateTime?
+  subTotalAmount Decimal     @db.Decimal(10, 2)
+  vatAmount      Decimal     @db.Decimal(10, 2)
+  grandTotal     Decimal     @db.Decimal(10, 2)
+  notes          String?     @db.Text
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  quoteItems QuoteItem[]
+
+  @@index([clientId])
+  @@index([userId])
+  @@map("quotes")
+}
+
+model QuoteItem {
+  id                String   @id @default(cuid())
+  quoteId           String
+  quote             Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id])
+  quantity          Int
+  unitPrice         Decimal  @db.Decimal(10, 2)
+  totalPrice        Decimal  @db.Decimal(10, 2)
+  itemVatAmount     Decimal  @db.Decimal(10, 2)
+  totalPriceWithVat Decimal  @db.Decimal(10, 2)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([quoteId])
+  @@index([productId])
+  @@map("quote_items")
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  VOID
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  orderId        String        @unique // Each order can only have one invoice
+  order          Order         @relation(fields: [orderId], references: [id])
+  clientId       String
+  client         Client        @relation(fields: [clientId], references: [id])
+  invoiceNumber  String        @unique
+  status         InvoiceStatus @default(DRAFT)
+  issueDate      DateTime      @default(now())
+  dueDate        DateTime?
+  subTotalAmount Decimal       @db.Decimal(10, 2)
+  vatAmount      Decimal       @db.Decimal(10, 2)
+  grandTotal     Decimal       @db.Decimal(10, 2)
+  notes          String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // DTE Fields
+  dteProvider    String?       // e.g., "Facto.cl"
+  dteStatus      String?       // e.g., PENDING, ISSUED, REJECTED
+  dteFolio       Int?          // Folio number from SII
+  dteXmlUrl      String?       // URL to the XML file
+  dtePdfUrl      String?       // URL to the PDF file
+
+  items InvoiceItem[]
+  payments Payment[]
+
+  @@index([orderId])
+  @@index([clientId])
+  @@index([status])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id                String   @id @default(cuid())
+  invoiceId         String
+  invoice           Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id])
+  quantity          Int
+  unitPrice         Decimal  @db.Decimal(10, 2)
+  totalPrice        Decimal  @db.Decimal(10, 2)
+  itemVatAmount     Decimal  @db.Decimal(10, 2)
+  totalPriceWithVat Decimal  @db.Decimal(10, 2)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([invoiceId])
+  @@index([productId])
+  @@map("invoice_items")
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  invoiceId     String
+  invoice       Invoice       @relation(fields: [invoiceId], references: [id])
+  amount        Decimal       @db.Decimal(10, 2)
+  paymentDate   DateTime      @default(now())
+  paymentMethod PaymentMethod
+  notes         String?       @db.Text
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([invoiceId])
+  @@map("payments")
 }

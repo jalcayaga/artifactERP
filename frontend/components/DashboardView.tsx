@@ -3,6 +3,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; 
 import { UsersIcon, ShoppingCartIcon, ArchiveBoxIcon, CreditCardIcon } from '@/components/Icons';
 import SalesChart from '@/components/SalesChart'; // Importar el nuevo componente de gráfico
+import { DashboardService } from '@/lib/services/dashboardService';
+import { useAuth } from '@/contexts/AuthContext';
+import { DashboardStats, RecentActivity } from '@/lib/types';
+import { formatCurrencyChilean } from '@/lib/utils';
 
 // Interfaz para una tarea
 interface Task {
@@ -50,6 +54,7 @@ const initialTasksData: Task[] = [
 
 // Componente principal para la vista del Dashboard.
 const DashboardView: React.FC = () => {
+  const { token } = useAuth();
   const [tasks, setTasks] = useState<Task[]>(() => {
     // Carga inicial de tareas desde localStorage o usa datos iniciales.
     try {
@@ -64,6 +69,30 @@ const DashboardView: React.FC = () => {
     }
     return initialTasksData;
   });
+
+  const [dashboardStats, setDashboardStats] = useState<DashboardStats | null>(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [statsError, setStatsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      if (!token) {
+        setStatsError('No autorizado. Por favor, inicie sesión como administrador.');
+        setLoadingStats(false);
+        return;
+      }
+      try {
+        const stats = await DashboardService.getStats(token);
+        setDashboardStats(stats);
+      } catch (err) {
+        console.error('Error fetching dashboard stats:', err);
+        setStatsError('Error al cargar las estadísticas del dashboard.');
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+    fetchStats();
+  }, [token]);
 
   // Efecto para guardar las tareas en localStorage cada vez que cambian.
   useEffect(() => {
@@ -84,25 +113,31 @@ const DashboardView: React.FC = () => {
   }, []);
   
   // Datos de ejemplo para la actividad reciente (esto se conectará al backend más adelante).
-  const recentActivities = [
-    { id: 1, user: 'Ana Pérez', action: 'creó una nueva cotización', time: 'Hace 25 minutos', avatar: `https://placehold.co/40x40/EFEFEF/31343C?text=A` },
-    { id: 2, user: 'Carlos Ruiz', action: 'actualizó el cliente "Tech Solutions"', time: 'Hace 1 hora', avatar: `https://placehold.co/40x40/EFEFEF/31343C?text=C` },
-    { id: 3, user: 'Laura Gómez', action: 'registró una nueva compra', time: 'Hace 3 horas', avatar: `https://placehold.co/40x40/EFEFEF/31343C?text=L` },
-    { id: 4, user: 'Pedro Marín', action: 'agregó 50 unidades de "Producto X"', time: 'Ayer', avatar: `https://placehold.co/40x40/EFEFEF/31343C?text=P` },
-  ];
+  const recentActivities = dashboardStats?.recentActivities.map(activity => ({
+    id: activity.id,
+    user: `${activity.user.firstName} ${activity.user.lastName}`,
+    action: `creó un pedido con estado ${activity.status}`,
+    time: new Date(activity.createdAt).toLocaleDateString(), // Or format more precisely
+    avatar: `https://placehold.co/40x40/EFEFEF/31343C?text=${activity.user.firstName.charAt(0)}`,
+  })) || [];
   
   return (
     <div className="space-y-6 lg:space-y-8">
       <h1 className="text-3xl font-semibold text-foreground">Dashboard General</h1>
       
       {/* Sección de Tarjetas de Estadísticas */}
-      {/* TODO: Conectar estos valores a datos reales del backend. */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard title="Clientes Activos" value="1,280" icon={UsersIcon} />
-        <StatCard title="Ventas del Mes" value="$45,670" icon={ShoppingCartIcon} />
-        <StatCard title="Productos en Stock" value="8,923" icon={ArchiveBoxIcon} />
-        <StatCard title="Facturas Pendientes" value="12" icon={CreditCardIcon} />
-      </div>
+      {loadingStats ? (
+        <p>Cargando estadísticas...</p>
+      ) : statsError ? (
+        <p className="text-destructive">{statsError}</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard title="Clientes Activos" value={dashboardStats?.totalUsers.toString() || 'N/A'} icon={UsersIcon} />
+          <StatCard title="Ventas del Mes" value={formatCurrencyChilean(dashboardStats?.totalSalesAmount || 0)} icon={ShoppingCartIcon} />
+          <StatCard title="Productos en Stock" value={dashboardStats?.totalProducts.toString() || 'N/A'} icon={ArchiveBoxIcon} />
+          <StatCard title="Facturas Pendientes" value={dashboardStats?.pendingInvoices.toString() || 'N/A'} icon={CreditCardIcon} />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Sección de Actividad Reciente */}
@@ -113,17 +148,21 @@ const DashboardView: React.FC = () => {
           </CardHeader>
           <CardContent> {/* Uses default p-5 pt-0 */}
             <ul className="space-y-4">
-              {recentActivities.map(activity => (
-                <li key={activity.id} className="flex items-start space-x-3">
-                  <img className="w-10 h-10 rounded-full" src={activity.avatar} alt={activity.user} />
-                  <div>
-                    <p className="text-sm text-foreground">
-                      <span className="font-medium">{activity.user}</span> {activity.action}.
-                    </p>
-                    <p className="text-xs text-muted-foreground">{activity.time}</p>
-                  </div>
-                </li>
-              ))}
+              {recentActivities.length > 0 ? (
+                recentActivities.map(activity => (
+                  <li key={activity.id} className="flex items-start space-x-3">
+                    <img className="w-10 h-10 rounded-full" src={activity.avatar} alt={activity.user} />
+                    <div>
+                      <p className="text-sm text-foreground">
+                        <span className="font-medium">{activity.user}</span> {activity.action}.
+                      </p>
+                      <p className="text-xs text-muted-foreground">{activity.time}</p>
+                    </div>
+                  </li>
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground italic text-center py-4">No hay actividad reciente.</p>
+              )}
             </ul>
             <div className="mt-6 text-right"> 
                 <button className="text-sm font-medium text-primary hover:text-primary/80 dark:hover:text-primary/70">

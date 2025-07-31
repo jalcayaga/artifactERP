@@ -1,46 +1,65 @@
-
 // Importaciones de React, tipos y componentes/iconos necesarios.
 import React, { useState, useCallback, useEffect } from 'react';
-import { Client } from '@/lib/types'; 
+import { useRouter } from 'next/navigation'; // Importar useRouter
+import { useAuth } from '@/contexts/AuthContext';
+import { Client, CreateClientDto, UpdateClientDto, UserRole } from '@/lib/types'; 
+import { ClientService } from '@/lib/services/clientService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; 
 import ClientForm from '@/components/ClientForm';
 import ClientDetailModal from '@/components/ClientDetailModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { PencilIcon, TrashIcon, EyeIcon, BriefcaseIcon, PlusIcon } from '@/components/Icons';
-
-const initialMockClients: Client[] = [
-  { id: '1', name: 'Tech Solutions Inc.', email: 'contact@techsolutions.com', phone: '555-0101', type: 'Empresa', contactName: 'Jane Doe' },
-  { id: '2', name: 'Marketing Pros LLC', email: 'info@marketingpros.com', phone: '555-0102', type: 'Empresa', contactName: 'John Smith' },
-  { id: '3', name: 'Ana García (Freelancer)', email: 'ana.garcia@email.com', phone: '555-0103', type: 'Persona' },
-  { id: '4', name: 'Constructora Global', email: 'proyectos@global.com', phone: '555-0104', type: 'Empresa', contactName: 'Carlos López' },
-  { id: '5', name: 'Luis Martínez', email: 'luis.martinez@email.net', phone: '555-0105', type: 'Persona' },
-];
-
-const LOCAL_STORAGE_KEY_CLIENTS = 'wolfflow_clients';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 
 const ClientView: React.FC = () => {
-  const [clients, setClients] = useState<Client[]>(() => {
-    try {
-      const storedClients = localStorage.getItem(LOCAL_STORAGE_KEY_CLIENTS);
-      return storedClients ? JSON.parse(storedClients) : initialMockClients;
-    } catch (error) {
-      console.error("Error loading clients from localStorage:", error);
-      return initialMockClients;
-    }
-  });
+  const { isAuthenticated, currentUser, isLoading: authLoading } = useAuth();
+  const router = useRouter(); // Inicializar useRouter
+  const [clients, setClients] = useState<Client[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState<boolean>(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [viewingClient, setViewingClient] = useState<Client | null>(null);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalClients, setTotalClients] = useState(0);
+
+  const fetchClients = useCallback(async (page: number = 1) => {
+    if (!isAuthenticated || currentUser?.role !== UserRole.ADMIN) {
+      setError('No autorizado para ver esta página o no autenticado.');
+      setLoading(false);
+      if (!isAuthenticated) {
+        router.push('/login');
+      }
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await ClientService.getAllClients(page);
+      setClients(response.data);
+      setTotalPages(response.pages);
+      setCurrentPage(response.page);
+      setTotalClients(response.total);
+    } catch (err: any) { // Usar 'any' para acceder a 'message'
+      console.error('Error fetching clients:', err);
+      if (err.message && err.message.includes('Unauthorized')) {
+        router.push('/login'); // Redirigir al login en caso de 401
+      } else {
+        setError('Error al cargar los clientes.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, currentUser, router]); // Añadir isAuthenticated a las dependencias
 
   useEffect(() => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY_CLIENTS, JSON.stringify(clients));
-    } catch (error) {
-      console.error("Error saving clients to localStorage:", error);
+    if (!authLoading) {
+      fetchClients(currentPage);
     }
-  }, [clients]);
+  }, [fetchClients, currentPage, authLoading]);
 
   const handleAddNewClient = useCallback(() => {
     setEditingClient(null);
@@ -57,13 +76,23 @@ const ClientView: React.FC = () => {
     setShowDeleteConfirmModal(true);
   }, []);
   
-  const handleConfirmDeleteClient = useCallback(() => {
+  const handleConfirmDeleteClient = useCallback(async () => {
     if (clientToDelete) {
-      setClients(prevClients => prevClients.filter(client => client.id !== clientToDelete.id));
-      setClientToDelete(null);
-      setShowDeleteConfirmModal(false);
+      try {
+        await ClientService.deleteClient(clientToDelete.id);
+        fetchClients(currentPage);
+        setClientToDelete(null);
+        setShowDeleteConfirmModal(false);
+      } catch (err: any) {
+        console.error('Error deleting client:', err);
+        if (err.message && err.message.includes('Unauthorized')) {
+          router.push('/login');
+        } else {
+          setError('Error al eliminar el cliente.');
+        }
+      }
     }
-  }, [clientToDelete]);
+  }, [clientToDelete, fetchClients, currentPage, router]);
 
   const handleCloseDeleteConfirmModal = useCallback(() => {
     setClientToDelete(null);
@@ -78,23 +107,50 @@ const ClientView: React.FC = () => {
     setViewingClient(null);
   }, []);
 
-  const handleSaveClient = useCallback((clientData: Client) => {
-    setClients(prevClients => {
+  const handleSaveClient = useCallback(async (clientData: Client) => {
+    try {
       if (editingClient) {
-        return prevClients.map(c => (c.id === clientData.id ? clientData : c));
+        await ClientService.updateClient(editingClient.id, clientData as UpdateClientDto);
       } else {
-        const newId = clientData.id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        return [...prevClients, { ...clientData, id: newId }];
+        await ClientService.createClient(clientData as CreateClientDto);
       }
-    });
-    setShowForm(false);
-    setEditingClient(null);
-  }, [editingClient]);
+      setShowForm(false);
+      setEditingClient(null);
+      fetchClients(currentPage);
+    } catch (err: any) {
+      console.error('Error saving client:', err);
+      if (err.message && err.message.includes('Unauthorized')) {
+        router.push('/login');
+      } else {
+        setError('Error al guardar el cliente.');
+      }
+    }
+  }, [editingClient, fetchClients, currentPage, router]);
 
   const handleCloseForm = useCallback(() => {
     setShowForm(false);
     setEditingClient(null);
   }, []);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  if (authLoading) {
+    return <div className="text-center py-8">Cargando autenticación...</div>;
+  }
+
+  if (loading) {
+    return <div className="text-center py-8">Cargando clientes...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-8 text-destructive">{error}</div>;
+  }
+
+  if (!isAuthenticated || currentUser?.role !== UserRole.ADMIN) {
+    return <div className="text-center py-8 text-destructive">Acceso denegado. No tienes permisos de administrador.</div>;
+  }
 
   if (showForm) {
     return (
@@ -113,78 +169,77 @@ const ClientView: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">
             Gestión de Clientes
           </h1>
-          <button
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center space-x-2"
+          <Button
+            className="w-full sm:w-auto"
             onClick={handleAddNewClient}
-            aria-label="Añadir Nuevo Cliente"
           >
-            <PlusIcon className="w-5 h-5" /> 
+            <PlusIcon className="w-5 h-5 mr-2" /> 
             <span>Nuevo Cliente</span>
-          </button>
+          </Button>
         </div>
 
         <Card className="overflow-hidden border">
           <CardContent className="p-0">
             {clients.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-border">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Nombre</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Email</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Teléfono</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Tipo</th>
-                      <th scope="col" className="px-6 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-card divide-y divide-border">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead className="hidden sm:table-cell">Email</TableHead>
+                      <TableHead className="hidden md:table-cell">Teléfono</TableHead>
+                      <TableHead className="hidden sm:table-cell">Tipo</TableHead>
+                      <TableHead className="text-center">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {clients.map((client) => (
-                      <tr key={client.id} className="hover:bg-accent transition-colors duration-150">
-                        <td className="px-6 py-4 whitespace-nowrap">
+                      <TableRow key={client.id} className="hover:bg-accent transition-colors duration-150">
+                        <TableCell>
                           <div className="text-sm font-medium text-foreground">{client.name}</div>
                           <div className="text-xs text-muted-foreground sm:hidden">{client.email || client.phone || client.type}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground hidden sm:table-cell">{client.email || '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground hidden md:table-cell">{client.phone || '-'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground hidden sm:table-cell">
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">{client.email || '-'}</TableCell>
+                        <TableCell className="hidden md:table-cell text-sm text-muted-foreground">{client.phone || '-'}</TableCell>
+                        <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                             client.type === 'Empresa' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary-foreground'
                           }`}>
                             {client.type}
                           </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        </TableCell>
+                        <TableCell className="text-center text-sm font-medium">
                           <div className="flex items-center justify-center space-x-1 sm:space-x-3">
-                            <button 
+                            <Button 
+                              variant="ghost" size="sm"
                               onClick={() => handleViewClient(client)} 
                               title="Ver Detalles" 
-                              className="text-primary hover:text-primary/80 dark:hover:text-primary/70 transition-colors p-1 rounded-md hover:bg-primary/10"
                               aria-label={`Ver detalles de ${client.name}`}
                             >
                               <EyeIcon className="w-5 h-5" />
-                            </button>
-                            <button 
+                            </Button>
+                            <Button 
+                              variant="ghost" size="sm"
                               onClick={() => handleEditClient(client)} 
                               title="Editar Cliente" 
-                              className="text-primary hover:text-primary/80 dark:hover:text-primary/70 transition-colors p-1 rounded-md hover:bg-primary/10"
                               aria-label={`Editar cliente ${client.name}`}
                             >
                               <PencilIcon className="w-5 h-5" />
-                            </button>
-                            <button 
+                            </Button>
+                            <Button 
+                              variant="ghost" size="sm"
                               onClick={() => handleDeleteClientRequest(client)} 
                               title="Eliminar Cliente" 
-                              className="text-destructive hover:text-destructive/80 dark:hover:text-destructive/70 transition-colors p-1 rounded-md hover:bg-destructive/10"
                               aria-label={`Eliminar cliente ${client.name}`}
                             >
                               <TrashIcon className="w-5 h-5" />
-                            </button>
+                            </Button>
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             ) : (
               <div className="text-center py-12 px-4">
@@ -194,19 +249,44 @@ const ClientView: React.FC = () => {
                   Empieza añadiendo tu primer cliente para gestionar sus datos y actividades.
                 </p>
                 <div className="mt-6">
-                  <button
+                  <Button
                     type="button"
                     onClick={handleAddNewClient}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center space-x-2 mx-auto"
                   >
-                    <PlusIcon className="w-5 h-5" />
+                    <PlusIcon className="w-5 h-5 mr-2" />
                     <span>Añadir Primer Cliente</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
+
+        <div className="flex justify-between items-center mt-4">
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages} (Total: {totalClients} clientes)
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+            >
+              Siguiente
+            </Button>
+          </div>
+        </div>
       </div>
       
       {viewingClient && (

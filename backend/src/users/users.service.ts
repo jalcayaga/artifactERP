@@ -1,77 +1,35 @@
-
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto } from './dto/create-user.dto';
-// import { UpdateUserDto } from './dto/update-user.dto'; // Placeholder
+import { User, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { User, UserRole } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
-    const existingUser = await this.prisma.client.user.findUnique({
-      where: { email: createUserDto.email },
-    });
-
+  async create(data: Prisma.UserCreateInput): Promise<User> {
+    const existingUser = await this.prisma.user.findUnique({ where: { email: data.email } });
     if (existingUser) {
-      throw new ConflictException('Email already exists');
+      throw new ConflictException('User with this email already exists');
     }
-
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    
-    const roleKey = createUserDto.role?.toUpperCase();
-    // Ensure UserRole is correctly referenced
-    const userRoleValue: UserRole = roleKey && roleKey in UserRole 
-        ? UserRole[roleKey as keyof typeof UserRole] 
-        : UserRole.VIEWER; 
-
-    const user = await this.prisma.client.user.create({
-      data: {
-        ...createUserDto,
-        password: hashedPassword,
-        role: userRoleValue, 
-      },
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = user;
-    return result;
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    const userData = { ...data, password: hashedPassword };
+    return this.prisma.user.create({ data: userData });
   }
 
-  async findAll(): Promise<Omit<User, 'password'>[]> {
-    const users = await this.prisma.client.user.findMany();
-    return users.map(({ password, ...user }) => user);
+  async findAll(): Promise<User[]> {
+    return this.prisma.user.findMany();
   }
 
-  async findOneByEmail(email: string): Promise<User | null> {
-    return this.prisma.client.user.findUnique({
-      where: { email },
-    });
-  }
-  
-  async findOneById(id: string): Promise<Omit<User, 'password'> | null> {
-    const user = await this.prisma.client.user.findUnique({
-      where: { id },
-    });
-    if (!user) {
-        return null;
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password, ...result } = user;
-    return result;
+  async findOne(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
   }
 
-  // Placeholder for update
-  // async update(id: string, updateUserDto: UpdateUserDto) {
-  //   // Add logic to update user, potentially hashing new password if provided
-  //   return `This action updates a #${id} user`;
-  // }
+  async findOneById(id: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { id } });
+  }
 
-  // Placeholder for remove
-  // async remove(id: string) {
-  //   // Add logic to "soft delete" (mark as inactive) or hard delete
-  //   return `This action removes a #${id} user`;
-  // }
+  async findByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
 }

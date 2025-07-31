@@ -1,88 +1,68 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
+import { useRouter } from 'next/navigation'; // Importar useRouter
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card'; 
 import SaleForm from '@/components/SaleForm';
 import SaleDetailModal from '@/components/SaleDetailModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
-import { PlusIcon, ShoppingCartIcon, EyeIcon, PencilIcon, TrashIcon } from '@/components/Icons';
-import { Sale } from '@/lib/types'; 
+import { PlusIcon, ShoppingCartIcon, EyeIcon, PencilIcon, TrashIcon, DocumentTextIcon } from '@/components/Icons'; 
+import { Sale, UserRole, OrderStatus } from '@/lib/types'; 
 import { formatCurrencyChilean } from '@/lib/utils';
-
-const FIXED_VAT_RATE_PERCENT_DISPLAY = 19;
-const LOCAL_STORAGE_KEY_SALES = 'wolfflow_sales';
-
-const initialMockSales: Sale[] = [
-  {
-    id: 'sale-mock-1',
-    clientName: 'Cliente Ejemplo Ltda.',
-    saleDate: '2023-10-15T10:30:00Z',
-    observations: 'Entrega prioritaria solicitada.',
-    items: [
-      { id: 'item-mock-1a', productName: 'Laptop Pro 15"', quantity: 1, unitPrice: 1000, totalItemPrice: 1000, itemVatAmount: 190 },
-      { id: 'item-mock-1b', productName: 'Mouse Inalámbrico Ergo', quantity: 2, unitPrice: 20, totalItemPrice: 40, itemVatAmount: 7.6 },
-    ],
-    vatRatePercent: 19,
-    subTotal: 1040,
-    totalVatAmount: 197.6,
-    grandTotal: 1237.6,
-  },
-  {
-    id: 'sale-mock-2',
-    clientName: 'Ana Pérez',
-    saleDate: '2023-10-20T14:45:00Z',
-    items: [
-      { id: 'item-mock-2a', productName: 'Servicio de Consultoría Tech (5hrs)', quantity: 5, unitPrice: 70, totalItemPrice: 350, itemVatAmount: 66.5 },
-    ],
-    vatRatePercent: 19,
-    subTotal: 350,
-    totalVatAmount: 66.5,
-    grandTotal: 416.5,
-  },
-  {
-    id: 'sale-mock-3',
-    clientName: 'Comercializadora Rápida SpA',
-    saleDate: '2023-11-01T09:00:00Z',
-    observations: 'Pago confirmado. Despachar a bodega central.',
-    items: [
-      { id: 'item-mock-3a', productName: 'Teclado Mecánico RGB', quantity: 10, unitPrice: 80, totalItemPrice: 800, itemVatAmount: 152 },
-      { id: 'item-mock-3b', productName: 'Monitor Curvo 32"', quantity: 2, unitPrice: 350, totalItemPrice: 700, itemVatAmount: 133 },
-    ],
-    vatRatePercent: 19,
-    subTotal: 1500,
-    totalVatAmount: 285,
-    grandTotal: 1785,
-  },
-];
+import { SaleService } from '@/lib/services/saleService';
+import { InvoiceService } from '@/lib/services/invoiceService';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 
 const SalesView: React.FC = () => {
+  const { isAuthenticated, currentUser, isLoading: authLoading } = useAuth();
+  const router = useRouter(); // Inicializar useRouter
   const [showSaleForm, setShowSaleForm] = useState<boolean>(false);
-  const [savedSales, setSavedSales] = useState<Sale[]>(() => {
-    try {
-      const storedSales = localStorage.getItem(LOCAL_STORAGE_KEY_SALES);
-      if (storedSales) {
-        const parsedSales = JSON.parse(storedSales) as Sale[];
-        if (Array.isArray(parsedSales) && parsedSales.length > 0) {
-          return parsedSales;
-        }
-      }
-    } catch (error) {
-      console.error("Error loading sales from localStorage:", error);
-    }
-    return initialMockSales; 
-  }); 
+  const [sales, setSales] = useState<Sale[]>([]);
   const [viewingSale, setViewingSale] = useState<Sale | null>(null);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState<boolean>(false);
   const [saleToDelete, setSaleToDelete] = useState<Sale | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalSales, setTotalSales] = useState(0);
+
+  const fetchSales = useCallback(async (page: number = 1) => {
+    if (!isAuthenticated || (currentUser?.role !== UserRole.ADMIN && currentUser?.role !== UserRole.EDITOR && currentUser?.role !== UserRole.VIEWER)) {
+      setError('No autorizado para ver esta página o no autenticado.');
+      setLoading(false);
+      if (!isAuthenticated) {
+        router.push('/login');
+      }
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await SaleService.getAllSales(page);
+      setSales(response.data);
+      setTotalPages(response.pages);
+      setCurrentPage(response.page);
+      setTotalSales(response.total);
+    } catch (err: any) { // Usar 'any' para acceder a 'message'
+      console.error('Error fetching sales:', err);
+      if (err.message && err.message.includes('Unauthorized')) {
+        router.push('/login');
+      } else {
+        setError('Error al cargar las ventas.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [isAuthenticated, currentUser, router]); // Añadir isAuthenticated a las dependencias
 
   useEffect(() => {
-    try {
-      localStorage.setItem(LOCAL_STORAGE_KEY_SALES, JSON.stringify(savedSales));
-    } catch (error) {
-      console.error("Error saving sales to localStorage:", error);
+    if (!authLoading) {
+      fetchSales(currentPage);
     }
-  }, [savedSales]);
+  }, [fetchSales, currentPage, authLoading]);
 
   const handleCreateNewSale = useCallback(() => {
     setEditingSale(null); // Asegurarse de que no hay una venta en edición
@@ -99,30 +79,47 @@ const SalesView: React.FC = () => {
     setShowDeleteConfirmModal(true);
   }, []);
 
-  const handleConfirmDeleteSale = useCallback(() => {
+  const handleConfirmDeleteSale = useCallback(async () => {
     if (saleToDelete) {
-      setSavedSales(prevSales => prevSales.filter(s => s.id !== saleToDelete.id));
-      setSaleToDelete(null);
-      setShowDeleteConfirmModal(false);
+      try {
+        // Assuming SaleService will have a delete method
+        // await SaleService.deleteSale(saleToDelete.id);
+        fetchSales(currentPage);
+        setSaleToDelete(null);
+        setShowDeleteConfirmModal(false);
+      } catch (err: any) {
+        console.error('Error deleting sale:', err);
+        if (err.message && err.message.includes('Unauthorized')) {
+          router.push('/login');
+        } else {
+          setError('Error al eliminar la venta.');
+        }
+      }
     }
-  }, [saleToDelete]);
+  }, [saleToDelete, fetchSales, currentPage, router]);
 
   const handleCloseDeleteConfirmModal = useCallback(() => {
     setSaleToDelete(null);
     setShowDeleteConfirmModal(false);
   }, []);
   
-  const handleSaveSale = useCallback((saleData: Sale) => {
-    setSavedSales(prevSales => {
-      if (editingSale) { 
-        return prevSales.map(s => (s.id === saleData.id ? saleData : s));
-      } else { 
-        return [...prevSales, saleData];
+  const handleSaveSale = useCallback(async (saleData: Sale) => {
+    try {
+      // Assuming this is always for creation now, as editing logic is complex with lots
+      // If editing is implemented, it would need to handle lot adjustments (returns, new lots, etc.)
+      // For now, we'll just refresh the list after a successful save.
+      setShowSaleForm(false);
+      setEditingSale(null); 
+      fetchSales(currentPage);
+    } catch (err: any) {
+      console.error('Error saving sale:', err);
+      if (err.message && err.message.includes('Unauthorized')) {
+        router.push('/login');
+      } else {
+        setError('Error al guardar la venta.');
       }
-    });
-    setShowSaleForm(false);
-    setEditingSale(null); 
-  }, [editingSale]);
+    }
+  }, [fetchSales, currentPage, router]);
 
   const handleCancelSaleForm = useCallback(() => {
     setShowSaleForm(false);
@@ -136,6 +133,39 @@ const SalesView: React.FC = () => {
   const handleCloseSaleDetailModal = useCallback(() => {
     setViewingSale(null);
   }, []);
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  const handleGenerateInvoice = async (orderId: string) => {
+    try {
+      const invoice = await InvoiceService.createInvoiceFromOrder(orderId);
+      toast.success(`Factura ${invoice.invoiceNumber} creada exitosamente.`);
+      // Optionally, you can navigate to the new invoice page or refresh the sales list
+      // to show that the order has been invoiced.
+      fetchSales(currentPage);
+    } catch (error: any) {
+      console.error("Error creating invoice:", error);
+      toast.error(error.response?.data?.message || "Error al crear la factura.");
+    }
+  };
+
+  if (authLoading) {
+    return <div className="text-center py-8">Cargando autenticación...</div>;
+  }
+
+  if (loading) {
+    return <div className="text-center py-8">Cargando ventas...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-8 text-destructive">{error}</div>;
+  }
+
+  if (!isAuthenticated || (currentUser?.role !== UserRole.ADMIN && currentUser?.role !== UserRole.EDITOR && currentUser?.role !== UserRole.VIEWER)) {
+    return <div className="text-center py-8 text-destructive">Acceso denegado. No tienes permisos suficientes.</div>;
+  }
 
   if (showSaleForm) {
     return (
@@ -154,76 +184,86 @@ const SalesView: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-semibold text-foreground">
             Gestión de Ventas
           </h1>
-          <button
-            className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center space-x-2"
+          <Button
+            className="w-full sm:w-auto"
             onClick={handleCreateNewSale}
-            aria-label="Crear Nueva Venta"
           >
-            <PlusIcon className="w-5 h-5" />
+            <PlusIcon className="w-5 h-5 mr-2" />
             <span>Crear Nueva Venta</span>
-          </button>
+          </Button>
         </div>
 
         <Card className="overflow-hidden border">
           <CardContent className="p-0">
-            {savedSales.length > 0 ? (
+            {sales.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-border">
-                  <thead className="bg-muted/50">
-                    <tr>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">ID Venta</th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cliente</th>
-                      <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell">Fecha</th>
-                      <th scope="col" className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden md:table-cell">Subtotal</th>
-                      <th scope="col" className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden lg:table-cell">IVA ({FIXED_VAT_RATE_PERCENT_DISPLAY}%)</th>
-                      <th scope="col" className="px-4 py-3 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total</th>
-                      <th scope="col" className="px-4 py-3 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-card divide-y divide-border">
-                    {savedSales.map((sale) => (
-                      <tr key={sale.id} className="hover:bg-accent transition-colors duration-150">
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-mono text-muted-foreground">{sale.id.substring(0, 8)}...</td>
-                        <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="text-sm font-medium text-foreground">{sale.clientName}</div>
-                          <div className="text-xs text-muted-foreground sm:hidden">{new Date(sale.saleDate).toLocaleDateString()} - Total: {formatCurrencyChilean(sale.grandTotal)}</div>
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground hidden sm:table-cell">{new Date(sale.saleDate).toLocaleDateString()}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground text-right hidden md:table-cell">{formatCurrencyChilean(sale.subTotal)}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground text-right hidden lg:table-cell">{formatCurrencyChilean(sale.totalVatAmount)}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-primary text-right">{formatCurrencyChilean(sale.grandTotal)}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
+                <Table>
+                  <TableHeader className="bg-muted/50">
+                    <TableRow>
+                      <TableHead>ID Venta</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead className="hidden sm:table-cell">Fecha</TableHead>
+                      <TableHead className="hidden md:table-cell text-right">Subtotal</TableHead>
+                      <TableHead className="hidden lg:table-cell text-right">IVA</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                      <TableHead className="text-center">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {sales.map((sale) => (
+                      <TableRow key={sale.id} className="hover:bg-accent transition-colors duration-150">
+                        <TableCell className="font-mono text-muted-foreground">{sale.id.substring(0, 8)}...</TableCell>
+                        <TableCell>
+                          <div className="font-medium text-foreground">{sale.user?.firstName} {sale.user?.lastName}</div>
+                          <div className="text-xs text-muted-foreground sm:hidden">{new Date(sale.createdAt).toLocaleDateString()} - Total: {formatCurrencyChilean(sale.grandTotalAmount)}</div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell text-muted-foreground">{new Date(sale.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell className="hidden md:table-cell text-muted-foreground text-right">{formatCurrencyChilean(sale.subTotalAmount)}</TableCell>
+                        <TableCell className="hidden lg:table-cell text-muted-foreground text-right">{formatCurrencyChilean(sale.vatAmount)}</TableCell>
+                        <TableCell className="font-semibold text-primary text-right">{formatCurrencyChilean(sale.grandTotalAmount)}</TableCell>
+                        <TableCell className="text-center">
                           <div className="flex items-center justify-center space-x-1 sm:space-x-2">
-                            <button 
+                            <Button 
+                              variant="ghost" size="sm"
                               onClick={() => handleViewSale(sale)} 
                               title="Ver Detalles de Venta" 
-                              className="text-primary hover:text-primary/80 dark:hover:text-primary/70 transition-colors p-1 rounded-md hover:bg-primary/10"
                               aria-label={`Ver detalles de venta ${sale.id.substring(0,8)}`}
                             >
                               <EyeIcon className="w-5 h-5" />
-                            </button>
-                            <button 
+                            </Button>
+                            <Button 
+                              variant="ghost" size="sm"
                               onClick={() => handleEditSale(sale)} 
                               title="Editar Venta" 
-                              className="text-primary hover:text-primary/80 dark:hover:text-primary/70 transition-colors p-1 rounded-md hover:bg-primary/10"
                               aria-label={`Editar venta ${sale.id.substring(0,8)}`}
                             >
                               <PencilIcon className="w-5 h-5" />
-                            </button>
-                            <button 
+                            </Button>
+                            <Button 
+                              variant="ghost" size="sm"
                               onClick={() => handleDeleteSaleRequest(sale)} 
                               title="Eliminar Venta" 
-                              className="text-destructive hover:text-destructive/80 dark:hover:text-destructive/70 transition-colors p-1 rounded-md hover:bg-destructive/10"
                               aria-label={`Eliminar venta ${sale.id.substring(0,8)}`}
                             >
                               <TrashIcon className="w-5 h-5" />
-                            </button>
+                            </Button>
+                            {(sale.status === OrderStatus.DELIVERED || sale.status === OrderStatus.SHIPPED) && !sale.invoice && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleGenerateInvoice(sale.id)}
+                                title="Generar Factura"
+                                aria-label={`Generar factura para la venta ${sale.id.substring(0,8)}`}
+                              >
+                                <DocumentTextIcon className="w-5 h-5" />
+                              </Button>
+                            )}
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             ) : (
               <div className="text-center py-12 px-4">
@@ -235,19 +275,44 @@ const SalesView: React.FC = () => {
                   Comienza creando una nueva venta para verla listada aquí.
                 </p>
                 <div className="mt-6">
-                  <button
+                  <Button
                     type="button"
                     onClick={handleCreateNewSale}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center space-x-2 mx-auto"
                   >
-                    <PlusIcon className="w-5 h-5" />
+                    <PlusIcon className="w-5 h-5 mr-2" />
                     <span>Crear Primera Venta</span>
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
+
+        <div className="flex justify-between items-center mt-4">
+          <div>
+            <p className="text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages} (Total: {totalSales} ventas)
+            </p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage <= 1}
+            >
+              Anterior
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage >= totalPages}
+            >
+              Siguiente
+            </Button>
+          </div>
+        </div>
       </div>
       {viewingSale && (
         <SaleDetailModal 
@@ -261,7 +326,7 @@ const SalesView: React.FC = () => {
           onClose={handleCloseDeleteConfirmModal}
           onConfirm={handleConfirmDeleteSale}
           title="Confirmar Eliminación de Venta"
-          message={<>¿Estás seguro de que quieres eliminar la venta <strong>ID: {saleToDelete.id.substring(0,8)}...</strong> para el cliente <strong>{saleToDelete.clientName}</strong>? Esta acción no se puede deshacer.</>}
+          message={<>¿Estás seguro de que quieres eliminar la venta <strong>ID: {saleToDelete.id.substring(0,8)}...</strong> para el cliente <strong>{saleToDelete.user?.firstName} {saleToDelete.user?.lastName}</strong>? Esta acción no se puede deshacer.</>}
           confirmText="Eliminar Venta"
           confirmButtonClass="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           icon={<TrashIcon className="w-5 h-5 mr-2" />}

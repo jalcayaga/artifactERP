@@ -2,12 +2,12 @@
 import React, { useState, FormEvent, useMemo, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'; 
 import { TruckIcon, PlusIcon, TrashIcon } from '@/components/Icons';
-import { PurchaseOrderItem, PurchaseOrder } from '@/lib/types'; 
+import { PurchaseItem, Purchase } from '@/lib/types'; 
 import { formatCurrencyChilean } from '@/lib/utils';
 
 interface PurchaseOrderFormProps {
-  orderData?: PurchaseOrder | null; // Datos de la orden para edición (opcional)
-  onSave: (orderData: PurchaseOrder) => void;
+  orderData?: Purchase | null; // Datos de la orden para edición (opcional)
+  onSave: (orderData: Purchase) => void;
   onCancel: () => void;
 }
 
@@ -16,10 +16,9 @@ const FIXED_VAT_RATE_PERCENT_PURCHASES = 19;
 const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ orderData, onSave, onCancel }) => {
   const [supplierName, setSupplierName] = useState('');
   const [orderDate, setOrderDate] = useState(new Date().toISOString().split('T')[0]);
-  const [expectedDeliveryDate, setExpectedDeliveryDate] = useState('');
-  const [observations, setObservations] = useState('');
-  const [status, setStatus] = useState<'Pendiente' | 'Aprobada' | 'Recibida' | 'Cancelada'>('Pendiente');
-  const [items, setItems] = useState<PurchaseOrderItem[]>([]);
+  
+  const [status, setStatus] = useState<string>('PENDING');
+  const [items, setItems] = useState<PurchaseItem[]>([]);
   
   const [newItemName, setNewItemName] = useState('');
   const [newItemQuantity, setNewItemQuantity] = useState('');
@@ -32,17 +31,15 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ orderData, onSave
 
   useEffect(() => {
     if (orderData) {
-      setSupplierName(orderData.supplierName);
-      setOrderDate(new Date(orderData.orderDate).toISOString().split('T')[0]);
-      setExpectedDeliveryDate(orderData.expectedDeliveryDate ? new Date(orderData.expectedDeliveryDate).toISOString().split('T')[0] : '');
-      setObservations(orderData.observations || '');
+      setSupplierName(orderData.supplier?.name || '');
+      setOrderDate(new Date(orderData.purchaseDate).toISOString().split('T')[0]);
+      
       setStatus(orderData.status);
       setItems(orderData.items || []);
     } else {
       setSupplierName('');
       setOrderDate(new Date().toISOString().split('T')[0]);
-      setExpectedDeliveryDate('');
-      setObservations('');
+      
       setStatus('Pendiente');
       setItems([]);
     }
@@ -78,7 +75,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ orderData, onSave
     const itemSubTotal = quantity * unitPrice;
     const itemVatAmount = itemSubTotal * (FIXED_VAT_RATE_PERCENT_PURCHASES / 100);
     const itemTotalPriceWithVat = itemSubTotal + itemVatAmount;
-    const newItem: PurchaseOrderItem = {
+    const newItem: PurchaseItem = {
       id: `po-item-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
       productName: newItemName.trim(), quantity, unitPrice, totalPrice: itemSubTotal,
       itemVatAmount, totalPriceWithVat: itemTotalPriceWithVat,
@@ -104,16 +101,15 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ orderData, onSave
     e.preventDefault();
     if (!validateMainForm()) return;
     const currentId = isEditing && orderData?.id ? orderData.id : `po-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
-    const orderDetails: PurchaseOrder = {
+    const orderDetails: Purchase = {
       id: currentId, 
-      supplierName: supplierName.trim(), 
-      orderDate,
-      expectedDeliveryDate: expectedDeliveryDate || undefined,
-      observations: observations.trim() || undefined, 
+      supplierId: orderData?.supplierId || '', // Assuming supplierId is available from orderData or needs to be set
+      purchaseDate: orderDate,
       status, // Usar el estado actual del formulario
+      subTotalAmount: subTotal, 
+      totalVatAmount, 
+      grandTotal, 
       items, 
-      vatRatePercent: FIXED_VAT_RATE_PERCENT_PURCHASES,
-      subTotal, totalVatAmount, grandTotal,
     };
     onSave(orderDetails);
   };
@@ -146,12 +142,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ orderData, onSave
               <input type="date" id="po-order-date" value={orderDate} onChange={(e) => setOrderDate(e.target.value)} className={inputBaseClass} aria-describedby="orderDate-error"/>
               {errors.orderDate && <p id="orderDate-error" className={errorTextClass}>{errors.orderDate}</p>}
             </div>
-            <div>
-              <label htmlFor="po-expected-delivery-date" className="block text-sm font-medium text-foreground">
-                Fecha Entrega Estimada
-              </label>
-              <input type="date" id="po-expected-delivery-date" value={expectedDeliveryDate} onChange={(e) => setExpectedDeliveryDate(e.target.value)} className={inputBaseClass}/>
-            </div>
+            
           </div>
 
           {isEditing && (
@@ -162,13 +153,12 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ orderData, onSave
               <select 
                 id="po-status" 
                 value={status} 
-                onChange={(e) => setStatus(e.target.value as PurchaseOrder['status'])} 
+                onChange={(e) => setStatus(e.target.value as string)} 
                 className={selectBaseClass}
               >
-                <option value="Pendiente">Pendiente</option>
-                <option value="Aprobada">Aprobada</option>
-                <option value="Recibida">Recibida</option>
-                <option value="Cancelada">Cancelada</option>
+                <option value="PENDING">Pendiente</option>
+                <option value="RECEIVED">Recibida</option>
+                <option value="CANCELLED">Cancelada</option>
               </select>
             </div>
           )}
@@ -240,10 +230,7 @@ const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({ orderData, onSave
             <div className="flex justify-end items-center mt-1 pt-1 border-t border-border/50"><span className="text-lg font-bold text-foreground">Total Orden:</span><span className="ml-4 text-2xl font-bold text-primary w-32 text-right">{formatCurrencyChilean(grandTotal)}</span></div>
           </div>
 
-          <div>
-            <label htmlFor="po-observations" className="block text-sm font-medium text-foreground">Observaciones</label>
-            <textarea id="po-observations" value={observations} onChange={(e) => setObservations(e.target.value)} rows={3} className={inputBaseClass} placeholder="Añadir notas adicionales sobre la orden de compra..."/>
-          </div>
+          
         </CardContent>
         <CardFooter className="flex flex-col sm:flex-row justify-end items-center gap-3 pt-6">
           <button type="button" onClick={onCancel} className="w-full sm:w-auto order-2 sm:order-1 px-4 py-2.5 border border-border text-sm font-medium rounded-md text-foreground bg-background hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring dark:focus:ring-offset-card transition-colors duration-150">Cancelar</button>

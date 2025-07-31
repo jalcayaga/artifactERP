@@ -1,9 +1,8 @@
-# docker-compose.yml (at the root of SubRed-ERP project)
-version: "3.8"
+version: '3.8'
 
 services:
   postgres_db:
-    image: postgres:15 # Or your preferred PostgreSQL version
+    image: postgres:15
     container_name: subred_erp_postgres_db
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-subred_user}
@@ -23,6 +22,31 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  backend:
+    build: ./backend
+    ports:
+      - "3001:3001"
+    dns:
+      - 8.8.8.8
+    env_file:
+      - ./backend/.env
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   subred_erp_postgres_data:

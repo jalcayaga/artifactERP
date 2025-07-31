@@ -1,7 +1,16 @@
-
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, IsBoolean, Min, IsPositive, MaxLength, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ProductType } from '@prisma/client';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsEnum,
+  IsBoolean,
+  Min,
+  MaxLength,
+  IsArray,
+} from "class-validator";
+import { Type } from "class-transformer";
+import { ProductType } from "@prisma/client";
 
 export class CreateProductDto {
   @IsString()
@@ -24,7 +33,7 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   longDescription?: string;
-  
+
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -60,5 +69,5 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsBoolean()
-  isPublished?: boolean = false;
+  isPublished?: boolean = true;
 }

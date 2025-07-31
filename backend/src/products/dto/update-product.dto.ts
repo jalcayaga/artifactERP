@@ -1,7 +1,16 @@
-
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, IsBoolean, Min, MaxLength, IsArray } from 'class-validator';
-import { Type } from 'class-transformer';
-import { ProductType } from '@prisma/client';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsNumber,
+  IsEnum,
+  IsBoolean,
+  Min,
+  MaxLength,
+  IsArray,
+} from "class-validator";
+import { Type } from "class-transformer";
+import { ProductType } from "@prisma/client";
 
 // Explicitly defining UpdateProductDto to ensure properties are recognized
 export class UpdateProductDto {
@@ -27,7 +36,7 @@ export class UpdateProductDto {
   @IsOptional()
   @IsString()
   longDescription?: string;
-  
+
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
@@ -50,11 +59,7 @@ export class UpdateProductDto {
   @Type(() => Number)
   unitPrice?: number;
 
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  @Type(() => Number)
-  currentStock?: number;
+  
 
   @IsOptional()
   @IsNumber()

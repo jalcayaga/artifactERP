@@ -3,6 +3,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { Client } from '@/lib/types'; 
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'; 
 import { UsersIcon } from '@/components/Icons';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ClientFormProps {
   clientData: Client | null;
@@ -50,8 +51,17 @@ const ClientForm: React.FC<ClientFormProps> = ({ clientData, onSave, onCancel })
     e.preventDefault();
     if (!validateForm()) return;
 
+    const { currentUser } = useAuth();
+
+    if (!currentUser) {
+      // Handle case where user is not authenticated, perhaps redirect to login
+      console.error("User not authenticated. Cannot save client.");
+      return;
+    }
+
     onSave({
       id: clientData?.id || '',
+      userId: currentUser.id, // Add userId here
       name: name.trim(),
       contactName: contactName.trim() || undefined,
       email: email.trim() || undefined,

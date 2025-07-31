@@ -371,6 +371,23 @@ export const UserCircleIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
+export const UserPlusIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M18 18.75V10.5m0 0l-3 3m3-3l3 3m-3-3h-9.75M12 6a3 3 0 11-6 0 3 3 0 016 0zM12 15.75a3 3 0 11-6 0 3 3 0 016 0z"
+    />
+  </svg>
+);
+
 export const PencilIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -689,6 +706,23 @@ export const XCircleIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
+export const InboxIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-19.5.338V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18v-4.162c0-.224-.034-.447-.1-.661L19.24 5.338a2.25 2.25 0 00-2.12-1.588H6.88a2.25 2.25 0 00-2.12 1.588L2.35 13.177a2.25 2.25 0 00-.1.661z"
+    />
+  </svg>
+);
+
 // New Icons for FinanceView
 export const BanknotesIcon: React.FC<IconProps> = ({ className }) => (
   <svg
@@ -813,6 +847,40 @@ export const WhatsAppIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
+export const PackageIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 12L3.269 3.126A5.998 5.998 0 0112 3.75c2.648 0 5.195.68 7.46 1.948L21 12m-18 0v6.75A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V12m-18 0h18"
+    />
+  </svg>
+);
+
+export const HeadphonesIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9.53 16.122a3 3 0 00-2.087.893l-2.484 2.483c-.53.53-.997 1.111-1.364 1.737M12.01 19.033L10.5 20.546a2.25 2.25 0 01-3.182 0l-2.484-2.484a2.25 2.25 0 010-3.182l1.546-1.545m2.968-2.968L14.25 7.5l2.087-2.087a3 3 0 014.243 0l1.545 1.545a3 3 0 010 4.243L19.5 14.25m-2.968-2.968l-2.968 2.968m0 0L7.5 16.5V12l5.03-5.03M12 16.5l-2.087-2.087"
+    />
+  </svg>
+);
+
 export const VideoCameraIcon: React.FC<IconProps> = ({ className }) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9A2.25 2.25 0 004.5 18.75z" />
@@ -846,6 +914,23 @@ export const FacebookIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
+export const AlertTriangleIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+    />
+  </svg>
+);
+
 export const InstagramIcon: React.FC<IconProps> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
     <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
@@ -863,5 +948,22 @@ export const XTwitterIcon: React.FC<IconProps> = ({ className }) => (
 export const LinkedInIcon: React.FC<IconProps> = ({ className }) => (
   <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
     <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+  </svg>
+);
+
+export const SaveIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 3.75H4.5a2.25 2.25 0 00-2.25 2.25v13.5a2.25 2.25 0 002.25 2.25h15a2.25 2.25 0 002.25-2.25V7.5M9 3.75V7.5m0-3.75h6.375M9 3.75a2.25 2.25 0 012.25-2.25h.008a2.25 2.25 0 012.25 2.25v3.75M9 3.75a2.25 2.25 0 00-2.25 2.25v3.75m9-3.75h-6.375M15 15.75v3.75a3 3 0 01-3 3h-3a3 3 0 01-3-3v-3.75m12-3.75h-6.375M15 15.75a3 3 0 01-3 3h-3a3 3 0 01-3-3v-3.75m12-3.75h-6.375"
+    />
   </svg>
 );

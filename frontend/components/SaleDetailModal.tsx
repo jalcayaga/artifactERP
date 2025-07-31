@@ -1,6 +1,6 @@
 // Importaciones de React, tipos e iconos necesarios.
 import React, { useEffect } from 'react';
-import { Sale, SaleItem } from '@/lib/types'; // Tipos de datos para la venta y sus artículos.
+import { Sale, OrderItem } from '@/lib/types'; // Tipos de datos para la venta y sus artículos.
 import { XIcon, ShoppingCartIcon, CalendarIcon, ChatBubbleLeftEllipsisIcon } from '@/components/Icons'; // Iconos para la UI del modal.
 import { formatCurrencyChilean } from '@/lib/utils';
 
@@ -49,8 +49,8 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
   }
 
   // Calcula el total de cada artículo con IVA incluido
-  const calculateItemTotalWithVat = (item: SaleItem) => {
-    return item.totalItemPrice + item.itemVatAmount;
+  const calculateItemTotalWithVat = (item: OrderItem) => {
+    return item.totalPrice + item.itemVatAmount;
   };
 
   return (
@@ -84,11 +84,11 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
           {/* Información general de la venta */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 mb-3">
-            <SaleInfoItem label="Cliente" value={sale.clientName} />
-            <SaleInfoItem label="Fecha de Venta" value={new Date(sale.saleDate).toLocaleDateString()} icon={CalendarIcon} />
-            {sale.observations && (
+            <SaleInfoItem label="Cliente" value={sale.client?.name} />
+            <SaleInfoItem label="Fecha de Venta" value={new Date(sale.createdAt).toLocaleDateString()} icon={CalendarIcon} />
+            {sale.customerNotes && (
                 <div className="md:col-span-2">
-                    <SaleInfoItem label="Observaciones" value={sale.observations} icon={ChatBubbleLeftEllipsisIcon}/>
+                    <SaleInfoItem label="Observaciones" value={sale.customerNotes} icon={ChatBubbleLeftEllipsisIcon}/>
                 </div>
             )}
           </div>
@@ -108,12 +108,12 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {sale.items.map(item => (
+                {sale.orderItems?.map(item => (
                   <tr key={item.id}>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-sm text-foreground">{item.productName}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-sm text-foreground">{item.product?.name}</td>
                     <td className="px-3 py-2.5 whitespace-nowrap text-sm text-muted-foreground text-right">{item.quantity}</td>
                     <td className="px-3 py-2.5 whitespace-nowrap text-sm text-muted-foreground text-right hidden sm:table-cell">{formatCurrencyChilean(item.unitPrice)}</td>
-                    <td className="px-3 py-2.5 whitespace-nowrap text-sm text-foreground text-right">{formatCurrencyChilean(item.totalItemPrice)}</td>
+                    <td className="px-3 py-2.5 whitespace-nowrap text-sm text-foreground text-right">{formatCurrencyChilean(item.totalPrice)}</td>
                     <td className="px-3 py-2.5 whitespace-nowrap text-sm text-muted-foreground text-right hidden md:table-cell">{formatCurrencyChilean(item.itemVatAmount)}</td>
                     <td className="px-3 py-2.5 whitespace-nowrap text-sm font-medium text-foreground text-right">{formatCurrencyChilean(calculateItemTotalWithVat(item))}</td>
                   </tr>
@@ -126,15 +126,15 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
           <div className="mt-4 pt-3 border-t border-border space-y-1.5">
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-muted-foreground">Subtotal (sin IVA):</span>
-              <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(sale.subTotal)}</span>
+              <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(sale.subTotalAmount)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-muted-foreground">Total IVA ({sale.vatRatePercent}%):</span>
-              <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(sale.totalVatAmount)}</span>
+              <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(sale.vatAmount)}</span>
             </div>
             <div className="flex justify-between items-center pt-1.5 border-t border-border/50">
               <span className="text-md font-bold text-foreground">Gran Total:</span>
-              <span className="text-lg font-bold text-primary">{formatCurrencyChilean(sale.grandTotal)}</span>
+              <span className="text-lg font-bold text-primary">{formatCurrencyChilean(sale.grandTotalAmount)}</span>
             </div>
           </div>
         </div>

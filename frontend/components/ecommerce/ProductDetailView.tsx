@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { ProductService } from '@/lib/services/productService';
 import { Product } from '@/lib/types';
+import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
 import { ShieldCheckIcon, ShoppingCartIcon, CheckCircleIcon, WrenchScrewdriverIcon, TagIcon, ArchiveBoxIcon, PlusIcon, MinusIcon } from '@/components/Icons';
 import { formatCurrencyChilean } from '@/lib/utils';
@@ -22,6 +23,7 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
   const [showAddedToCartMessage, setShowAddedToCartMessage] = useState(false);
 
   const { addItem } = useCart();
+  const router = useRouter();
   
   // Mocked installation service price, should come from Product data if service is a product itself
   const MOCK_INSTALLATION_PRICE = 50000; 
@@ -63,6 +65,13 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
     }
   };
 
+  const handleBuyNow = () => {
+    if (product) {
+      addItem(product, quantity, includeInstallation);
+      router.push('/checkout');
+    }
+  };
+
   const handleQuantityChange = (change: number) => {
     setQuantity(prev => Math.max(1, prev + change));
   };
@@ -79,9 +88,9 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
     return <div className="container mx-auto px-4 py-12 text-center text-muted-foreground min-h-[60vh] flex items-center justify-center">Producto no disponible.</div>;
   }
   
-  const isService = product.productType === 'Servicio';
-  const stockAvailable = !isService && product.currentStock !== null && product.currentStock !== undefined && product.currentStock > 0;
-  const canAddToCart = isService || (stockAvailable && product.currentStock! >= quantity);
+  const isService = product.productType === 'SERVICE';
+  const stockAvailable = !isService && product.totalStock !== null && product.totalStock !== undefined && product.totalStock > 0;
+  const canAddToCart = isService || (stockAvailable && product.totalStock! >= quantity);
 
 
   return (
@@ -131,10 +140,10 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
           
           {product.description && <p className="text-base text-muted-foreground leading-relaxed">{product.description}</p>}
 
-          {product.productType === 'Producto' && product.currentStock !== null && product.currentStock !== undefined && (
-            <p className={`text-sm font-medium flex items-center ${product.currentStock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
+          {product.productType === 'PRODUCT' && product.totalStock !== null && product.totalStock !== undefined && (
+            <p className={`text-sm font-medium flex items-center ${product.totalStock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
               <ArchiveBoxIcon className="w-4 h-4 mr-1.5" />
-              {product.currentStock > 0 ? `${product.currentStock} unidades disponibles` : 'Producto Agotado'}
+              {product.totalStock > 0 ? `${product.totalStock} unidades disponibles` : 'Producto Agotado'}
             </p>
           )}
           
@@ -159,7 +168,7 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
               </div>
 
               {/* Installation Service Option */}
-              {product.productType === 'Producto' && ( // Only show for 'Producto' type
+              {product.productType === 'PRODUCT' && ( // Only show for 'PRODUCT' type
                 <div className="flex items-center space-x-2.5 pt-2">
                     <input
                     type="checkbox"
@@ -177,17 +186,26 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
               )}
 
               {/* Add to Cart Button */}
-              <button 
-                onClick={handleAddToCart}
-                disabled={!canAddToCart || isLoading}
-                className="w-full sm:w-auto flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-card transition-all duration-200 ease-in-out text-base disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                <ShoppingCartIcon className="w-5 h-5 mr-2.5" />
-                Añadir al Carrito
-              </button>
+              <div className="flex space-x-4">
+                <button 
+                  onClick={handleAddToCart}
+                  disabled={!canAddToCart || isLoading}
+                  className="w-full sm:w-auto flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-card transition-all duration-200 ease-in-out text-base disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  <ShoppingCartIcon className="w-5 h-5 mr-2.5" />
+                  Añadir al Carrito
+                </button>
+                <button 
+                  onClick={handleBuyNow}
+                  disabled={!canAddToCart || isLoading}
+                  className="w-full sm:w-auto flex items-center justify-center bg-secondary hover:bg-secondary/90 text-secondary-foreground font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-2 dark:focus:ring-offset-card transition-all duration-200 ease-in-out text-base disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  Comprar Ahora
+                </button>
+              </div>
               
-              {!isService && product.currentStock !== null && product.currentStock < quantity && product.currentStock > 0 &&
-                <p className="text-xs text-destructive mt-1">No hay suficiente stock. Solo {product.currentStock} unidades disponibles.</p>
+              {product.productType === 'PRODUCT' && product.totalStock !== null && product.totalStock !== undefined && product.totalStock < quantity && product.totalStock > 0 &&
+                <p className="text-xs text-destructive mt-1">No hay suficiente stock. Solo {product.totalStock} unidades disponibles.</p>
               }
               {showAddedToCartMessage && (
                 <div className="mt-3 flex items-center text-sm text-emerald-600 dark:text-emerald-400 transition-opacity duration-300">

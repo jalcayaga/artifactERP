@@ -3,6 +3,7 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import { Product } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { ArchiveBoxIcon, PlusIcon } from '@/components/Icons';
+import { UploadService } from '@/lib/services/uploadService';
 
 interface ProductFormProps {
   productData: Product | null;
@@ -12,13 +13,15 @@ interface ProductFormProps {
 
 const ProductForm: React.FC<ProductFormProps> = ({ productData, onSave, onCancel }) => {
   const [name, setName] = useState('');
-  const [productType, setProductType] = useState<'Producto' | 'Servicio'>('Producto');
+  const [productType, setProductType] = useState<'PRODUCT' | 'SERVICE'>('PRODUCT');
   const [sku, setSku] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
   const [price, setPrice] = useState(''); // Selling price
   const [unitPrice, setUnitPrice] = useState(''); // Cost price
-  const [currentStock, setCurrentStock] = useState('');
+  const [images, setImages] = useState<string[]>([]); // Existing image URLs
+  const [newImages, setNewImages] = useState<File[]>([]); // Newly selected image files
+  
   const [isPublished, setIsPublished] = useState(true);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
@@ -31,22 +34,49 @@ const ProductForm: React.FC<ProductFormProps> = ({ productData, onSave, onCancel
       setCategory(productData.category || '');
       setPrice(productData.price.toString());
       setUnitPrice(productData.unitPrice?.toString() || '');
-      setCurrentStock(productData.currentStock?.toString() || '');
+      setImages(productData.images || []); // Initialize existing images
+      
       setIsPublished(productData.isPublished);
     } else {
       // Defaults for new product
       setName('');
-      setProductType('Producto');
+      setProductType('PRODUCT');
       setSku('');
       setDescription('');
       setCategory('');
       setPrice('');
       setUnitPrice('');
-      setCurrentStock('');
+      setImages([]);
+      setNewImages([]);
+      
       setIsPublished(true);
     }
     setErrors({});
   }, [productData]);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setNewImages(prev => [...prev, ...Array.from(e.target.files || [])]);
+    }
+  };
+
+  const handleRemoveExistingImage = async (index: number) => {
+    const imageUrlToRemove = images[index];
+    const filename = imageUrlToRemove.split('/').pop(); // Extract filename from URL
+    if (filename) {
+      try {
+        await UploadService.deleteImage(filename);
+        setImages(prev => prev.filter((_, i) => i !== index));
+      } catch (error) {
+        console.error('Error deleting image from backend:', error);
+        // Optionally, show an error message to the user
+      }
+    }
+  };
+
+  const handleRemoveNewImage = (index: number) => {
+    setNewImages(prev => prev.filter((_, i) => i !== index));
+  };
 
   const validateForm = (): boolean => {
     const newErrors: { [key: string]: string } = {};
@@ -61,22 +91,30 @@ const ProductForm: React.FC<ProductFormProps> = ({ productData, onSave, onCancel
       if (isNaN(unitPriceNum) || unitPriceNum < 0) newErrors.unitPrice = 'El precio de costo debe ser un número positivo o cero.';
     }
 
-    if (productType === 'Producto' && currentStock.trim()){
-      const stockNum = parseInt(currentStock, 10);
-      if (isNaN(stockNum) || stockNum < 0) newErrors.currentStock = 'El stock debe ser un número entero positivo o cero.';
-    }
+    
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    const stockValue = productType === 'Producto' ? (currentStock.trim() ? parseInt(currentStock, 10) : null) : null;
+    let uploadedImageUrls: string[] = [];
+    if (newImages.length > 0) {
+      try {
+        const uploadPromises = newImages.map(image => UploadService.uploadImage(image));
+        const results = await Promise.all(uploadPromises);
+        uploadedImageUrls = results.map(result => result.url);
+      } catch (uploadError) {
+        console.error('Error uploading new images:', uploadError);
+        setErrors({ images: 'Error al subir las nuevas imágenes.' });
+        return;
+      }
+    }
 
-    onSave({
+    const payload: any = {
       id: productData?.id || '', // Let parent handle ID generation for new items
       name: name.trim(),
       productType,
@@ -85,15 +123,23 @@ const ProductForm: React.FC<ProductFormProps> = ({ productData, onSave, onCancel
       category: category.trim() || undefined,
       price: parseFloat(price),
       unitPrice: unitPrice.trim() ? parseFloat(unitPrice) : undefined,
-      currentStock: stockValue,
       isPublished,
-      // images and longDescription can be added later
-    });
+      images: [...images, ...uploadedImageUrls], // Combine existing and new uploaded images
+      // longDescription can be added later
+    };
+
+    onSave(payload);
   };
 
   const inputBaseClass = "mt-1 block w-full px-3 py-2 border rounded-md shadow-sm text-sm transition-colors duration-150 bg-background border-border placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-foreground";
   const selectBaseClass = `${inputBaseClass} pr-8`; // Added pr-8 for select arrow
   const errorTextClass = "mt-1 text-xs text-destructive";
+
+  const generateSku = () => {
+    const cleanedName = name.trim().toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 10); // Take first 10 alphanumeric chars
+    const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
+    setSku(`${cleanedName}-${timestamp}`);
+  };
 
   return (
     <Card className="max-w-3xl mx-auto border">
@@ -117,18 +163,28 @@ const ProductForm: React.FC<ProductFormProps> = ({ productData, onSave, onCancel
               <label htmlFor="prod-type" className="block text-sm font-medium text-foreground">
                 Tipo <span className="text-red-500">*</span>
               </label>
-              <select id="prod-type" value={productType} onChange={(e) => setProductType(e.target.value as 'Producto' | 'Servicio')} className={selectBaseClass} aria-describedby="type-error">
-                <option value="Producto">Producto</option>
-                <option value="Servicio">Servicio</option>
+              <select id="prod-type" value={productType} onChange={(e) => setProductType(e.target.value as 'PRODUCT' | 'SERVICE')} className={selectBaseClass} aria-describedby="type-error">
+                <option value="PRODUCT">Producto</option>
+                <option value="SERVICE">Servicio</option>
               </select>
               {errors.type && <p id="type-error" className={errorTextClass}>{errors.type}</p>}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label htmlFor="prod-sku" className="block text-sm font-medium text-foreground">SKU</label>
-              <input type="text" id="prod-sku" value={sku} onChange={(e) => setSku(e.target.value)} className={inputBaseClass} />
+            <div className="flex items-end gap-2">
+              <div className="flex-grow">
+                <label htmlFor="prod-sku" className="block text-sm font-medium text-foreground">SKU</label>
+                <input type="text" id="prod-sku" value={sku} onChange={(e) => setSku(e.target.value)} className={inputBaseClass} />
+              </div>
+              <button
+                type="button"
+                onClick={generateSku}
+                className="px-4 py-2.5 bg-secondary hover:bg-secondary/80 text-secondary-foreground text-sm font-medium rounded-md shadow-sm transition-colors duration-150"
+                title="Generar SKU automáticamente"
+              >
+                Generar
+              </button>
             </div>
             <div>
               <label htmlFor="prod-category" className="block text-sm font-medium text-foreground">Categoría</label>
@@ -154,13 +210,48 @@ const ProductForm: React.FC<ProductFormProps> = ({ productData, onSave, onCancel
               <input type="number" id="prod-unitPrice" value={unitPrice} onChange={(e) => setUnitPrice(e.target.value)} className={inputBaseClass} placeholder="0.00" step="0.01" aria-describedby="unitPrice-error"/>
               {errors.unitPrice && <p id="unitPrice-error" className={errorTextClass}>{errors.unitPrice}</p>}
             </div>
-            {productType === 'Producto' && (
-              <div>
-                <label htmlFor="prod-currentStock" className="block text-sm font-medium text-foreground">Stock Actual</label>
-                <input type="number" id="prod-currentStock" value={currentStock} onChange={(e) => setCurrentStock(e.target.value)} className={inputBaseClass} placeholder="0" step="1" aria-describedby="currentStock-error"/>
-                {errors.currentStock && <p id="currentStock-error" className={errorTextClass}>{errors.currentStock}</p>}
-              </div>
-            )}
+            
+          </div>
+
+          {/* Image Upload Section */}
+          <div>
+            <label htmlFor="prod-images" className="block text-sm font-medium text-foreground">Imágenes</label>
+            <input 
+              type="file" 
+              id="prod-images" 
+              multiple 
+              accept="image/*" 
+              onChange={handleImageChange} 
+              className="mt-1 block w-full text-sm text-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+            />
+            <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {images.map((image, index) => (
+                <div key={image} className="relative group">
+                  <img src={image} alt={`Producto ${index + 1}`} className="w-full h-24 object-cover rounded-md" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveExistingImage(index)}
+                    className="absolute top-1 right-1 bg-destructive/80 text-destructive-foreground rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Eliminar imagen existente"
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+              {newImages.map((image, index) => (
+                <div key={image.name} className="relative group">
+                  <img src={URL.createObjectURL(image)} alt={`Nueva imagen ${index + 1}`} className="w-full h-24 object-cover rounded-md" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveNewImage(index)}
+                    className="absolute top-1 right-1 bg-destructive/80 text-destructive-foreground rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Eliminar nueva imagen"
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
           
           <div className="flex items-center pt-2">

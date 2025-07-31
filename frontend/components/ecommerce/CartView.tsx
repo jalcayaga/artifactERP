@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useCart } from '@/contexts/CartContext';
+import { CartItem } from '@/lib/types';
 import { TrashIcon, ShoppingCartIcon, CreditCardIcon, WrenchScrewdriverIcon } from '@/components/Icons';
 import { formatCurrencyChilean } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -30,7 +31,7 @@ const CartView: React.FC = () => {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           <div className="lg:col-span-2 space-y-4">
-            {items.map(item => (
+            {items.map((item: CartItem) => (
               <Card key={item.productId} className="flex flex-col sm:flex-row items-start sm:items-center p-4 gap-4 border transition-shadow hover:shadow-md">
                 {item.image && (
                   <Link href={`/products/${item.productId}`} className="flex-shrink-0 self-center sm:self-start">

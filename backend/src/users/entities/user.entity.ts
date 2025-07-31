@@ -1,12 +1,11 @@
-
-import { UserRole } from '@prisma/client';
+import { UserRole } from "@prisma/client";
 
 export class UserEntity {
   id: string;
   email: string;
   firstName?: string | null;
   lastName?: string | null;
-  role: UserRole; 
+  role: UserRole;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;

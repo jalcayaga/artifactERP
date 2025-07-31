@@ -11,7 +11,7 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const TypeIcon = product.productType === 'Producto' ? CubeIcon : WrenchScrewdriverIcon;
+  const TypeIcon = product.productType === 'PRODUCT' ? CubeIcon : WrenchScrewdriverIcon;
 
   return (
     <Link href={`/products/${product.id}`} className="group block h-full">
@@ -33,7 +33,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           )}
           {/* Product Type Badge */}
           <div className={`absolute top-2 right-2 text-xs font-semibold px-2.5 py-1 rounded-full shadow-sm flex items-center
-            ${product.productType === 'Producto' 
+            ${product.productType === 'PRODUCT' 
               ? 'bg-primary/20 text-primary-foreground dark:bg-primary/30 dark:text-primary-foreground' 
               : 'bg-secondary/20 text-secondary-foreground dark:bg-secondary/30 dark:text-secondary-foreground'}`}>
             <TypeIcon className="w-3 h-3 mr-1.5"/>
@@ -56,9 +56,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 ? product.price.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' })
                 : 'Consultar'}
             </p>
-            {product.productType === 'Producto' && product.currentStock !== null && product.currentStock !== undefined && (
-              <p className={`text-xs mt-1 font-medium ${product.currentStock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
-                {product.currentStock > 0 ? `${product.currentStock} en stock` : 'Agotado'}
+            {product.productType === 'PRODUCT' && product.totalStock !== null && product.totalStock !== undefined && (
+              <p className={`text-xs mt-1 font-medium ${product.totalStock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
+                {product.totalStock > 0 ? `${product.totalStock} en stock` : 'Agotado'}
               </p>
             )}
           </div>
