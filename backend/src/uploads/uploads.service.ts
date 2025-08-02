@@ -5,7 +5,7 @@ import { join } from 'path';
 @Injectable()
 export class UploadsService {
   async deleteFile(filename: string): Promise<void> {
-    const filePath = join(process.cwd(), 'uploads', filename);
+    const filePath = join(__dirname, '..', '..', 'uploads', filename);
     try {
       await unlink(filePath);
     } catch (error) {

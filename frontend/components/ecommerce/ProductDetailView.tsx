@@ -5,7 +5,7 @@ import { ProductService } from '@/lib/services/productService';
 import { Product } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/contexts/CartContext';
-import { ShieldCheckIcon, ShoppingCartIcon, CheckCircleIcon, WrenchScrewdriverIcon, TagIcon, ArchiveBoxIcon, PlusIcon, MinusIcon } from '@/components/Icons';
+import { ShieldCheckIcon, ShoppingCartIcon, CheckCircleIcon, WrenchScrewdriverIcon, TagIcon, ArchiveBoxIcon, PlusIcon, MinusIcon, DocumentTextIcon } from '@/components/Icons';
 import { formatCurrencyChilean } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -25,7 +25,6 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
   const { addItem } = useCart();
   const router = useRouter();
   
-  // Mocked installation service price, should come from Product data if service is a product itself
   const MOCK_INSTALLATION_PRICE = 50000; 
 
   useEffect(() => {
@@ -61,7 +60,7 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
     if (product) {
       addItem(product, quantity, includeInstallation);
       setShowAddedToCartMessage(true);
-      setTimeout(() => setShowAddedToCartMessage(false), 3000); // Hide message after 3 seconds
+      setTimeout(() => setShowAddedToCartMessage(false), 3000);
     }
   };
 
@@ -91,12 +90,13 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
   const isService = product.productType === 'SERVICE';
   const stockAvailable = !isService && product.totalStock !== null && product.totalStock !== undefined && product.totalStock > 0;
   const canAddToCart = isService || (stockAvailable && product.totalStock! >= quantity);
+  const priceWithVat = product.price * 1.19; // Calculate price with 19% VAT
 
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-12 items-start">
-        {/* Image Gallery - spans 2 cols on lg screens */}
+        {/* Image Gallery */}
         <div className="lg:col-span-2 space-y-4">
           <div className="aspect-square bg-muted rounded-xl overflow-hidden border border-border shadow-sm sticky top-24">
             {selectedImage ? (
@@ -125,7 +125,7 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
           )}
         </div>
 
-        {/* Product Info - spans 3 cols on lg screens */}
+        {/* Product Info */}
         <div className="lg:col-span-3 space-y-6">
           <div className="space-y-2">
             {product.category && <p className="text-sm font-medium text-primary uppercase tracking-wider">{product.category}</p>}
@@ -134,11 +134,20 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
           </div>
 
           <p className="text-3xl sm:text-4xl font-semibold text-primary">
-            {formatCurrencyChilean(product.price)}
+            {formatCurrencyChilean(priceWithVat)}
             <span className="text-sm text-muted-foreground ml-2">IVA Incluido</span>
           </p>
           
-          {product.description && <p className="text-base text-muted-foreground leading-relaxed">{product.description}</p>}
+          {product.description && <p className="text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">{product.description}</p>}
+
+          {product.technicalSheetUrl && (
+            <div className="pt-4">
+              <a href={`http://localhost:3001${product.technicalSheetUrl}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
+                <DocumentTextIcon className="w-5 h-5 mr-2" />
+                Descargar Ficha Técnica
+              </a>
+            </div>
+          )}
 
           {product.productType === 'PRODUCT' && product.totalStock !== null && product.totalStock !== undefined && (
             <p className={`text-sm font-medium flex items-center ${product.totalStock > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-destructive'}`}>
@@ -168,7 +177,7 @@ const ProductDetailView: React.FC<ProductDetailViewProps> = ({ productId }) => {
               </div>
 
               {/* Installation Service Option */}
-              {product.productType === 'PRODUCT' && ( // Only show for 'PRODUCT' type
+              {product.productType === 'PRODUCT' && (
                 <div className="flex items-center space-x-2.5 pt-2">
                     <input
                     type="checkbox"

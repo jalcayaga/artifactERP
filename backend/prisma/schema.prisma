@@ -64,36 +64,57 @@ model User {
   updatedAt DateTime @updatedAt
 
   orders  Order[] // Un usuario puede tener muchos pedidos
-  clients Client[] // Un usuario puede tener muchos clientes asociados
+  companies Company[] // Un usuario puede tener muchas empresas asociadas
   quotes  Quote[] // NEW: Un usuario puede tener muchas cotizaciones
 
   @@map("users")
 }
 
-model Client {
+// NEW: Unified Company Model (replaces Client and Supplier)
+model Company {
   id          String   @id @default(cuid())
-  userId      String // ID del usuario que creó/gestiona este cliente
+  userId      String // ID del usuario que creó/gestiona esta empresa
   name        String
-  rut         String?  @unique // RUT of the client
-  giro        String?  // Business activity of the client
-  contactName String?
-  email       String?  @unique
-  phone       String?
+  fantasyName String?
+  rut         String?  @unique // RUT of the company
+  giro        String?  // Business activity of the company
   address     String?
   city        String?
   state       String?
   zip         String?
-  type        String // e.g., "Empresa", "Persona"
+  phone       String?
+  email       String?  @unique
+  isClient    Boolean  @default(false) // Can this company be a client?
+  isSupplier  Boolean  @default(false) // Can this company be a supplier?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quotes   Quote[] // NEW: Un cliente puede tener muchas cotizaciones
-  invoices Invoice[]
-  orders   Order[] // NEW: Un cliente puede tener muchas órdenes
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contactPeople ContactPerson[] // A company can have many contact people
+  quotes        Quote[] // A company can be a client for many quotes
+  invoices      Invoice[] // A company can be a client for many invoices
+  orders        Order[] // A company can be a client for many orders
+  purchases     Purchase[] // A company can be a supplier for many purchases
 
   @@index([userId])
-  @@map("clients")
+  @@map("companies")
+}
+
+// NEW: Contact Person Model
+model ContactPerson {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  firstName   String
+  lastName    String?
+  email       String?  @unique
+  phone       String?
+  role        String? // e.g., "Ventas", "Compras", "Gerente"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([companyId])
+  @@map("contact_people")
 }
 
 model Product {
@@ -104,10 +125,10 @@ model Product {
   description     String?
   longDescription String?     @db.Text
   images          String[]    @default([]) // URLs de las imágenes
+  technicalSheetUrl String?   // URL to the product's technical sheet PDF
   category        String?
   price           Decimal // Precio de venta al público (usado en pedidos)
   unitPrice       Decimal? // Podría ser el costo del producto para el ERP
-  // currentStock     Int? // REMOVED: Stock now managed by Lots
   reorderLevel    Int?
   isPublished     Boolean     @default(false) // Si el producto es visible en el e-commerce
   createdAt       DateTime    @default(now())
@@ -116,7 +137,7 @@ model Product {
   orderItems    OrderItem[] // Un producto puede estar en muchos items de pedido
   purchaseItems PurchaseItem[] // Un producto puede estar en muchos items de compra
   lots          Lot[] // NEW: A product can have many lots
-  quoteItems    QuoteItem[] // NEW: Un producto puede estar en muchos items de cotización
+  quoteItems    QuoteItem[] // Un producto puede estar en muchos items de cotización
   invoiceItems  InvoiceItem[]
 
   @@index([category])
@@ -148,7 +169,7 @@ model Lot {
 model Order {
   id               String         @id @default(cuid())
   userId           String
-  clientId         String         // The client this order belongs to
+  companyId        String         // NEW: The company (client) this order belongs to
   status           OrderStatus    @default(PENDING_PAYMENT)
   paymentStatus    PaymentStatus  @default(PENDING)
   subTotalAmount   Decimal // Suma de totalItemPrice de OrderItems
@@ -166,37 +187,20 @@ model Order {
   updatedAt        DateTime       @updatedAt
 
   user       User        @relation(fields: [userId], references: [id], onDelete: Restrict)
-  client     Client      @relation(fields: [clientId], references: [id], onDelete: Restrict)
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Restrict)
   orderItems OrderItem[]
   invoice    Invoice? // An order can have one invoice
 
   @@index([userId])
-  @@index([clientId])
+  @@index([companyId])
   @@index([status])
   @@map("orders")
 }
 
-// NEW: Supplier Model
-model Supplier {
-  id            String   @id @default(cuid())
-  name          String   @unique
-  contactPerson String?
-  email         String?  @unique
-  phone         String?
-  address       String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  purchases Purchase[] // A supplier can have many purchases
-
-  @@map("suppliers")
-}
-
 model Purchase {
   id             String   @id @default(cuid())
-  supplierId     String // NEW: Link to Supplier
-  supplier       Supplier @relation(fields: [supplierId], references: [id]) // NEW: Relation to Supplier
-  // supplierName     String? // REMOVED: Now linked via supplierId
+  companyId      String // NEW: Link to Company (supplier)
+  company        Company  @relation(fields: [companyId], references: [id]) // NEW: Relation to Company
   purchaseDate   DateTime @default(now())
   status         String   @default("PENDING") // e.g., PENDING, RECEIVED, CANCELLED
   subTotalAmount Decimal  @db.Decimal(10, 2)
@@ -208,7 +212,7 @@ model Purchase {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([supplierId]) // NEW: Index for supplierId
+  @@index([companyId])
   @@map("purchases")
 }
 
@@ -277,8 +281,8 @@ enum QuoteStatus {
 
 model Quote {
   id             String      @id @default(cuid())
-  clientId       String
-  client         Client      @relation(fields: [clientId], references: [id])
+  companyId      String // NEW: Link to Company (client)
+  company        Company     @relation(fields: [companyId], references: [id])
   userId         String
   user           User        @relation(fields: [userId], references: [id])
   status         QuoteStatus @default(DRAFT)
@@ -293,7 +297,7 @@ model Quote {
 
   quoteItems QuoteItem[]
 
-  @@index([clientId])
+  @@index([companyId])
   @@index([userId])
   @@map("quotes")
 }
@@ -321,6 +325,8 @@ enum InvoiceStatus {
   DRAFT
   SENT
   PAID
+  PARTIALLY_PAID
+  OVERDUE
   VOID
 }
 
@@ -328,8 +334,8 @@ model Invoice {
   id             String        @id @default(cuid())
   orderId        String        @unique // Each order can only have one invoice
   order          Order         @relation(fields: [orderId], references: [id])
-  clientId       String
-  client         Client        @relation(fields: [clientId], references: [id])
+  companyId      String // NEW: Link to Company (client)
+  company        Company       @relation(fields: [companyId], references: [id])
   invoiceNumber  String        @unique
   status         InvoiceStatus @default(DRAFT)
   issueDate      DateTime      @default(now())
@@ -352,7 +358,7 @@ model Invoice {
   payments Payment[]
 
   @@index([orderId])
-  @@index([clientId])
+  @@index([companyId])
   @@index([status])
   @@map("invoices")
 }

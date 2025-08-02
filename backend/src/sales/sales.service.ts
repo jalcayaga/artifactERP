@@ -9,11 +9,11 @@ export class SalesService {
 
   async create(createSaleDto: CreateSaleDto): Promise<Order> {
     return this.prisma.$transaction(async (tx) => {
-      const { items, clientId, userId, ...orderData } = createSaleDto;
+      const { items, companyId, userId, ...orderData } = createSaleDto;
       const newOrder = await tx.order.create({
         data: {
           ...orderData,
-          client: { connect: { id: clientId } },
+          company: { connect: { id: companyId } },
           user: { connect: { id: userId } },
           orderItems: {
             create: items.map(item => ({
@@ -43,7 +43,7 @@ export class SalesService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { client: true, orderItems: true },
+        include: { company: true, orderItems: true },
       }),
       this.prisma.order.count({ where: whereClause }),
     ]);
@@ -54,7 +54,7 @@ export class SalesService {
   async findOne(id: string): Promise<Order | null> {
     return this.prisma.order.findUnique({
       where: { id },
-      include: { client: true, orderItems: { include: { product: true } } },
+      include: { company: true, orderItems: { include: { product: true } } },
     });
   }
 }

@@ -30,12 +30,15 @@ export class PaymentsService {
 
       const totalPaid = invoice.payments.reduce((acc, p) => acc.add(p.amount), new Prisma.Decimal(0)).add(newPayment.amount);
 
+      let newStatus: InvoiceStatus = InvoiceStatus.PARTIALLY_PAID;
       if (totalPaid.gte(invoice.grandTotal)) {
-        await tx.invoice.update({
-          where: { id: invoiceId },
-          data: { status: InvoiceStatus.PAID },
-        });
+        newStatus = InvoiceStatus.PAID;
       }
+
+      await tx.invoice.update({
+        where: { id: invoiceId },
+        data: { status: newStatus },
+      });
 
       return newPayment;
     });

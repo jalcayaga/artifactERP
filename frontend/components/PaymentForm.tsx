@@ -1,110 +1,88 @@
-
 import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
+import { CreatePaymentDto, Invoice, PaymentMethod } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { PaymentMethod } from '@/lib/types';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-
-const formSchema = z.object({
-  amount: z.string().min(1, 'El monto es requerido.'),
-  paymentDate: z.string().min(1, 'La fecha es requerida.'),
-  paymentMethod: z.nativeEnum(PaymentMethod),
-  notes: z.string().optional(),
-});
-
-type PaymentFormValues = z.infer<typeof formSchema>;
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { PaymentService } from '@/lib/services/paymentService';
+import { toast } from 'sonner';
 
 interface PaymentFormProps {
-  invoiceId: string;
-  onSave: (data: PaymentFormValues) => void;
+  invoice: Invoice;
+  onSave: () => void;
   onCancel: () => void;
 }
 
-const PaymentForm: React.FC<PaymentFormProps> = ({ invoiceId, onSave, onCancel }) => {
-  const form = useForm<PaymentFormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      amount: '',
-      paymentDate: new Date().toISOString().split('T')[0],
-      paymentMethod: PaymentMethod.BANK_TRANSFER,
-      notes: '',
-    },
-  });
+const PaymentForm: React.FC<PaymentFormProps> = ({ invoice, onSave, onCancel }) => {
+  const [amount, setAmount] = useState<number>(0);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.CASH);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    const paymentData: CreatePaymentDto = {
+      invoiceId: invoice.id,
+      amount,
+      paymentMethod,
+    };
+
+    try {
+      await PaymentService.createPayment(paymentData);
+      toast.success('Pago registrado exitosamente');
+      onSave();
+    } catch (error: any) {
+      toast.error(error.message || 'Error al registrar el pago');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSave)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="amount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Monto</FormLabel>
-              <FormControl>
-                <Input type="text" placeholder="0.00" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="paymentDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fecha de Pago</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="paymentMethod"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Método de Pago</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione un método" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {Object.values(PaymentMethod).map(method => (
-                    <SelectItem key={method} value={method}>{method}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notas</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="flex justify-end space-x-4">
-          <Button type="button" variant="outline" onClick={onCancel}>Cancelar</Button>
-          <Button type="submit">Guardar Pago</Button>
-        </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Registrar Pago para Factura {invoice.invoiceNumber}</CardTitle>
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="amount">Monto</Label>
+            <Input
+              id="amount"
+              type="number"
+              value={amount}
+              onChange={(e) => setAmount(Number(e.target.value))}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="paymentMethod">Método de Pago</Label>
+            <Select onValueChange={(value) => setPaymentMethod(value as PaymentMethod)} defaultValue={paymentMethod}>
+              <SelectTrigger>
+                <SelectValue placeholder="Seleccione un método de pago" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.values(PaymentMethod).map((method) => (
+                  <SelectItem key={method} value={method}>
+                    {method}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+        <CardFooter className="flex justify-end space-x-2">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Guardando...' : 'Guardar Pago'}
+          </Button>
+        </CardFooter>
       </form>
-    </Form>
+    </Card>
   );
 };
 

@@ -1,13 +1,17 @@
 // Importaciones de React, tipos e iconos necesarios.
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Sale, OrderItem } from '@/lib/types'; // Tipos de datos para la venta y sus artículos.
 import { XIcon, ShoppingCartIcon, CalendarIcon, ChatBubbleLeftEllipsisIcon } from '@/components/Icons'; // Iconos para la UI del modal.
 import { formatCurrencyChilean } from '@/lib/utils';
+import { InvoiceService } from '@/lib/services/invoiceService';
+import { toast } from 'sonner';
+import { Button } from './ui/button';
 
 // Props que espera el componente SaleDetailModal.
 interface SaleDetailModalProps {
   sale: Sale | null; // Datos de la venta a mostrar, o null si no hay venta.
   onClose: () => void; // Función para cerrar el modal.
+  onInvoiceCreated: () => void;
 }
 
 // Componente interno para mostrar un ítem de detalle general de la venta.
@@ -25,7 +29,9 @@ const SaleInfoItem: React.FC<{ label: string; value?: string | React.ReactNode; 
 };
 
 // Componente funcional para el modal que muestra los detalles de una venta.
-const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
+const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose, onInvoiceCreated }) => {
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+
   // useEffect para manejar efectos secundarios: cerrar con Escape y bloquear scroll del body.
   useEffect(() => {
     if (!sale) return; // Si no hay venta, no hace nada.
@@ -47,6 +53,21 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
   if (!sale) {
     return null; // Si no hay venta, no renderiza el modal.
   }
+
+  const handleCreateInvoice = async () => {
+    if (!sale) return;
+    setIsCreatingInvoice(true);
+    try {
+      await InvoiceService.createInvoiceFromOrder(sale.id);
+      toast.success('Factura creada exitosamente');
+      onInvoiceCreated();
+      onClose();
+    } catch (error: any) {
+      toast.error(error.message || 'Error al crear la factura');
+    } finally {
+      setIsCreatingInvoice(false);
+    }
+  };
 
   // Calcula el total de cada artículo con IVA incluido
   const calculateItemTotalWithVat = (item: OrderItem) => {
@@ -84,7 +105,7 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
           {/* Información general de la venta */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 mb-3">
-            <SaleInfoItem label="Cliente" value={sale.client?.name} />
+            <SaleInfoItem label="Empresa" value={sale.company?.name} />
             <SaleInfoItem label="Fecha de Venta" value={new Date(sale.createdAt).toLocaleDateString()} icon={CalendarIcon} />
             {sale.customerNotes && (
                 <div className="md:col-span-2">
@@ -140,14 +161,21 @@ const SaleDetailModal: React.FC<SaleDetailModalProps> = ({ sale, onClose }) => {
         </div>
 
         {/* Pie del modal */}
-        <div className="px-4 py-3 sm:p-4 bg-muted/50 border-t border-border flex justify-end">
-          <button
+        <div className="px-4 py-3 sm:p-4 bg-muted/50 border-t border-border flex justify-end space-x-2">
+          <Button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-border text-sm font-medium rounded-md text-foreground bg-background hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring dark:focus:ring-offset-card transition-colors"
+            variant="outline"
           >
             Cerrar
-          </button>
+          </Button>
+          <Button
+            type="button"
+            onClick={handleCreateInvoice}
+            disabled={isCreatingInvoice}
+          >
+            {isCreatingInvoice ? 'Creando Factura...' : 'Crear Factura'}
+          </Button>
         </div>
       </div>
     </div>

@@ -26,7 +26,7 @@ export class CreatePurchaseItemDto {
 export class CreatePurchaseDto {
   @IsString()
   @IsNotEmpty()
-  supplierId: string;
+  companyId: string;
 
   @IsDateString()
   purchaseDate: string;

@@ -69,7 +69,7 @@ const ProductPurchaseHistory: React.FC<ProductPurchaseHistoryProps> = ({ product
                 return (
                   <tr key={purchase.id}>
                     <td className="px-3 py-2 whitespace-nowrap text-muted-foreground">{formatDate(purchase.purchaseDate)}</td>
-                    <td className="px-3 py-2 whitespace-nowrap font-medium text-foreground">{purchase.supplier?.name || 'N/A'}</td>
+                    <td className="px-3 py-2 whitespace-nowrap font-medium text-foreground">{purchase.company?.name || 'N/A'}</td>
                     <td className="px-3 py-2 whitespace-nowrap">{item.quantity}</td>
                     <td className="px-3 py-2 whitespace-nowrap">{formatCurrencyChilean(item.unitPrice)}</td>
                     <td className="px-3 py-2 whitespace-nowrap">

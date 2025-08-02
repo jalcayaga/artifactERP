@@ -514,6 +514,23 @@ export const DocumentTextIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
+export const CalculatorIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+    className={className}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.75 15.75V18.75m0-3.75h-3.75m3.75 0l-3.75-3.75M15.75 15.75l3.75-3.75M4.5 6.75h15M4.5 12h15m-15 5.25h15M4.5 18.75h15"
+    />
+  </svg>
+);
+
 export const CubeIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"

@@ -12,7 +12,7 @@ export class PurchasesController {
   @Post()
   create(@Body() createPurchaseDto: CreatePurchaseDto) {
     return this.purchasesService.create({
-      supplier: { connect: { id: createPurchaseDto.supplierId } },
+      company: { connect: { id: createPurchaseDto.companyId } },
       purchaseDate: new Date(createPurchaseDto.purchaseDate),
       subTotalAmount: createPurchaseDto.subTotalAmount,
       totalVatAmount: createPurchaseDto.totalVatAmount,
@@ -42,10 +42,10 @@ export class PurchasesController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePurchaseDto: UpdatePurchaseDto) {
-    const { items, supplierId, ...purchaseData } = updatePurchaseDto;
+    const { items, companyId, ...purchaseData } = updatePurchaseDto;
     return this.purchasesService.update(id, {
       ...purchaseData,
-      ...(supplierId && { supplier: { connect: { id: supplierId } } }),
+      ...(companyId && { company: { connect: { id: companyId } } }),
       ...(items && { items: { deleteMany: {}, create: items.map(item => ({
         productId: item.productId,
         quantity: item.quantity,

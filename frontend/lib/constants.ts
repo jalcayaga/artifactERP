@@ -1,11 +1,10 @@
-
 // lib/constants.ts
 import { NavItem } from './types'; 
 import { HomeIcon, BriefcaseIcon, ShoppingCartIcon, TruckIcon, ArchiveBoxIcon, CreditCardIcon, ChartPieIcon, CogIcon, WrenchScrewdriverIcon, UsersIcon, ShieldCheckIcon, DocumentTextIcon } from '@/components/Icons'; // Added WrenchScrewdriverIcon, UsersIcon, ShieldCheckIcon
 
 export const NAVIGATION_ITEMS: NavItem[] = [
   { name: 'Dashboard', path: '/admin/dashboard', icon: HomeIcon }, 
-  { name: 'Clientes (CRM)', path: '/admin/clients', icon: BriefcaseIcon }, 
+  { name: 'Clientes/Proveedores', path: '/admin/clients', icon: BriefcaseIcon },
   { name: 'Ventas',
     path: '/admin/sales',
     icon: ShoppingCartIcon
@@ -16,10 +15,11 @@ export const NAVIGATION_ITEMS: NavItem[] = [
     icon: DocumentTextIcon
   },
   {
-    name: 'Compras',
+    name: 'Ingreso de Mercadería',
     path: '/admin/purchases',
-    icon: TruckIcon
+    icon: ArchiveBoxIcon
   }, 
+  { name: 'Órdenes de Compra', path: '/admin/purchase-orders', icon: TruckIcon },
   { name: 'Cotizaciones', path: '/admin/quotes', icon: DocumentTextIcon },
   { name: 'Productos/Servicios', path: '/admin/inventory', icon: ArchiveBoxIcon }, 
   { name: 'Finanzas', path: '/admin/finance', icon: CreditCardIcon }, 

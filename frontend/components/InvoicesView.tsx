@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -64,7 +63,7 @@ const InvoicesView: React.FC = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nº Factura</TableHead>
-                  <TableHead>Cliente</TableHead>
+                  <TableHead>Empresa</TableHead>
                   <TableHead>Fecha</TableHead>
                   <TableHead>Total</TableHead>
                   <TableHead>Estado</TableHead>
@@ -75,7 +74,7 @@ const InvoicesView: React.FC = () => {
                 {invoices.map((invoice) => (
                   <TableRow key={invoice.id}>
                     <TableCell>{invoice.invoiceNumber}</TableCell>
-                    <TableCell>{invoice.client.name}</TableCell>
+                    <TableCell>{invoice.company?.name}</TableCell>
                     <TableCell>{new Date(invoice.issueDate).toLocaleDateString()}</TableCell>
                     <TableCell>{formatCurrencyChilean(invoice.grandTotal)}</TableCell>
                     <TableCell>{invoice.status}</TableCell>

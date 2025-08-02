@@ -3,24 +3,24 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
 import { Prisma, ProductType, Quote } from '@prisma/client';
-import { ClientsService } from '../clients/clients.service';
+import { CompaniesService } from '../companies/companies.service';
 import { ProductsService } from '../products/products.service';
 
 @Injectable()
 export class QuotesService {
   constructor(
     private prisma: PrismaService,
-    private clientsService: ClientsService,
+    private companiesService: CompaniesService,
     private productsService: ProductsService,
   ) {}
 
   async create(createQuoteDto: CreateQuoteDto, userId: string): Promise<Quote> {
-    const { items, clientId, ...quoteData } = createQuoteDto;
+    const { items, companyId, ...quoteData } = createQuoteDto;
 
     return this.prisma.$transaction(async (tx) => {
-      const client = await this.clientsService.findOne(clientId, userId);
-      if (!client) {
-        throw new NotFoundException(`Client with ID ${clientId} not found.`);
+      const company = await this.companiesService.findOne(companyId, userId);
+      if (!company) {
+        throw new NotFoundException(`Company with ID ${companyId} not found.`);
       }
 
       const quoteItemsCreateData = [];
@@ -45,14 +45,14 @@ export class QuotesService {
       return tx.quote.create({
         data: {
           ...quoteData,
-          client: { connect: { id: clientId } },
+          company: { connect: { id: companyId } },
           user: { connect: { id: userId } },
           subTotalAmount: new Prisma.Decimal(quoteData.subTotalAmount),
           vatAmount: new Prisma.Decimal(quoteData.vatAmount),
           grandTotal: new Prisma.Decimal(quoteData.grandTotal),
           quoteItems: { create: quoteItemsCreateData },
         },
-        include: { quoteItems: { include: { product: true } }, client: true },
+        include: { quoteItems: { include: { product: true } }, company: true },
       });
     });
   }
@@ -63,7 +63,7 @@ export class QuotesService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { client: true, quoteItems: { include: { product: true } } },
+        include: { company: true, quoteItems: { include: { product: true } } },
       }),
       this.prisma.quote.count(),
     ]);
@@ -71,7 +71,7 @@ export class QuotesService {
   }
 
   async findOne(id: string): Promise<Quote> {
-    const quote = await this.prisma.quote.findUnique({ where: { id }, include: { client: true, quoteItems: { include: { product: true } } } });
+    const quote = await this.prisma.quote.findUnique({ where: { id }, include: { company: true, quoteItems: { include: { product: true } } } });
     if (!quote) {
       throw new NotFoundException(`Quote with ID ${id} not found.`);
     }
@@ -80,10 +80,10 @@ export class QuotesService {
 
   async update(id: string, updateQuoteDto: UpdateQuoteDto, userId: string): Promise<Quote> {
     // Simplified update logic
-    const { items, clientId, ...quoteData } = updateQuoteDto;
+    const { items, companyId, ...quoteData } = updateQuoteDto;
     return this.prisma.quote.update({
       where: { id },
-      data: { ...quoteData, client: { connect: { id: clientId } } },
+      data: { ...quoteData, company: { connect: { id: companyId } } },
     });
   }
 

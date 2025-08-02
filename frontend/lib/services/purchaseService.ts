@@ -1,4 +1,4 @@
-import fetchWithAuth from './api';
+import fetchWithAuth from '../fetchWithAuth';
 import { Purchase, CreatePurchaseDto, UpdatePurchaseDto } from '@/lib/types';
 
 interface PaginatedResponse<T> {

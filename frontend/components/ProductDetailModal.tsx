@@ -1,9 +1,9 @@
 // components/ProductDetailModal.tsx
 import React, { useEffect, useState } from 'react';
 import { Product, Lot } from '@/lib/types';
-import { XIcon, CubeIcon, ArchiveBoxIcon, TagIcon, CheckCircleIcon, XCircleIcon, CreditCardIcon, CalendarIcon, InboxIcon, PencilIcon } from '@/components/Icons';
+import { XIcon, CubeIcon, ArchiveBoxIcon, TagIcon, CheckCircleIcon, XCircleIcon, CreditCardIcon, CalendarIcon, InboxIcon, PencilIcon, DocumentTextIcon } from '@/components/Icons';
 import { formatCurrencyChilean, formatDate } from '@/lib/utils';
-import { api } from '@/lib/api'; // Assuming you have an api helper
+import { api } from '@/lib/api';
 import LotEditModal from './LotEditModal';
 
 interface ProductDetailModalProps {
@@ -56,11 +56,10 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
         setIsLoadingLots(true);
         try {
           const response = await api.get(`/products/${product.id}/lots`);
-          console.log('Lotes recibidos:', response.data);
           setLots(response.data);
         } catch (error) {
           console.error(`Error fetching lots for product ${product.id}:`, error);
-          setLots([]); // Clear lots on error
+          setLots([]);
         } finally {
           setIsLoadingLots(false);
         }
@@ -130,7 +129,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
           <dl className="divide-y divide-border/50">
             <DetailItem label="SKU" value={product.sku} icon={TagIcon} />
-            <DetailItem label="Descripción" value={product.description} />
+            <DetailItem label="Descripción" value={<p className="whitespace-pre-wrap">{product.description}</p>} />
             <DetailItem label="Categoría" value={product.category} />
             <DetailItem label="Precio Venta (sin IVA)" value={product.price} icon={CreditCardIcon} isCurrency={true} />
             {product.productType === 'PRODUCT' && product.unitPrice !== undefined && (
@@ -140,7 +139,18 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product, onClos
               <DetailItem label="Stock Actual" value={product.totalStock} icon={ArchiveBoxIcon} />
             )}
             <DetailItem label="Publicado" value={product.isPublished} />
-             {product.longDescription && <DetailItem label="Descripción Larga" value={<p className="whitespace-pre-wrap">{product.longDescription}</p>} />}
+            {product.longDescription && <DetailItem label="Descripción Larga" value={<p className="whitespace-pre-wrap">{product.longDescription}</p>} />}
+            {product.technicalSheetUrl && (
+              <DetailItem 
+                label="Ficha Técnica"
+                icon={DocumentTextIcon}
+                value={
+                  <a href={`http://localhost:3001${product.technicalSheetUrl}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary">
+                    Descargar PDF
+                  </a>
+                }
+              />
+            )}
           </dl>
 
           {product.productType === 'PRODUCT' && (

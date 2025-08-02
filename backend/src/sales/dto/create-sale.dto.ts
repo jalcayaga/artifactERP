@@ -30,7 +30,7 @@ export class CreateSaleDto {
 
   @IsString()
   @IsNotEmpty()
-  clientId: string;
+  companyId: string;
 
   @IsOptional()
   @IsString()

@@ -6,6 +6,7 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   limit: number;
+  pages: number;
 }
 
 export type Theme = 'light' | 'dark';
@@ -22,32 +23,74 @@ export interface ThemeContextType {
   setTheme: (theme: Theme) => void; 
 }
 
-export interface Client {
+// NEW: Unified Company Model (replaces Client and Supplier)
+export interface Company {
   id: string;
-  userId: string;
+  userId: string; // ID del usuario que creó/gestiona esta empresa
   name: string;
-  contactName?: string | null;
+  fantasyName?: string | null;
+  rut?: string | null; // RUT of the company
+  giro?: string | null; // Business activity of the company
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  isClient: boolean; // Can this company be a client?
+  isSupplier: boolean; // Can this company be a supplier?
+  createdAt?: string;
+  updatedAt?: string;
+  contactPeople?: ContactPerson[]; // A company can have many contact people
+}
+
+export interface CreateCompanyDto {
+  name: string;
+  fantasyName?: string;
+  rut?: string;
+  giro?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  phone?: string;
+  email?: string;
+  isClient?: boolean;
+  isSupplier?: boolean;
+}
+
+export interface UpdateCompanyDto extends Partial<CreateCompanyDto> {}
+
+// NEW: Contact Person Model
+export interface ContactPerson {
+  id: string;
+  companyId: string;
+  firstName: string;
+  lastName?: string | null;
   email?: string | null;
   phone?: string | null;
-  type: 'Empresa' | 'Persona';
+  role?: string | null; // e.g., "Ventas", "Compras", "Gerente"
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface CreateClientDto {
-  name: string;
-  contactName?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  type: 'Empresa' | 'Persona';
+export interface CreateContactPersonDto {
+  companyId: string;
+  firstName: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  role?: string;
 }
 
-export interface UpdateClientDto extends Partial<CreateClientDto> {}
+export interface UpdateContactPersonDto extends Partial<CreateContactPersonDto> {}
 
 // Backend Order model maps to frontend Sale
 export interface Sale {
   id: string;
   userId: string;
+  companyId: string; // NEW: Link to Company (client)
+  company?: Company; // Include company details
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   subTotalAmount: number;
@@ -65,7 +108,6 @@ export interface Sale {
   updatedAt: string;
   user?: { firstName: string; lastName: string; email: string };
   orderItems?: OrderItem[];
-  client?: Client;
   invoice?: Invoice | null;
 }
 
@@ -107,32 +149,11 @@ export interface Lot extends LotInfo {
   productId: string;
   product?: Product;
   initialQuantity: number;
-  supplierId?: string;
-  supplier?: Supplier;
+  companyId?: string; // NEW: Link to Company (supplier)
+  company?: Company; // NEW: Include company details
   purchaseId?: string;
   purchase?: Purchase;
 }
-
-export interface Supplier {
-  id: string;
-  name: string;
-  contactPerson?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  address?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CreateSupplierDto {
-  name: string;
-  contactPerson?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-}
-
-export interface UpdateSupplierDto extends Partial<CreateSupplierDto> {}
 
 // Definición de Product compatible con el backend y frontend
 export type ProductType = 'PRODUCT' | 'SERVICE'; // Updated to match backend enum
@@ -153,6 +174,7 @@ export interface Product {
   createdAt?: string;
   updatedAt?: string;
   totalStock?: number; // Add totalStock property
+  technicalSheetUrl?: string | null; // Add technicalSheetUrl property
 }
 
 export interface CreateProductDto {
@@ -174,13 +196,14 @@ export interface UpdateProductDto extends Partial<CreateProductDto> {}
 
 export interface Purchase {
   id: string;
-  supplierId: string; // Changed from supplierName to supplierId
-  supplier?: Supplier; // Include supplier details
+  companyId: string; // NEW: Link to Company (supplier)
+  company?: Company; // Include company details
   purchaseDate: string;
   status: string;
   subTotalAmount: number;
   totalVatAmount: number;
   grandTotal: number;
+  vatRatePercent: number; // NEW: Add vatRatePercent property
   createdAt?: string;
   updatedAt?: string;
   items?: PurchaseItem[];
@@ -200,6 +223,54 @@ export interface PurchaseItem {
   updatedAt?: string;
 }
 
+export interface PurchaseOrder {
+  id: string;
+  companyId: string; // NEW: Link to Company (supplier)
+  company?: Company; // Include company details
+  orderDate: string;
+  expectedDeliveryDate?: string | null;
+  status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
+  subTotalAmount: number;
+  totalVatAmount: number;
+  grandTotal: number;
+  createdAt?: string;
+  updatedAt?: string;
+  items?: PurchaseOrderItem[];
+}
+
+export interface PurchaseOrderItem {
+  id: string;
+  purchaseOrderId: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  itemVatAmount: number;
+  totalPriceWithVat: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreatePurchaseOrderDto {
+  companyId: string;
+  orderDate: string;
+  expectedDeliveryDate?: string;
+  status?: 'PENDING' | 'COMPLETED' | 'CANCELLED';
+  items: { 
+    productId: string;
+    quantity: number;
+    unitPrice: number;
+    totalPrice: number;
+    itemVatAmount: number;
+    totalPriceWithVat: number;
+  }[];
+  subTotalAmount: number;
+  totalVatAmount: number;
+  grandTotal: number;
+}
+
+export interface UpdatePurchaseOrderDto extends Partial<CreatePurchaseOrderDto> {}
 
 export enum OrderStatus {
   PENDING_PAYMENT = 'PENDING_PAYMENT',
@@ -263,9 +334,11 @@ export interface Invoice {
   grandTotal: number;
   createdAt: string;
   updatedAt: string;
-  client: Client;
+  companyId: string; // NEW: Link to Company (client)
+  company?: Company; // Include company details
   items: any[];
   order?: Sale; // Assuming an invoice is linked to a Sale/Order
+  payments?: Payment[]; // NEW: Add payments property
 }
 
 export interface Payment {
@@ -288,8 +361,8 @@ export interface CreatePaymentDto {
 
 export interface Quote {
   id: string;
-  clientId: string;
-  client?: Client; // Include client details
+  companyId: string; // NEW: Link to Company (client)
+  company?: Company; // Include company details
   quoteDate: string;
   expiryDate?: string | null;
   status: QuoteStatus;
@@ -420,6 +493,7 @@ export interface CreateSaleItemDto {
 
 export interface CreateSaleDto {
   userId: string;
+  companyId: string; // NEW: Add companyId property
   status?: OrderStatus;
   paymentStatus?: PaymentStatus;
   subTotalAmount: number; // Changed from string to number for frontend
@@ -453,7 +527,7 @@ export interface CreateQuoteItemDto {
 }
 
 export interface CreateQuoteDto {
-  clientId: string;
+  companyId: string; // NEW: Link to Company (client)
   quoteDate: string;
   expiryDate?: string;
   status?: QuoteStatus;
@@ -472,7 +546,7 @@ export interface UpdateQuoteDto extends Partial<CreateQuoteDto> {
 }
 
 export interface CreatePurchaseDto {
-  supplierId: string;
+  companyId: string; // NEW: Link to Company (supplier)
   purchaseDate: string;
   status: string;
   items: { 

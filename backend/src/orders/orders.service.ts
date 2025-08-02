@@ -12,7 +12,7 @@ export class OrdersService {
     return this.prisma.order.create({
       data: {
         user: { connect: { id: authenticatedUserId } },
-        client: { connect: { id: createOrderDto.clientId } },
+        company: { connect: { id: createOrderDto.companyId } },
         status: createOrderDto.status,
         paymentStatus: createOrderDto.paymentStatus,
         subTotalAmount: createOrderDto.subTotalAmount,
@@ -50,7 +50,7 @@ export class OrdersService {
   }
 
   async findOne(id: string): Promise<Order | null> {
-    return this.prisma.order.findUnique({ where: { id }, include: { orderItems: { include: { product: true } }, client: true } });
+    return this.prisma.order.findUnique({ where: { id }, include: { orderItems: { include: { product: true } }, company: true } });
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
@@ -73,8 +73,8 @@ export class OrdersService {
     if (updateOrderDto.userId !== undefined) {
       data.user = { connect: { id: updateOrderDto.userId } };
     }
-    if (updateOrderDto.clientId !== undefined) {
-      data.client = { connect: { id: updateOrderDto.clientId } };
+    if (updateOrderDto.companyId !== undefined) {
+      data.company = { connect: { id: updateOrderDto.companyId } };
     }
 
     if (updateOrderDto.items !== undefined) {

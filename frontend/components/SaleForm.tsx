@@ -1,11 +1,11 @@
 import React, { useState, FormEvent, useMemo, useCallback, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'; 
 import { ShoppingCartIcon, PlusIcon, TrashIcon, SearchIcon } from '@/components/Icons';
-import { Sale, OrderItem, Product, LotInfo, CreateSaleDto, CreateSaleItemDto, Client, OrderStatus, PaymentStatus } from '@/lib/types'; 
+import { Sale, OrderItem, Product, LotInfo, CreateSaleDto, CreateSaleItemDto, Company, OrderStatus, PaymentStatus } from '@/lib/types'; 
 import { formatCurrencyChilean } from '@/lib/utils';
 import { ProductService } from '@/lib/services/productService';
 import { SaleService } from '@/lib/services/saleService';
-import { ClientService } from '@/lib/services/clientService'; // Import ClientService
+import { CompanyService } from '@/lib/services/companyService';
 import { useAuth } from '@/contexts/AuthContext';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -25,8 +25,8 @@ const FIXED_VAT_RATE_PERCENT = 19;
 
 const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
   const { token, currentUser } = useAuth();
-  const [selectedClientId, setSelectedClientId] = useState<string>(''); // State for selected client ID
-  const [clients, setClients] = useState<Client[]>([]); // State for list of clients
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string>(''); // State for selected client ID
+  const [companies, setCompanies] = useState<Company[]>([]); // State for list of clients
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [observations, setObservations] = useState('');
   const [items, setItems] = useState<CreateSaleItemDto[]>([]);
@@ -51,20 +51,26 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
   // Fetch clients on component mount
   useEffect(() => {
     if (token) {
-      ClientService.getAllClients(1, 100) // Fetch all clients, or implement pagination/search if many
-        .then(res => setClients(res.data))
-        .catch(err => console.error("Error fetching clients:", err));
+      CompanyService.getAllCompanies() // Fetch all companies, or implement pagination/search if many
+        .then(res => {
+          if (Array.isArray(res)) {
+            setCompanies(res.filter(c => c.isClient));
+          } else {
+            setCompanies(res.data.filter(c => c.isClient));
+          }
+        })
+        .catch(err => console.error("Error fetching companies:", err));
     }
   }, [token]);
 
   useEffect(() => {
     if (saleData) {
-      setSelectedClientId(saleData.userId);
+      setSelectedCompanyId(saleData.companyId);
       setSaleDate(new Date(saleData.createdAt).toISOString().split('T')[0]);
       setObservations(saleData.customerNotes || '');
       setItems([]); 
     } else {
-      setSelectedClientId('');
+      setSelectedCompanyId('');
       setSaleDate(new Date().toISOString().split('T')[0]);
       setObservations('');
       setItems([]);
@@ -84,7 +90,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       if (searchTerm.length > 2 && token) {
-        ProductService.getAllProducts(token, 1, 10, undefined, searchTerm)
+        ProductService.searchProducts(token, searchTerm)
           .then(res => setSearchResults(res.data))
           .catch(err => console.error("Error searching products:", err));
       } else {
@@ -174,7 +180,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
 
   const validateMainForm = (): boolean => {
     const newErrors: { [key: string]: string } = {};
-    if (!selectedClientId) newErrors.selectedClientId = 'Debe seleccionar un cliente.';
+    if (!selectedCompanyId) newErrors.selectedCompanyId = 'Debe seleccionar un cliente.';
     if (!saleDate) newErrors.saleDate = 'La fecha de venta es requerida.';
     if (items.length === 0) newErrors.items = 'Debe añadir al menos un artículo a la venta.';
     setErrors(newErrors);
@@ -192,7 +198,8 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
     setIsSubmitting(true);
     try {
       const saleDetails: CreateSaleDto = {
-        userId: selectedClientId,
+        userId: currentUser.id, // Use current user ID
+        companyId: selectedCompanyId, // Use selected company ID
         status: saleData?.status || OrderStatus.PENDING_PAYMENT, // Default status
         paymentStatus: saleData?.paymentStatus || PaymentStatus.PENDING, // Default payment status
         subTotalAmount: subTotal, 
@@ -231,12 +238,12 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
     }
   };
 
-  const handleConfirmPurchaseOrder = async (productId: string, quantity: number, supplierId: string) => {
+  const handleConfirmPurchaseOrder = async (productId: string, quantity: number, companyId: string) => {
     try {
-      // This is a simplified example. In a real app, you'd want to select a supplier
+      // This is a simplified example. In a real app, you'd want to select a company
       // and have a more robust way of determining the purchase price.
       const newPurchase = await PurchaseService.createPurchase({
-        supplierId: supplierId, // Replace with a real supplier ID
+        companyId: companyId, // Replace with a real company ID
         status: "PENDING", // Default status
         items: [
           {
@@ -276,19 +283,19 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="client-select">Cliente <span className="text-red-500">*</span></Label>
-                <Select onValueChange={setSelectedClientId} value={selectedClientId}>
+                <Select onValueChange={setSelectedCompanyId} value={selectedCompanyId}>
                   <SelectTrigger id="client-select">
                     <SelectValue placeholder="Selecciona un cliente" />
                   </SelectTrigger>
                   <SelectContent>
-                    {clients.map(client => (
-                      <SelectItem key={client.id} value={client.id}>
-                        {client.name} {client.email ? `(${client.email})` : ''}
+                    {companies.map(company => (
+                      <SelectItem key={company.id} value={company.id}>
+                        {company.name} {company.email ? `(${company.email})` : ''}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.selectedClientId && <p id="client-error" className={errorTextClass}>{errors.selectedClientId}</p>}
+                {errors.selectedCompanyId && <p id="client-error" className={errorTextClass}>{errors.selectedCompanyId}</p>}
               </div>
               <div>
                 <Label htmlFor="sale-date">Fecha de Venta <span className="text-red-500">*</span></Label>
@@ -433,18 +440,18 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
             <Button type="button" variant="outline" onClick={onCancel} className="w-full sm:w-auto order-2 sm:order-1">Cancelar</Button>
             <Button type="submit" className="w-full sm:w-auto order-1 sm:order-2" disabled={isSubmitting}>
               {isSubmitting ? 'Guardando...' : (isEditing ? 'Actualizar Venta' : 'Guardar Venta')}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
-      <CreatePurchaseOrderModal
-        isOpen={showPurchaseModal}
-        onClose={() => setShowPurchaseModal(false)}
-        onConfirm={handleConfirmPurchaseOrder}
-        stockInfo={outOfStockInfo}
-      />
-    </>
-  );
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
+    <CreatePurchaseOrderModal
+      isOpen={showPurchaseModal}
+      onClose={() => setShowPurchaseModal(false)}
+      onConfirm={handleConfirmPurchaseOrder}
+      stockInfo={outOfStockInfo}
+    />
+  </>
+);
 };
 
 export default SaleForm;

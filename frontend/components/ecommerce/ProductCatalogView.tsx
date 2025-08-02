@@ -75,10 +75,7 @@ const ProductCatalogView: React.FC = () => {
       const response = await ProductService.getPublishedProducts(
         currentPage,
         productsPerPage,
-        selectedCategory,
-        searchQuery,
-        minPrice ? parseFloat(minPrice) : undefined,
-        maxPrice ? parseFloat(maxPrice) : undefined
+        selectedCategory
       );
       setProducts(response.data);
       setTotalPages(response.pages);

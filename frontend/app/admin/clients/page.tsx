@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
-import ClientView from '@/components/ClientView';
+import CompanyView from '@/components/CompanyView';
 
 export default function AdminClientsPage() {
-  return <ClientView />;
+  return <CompanyView show="clients" />;
 }

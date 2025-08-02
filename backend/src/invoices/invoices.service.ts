@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Invoice, InvoiceStatus } from '@prisma/client';
+import { Invoice, InvoiceStatus, Prisma } from '@prisma/client';
 import { DteService, DteFacturaData } from '../dte/dte.service';
 
 @Injectable()
@@ -16,13 +16,13 @@ export class InvoicesService {
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.order.findUnique({
         where: { id: orderId },
-        include: { orderItems: { include: { product: true } }, client: true },
+        include: { orderItems: { include: { product: true } }, company: true },
       });
 
       if (!order) throw new NotFoundException(`Order with ID ${orderId} not found.`);
       const existingInvoice = await tx.invoice.findFirst({ where: { orderId } });
       if (existingInvoice) throw new ConflictException(`Order with ID ${orderId} has already been invoiced.`);
-      if (!order.client.rut || !order.client.giro) throw new ConflictException(`Client for order ${orderId} is missing RUT or Giro.`);
+      if (!order.company.rut || !order.company.giro) throw new ConflictException(`Company for order ${orderId} is missing RUT or Giro.`);
 
       const invoiceCount = await tx.invoice.count();
       const invoiceNumber = `INV-${new Date().getFullYear()}-${invoiceCount + 1}`;
@@ -30,7 +30,7 @@ export class InvoicesService {
       const newInvoice = await tx.invoice.create({
         data: {
           orderId: orderId,
-          clientId: order.clientId,
+          companyId: order.companyId,
           invoiceNumber,
           status: InvoiceStatus.DRAFT,
           issueDate: new Date(),
@@ -50,16 +50,16 @@ export class InvoicesService {
           dteProvider: 'Facto.cl',
           dteStatus: 'PENDING',
         },
-        include: { items: { include: { product: true } }, client: true },
+        include: { items: { include: { product: true } }, company: true },
       });
 
       const dteData: DteFacturaData = {
-        receptorRut: newInvoice.client.rut,
-        receptorRazon: newInvoice.client.name,
-        receptorDireccion: newInvoice.client.address,
-        receptorComuna: newInvoice.client.city,
-        receptorCiudad: newInvoice.client.city,
-        receptorGiro: newInvoice.client.giro,
+        receptorRut: newInvoice.company.rut,
+        receptorRazon: newInvoice.company.name,
+        receptorDireccion: newInvoice.company.address,
+        receptorComuna: newInvoice.company.city,
+        receptorCiudad: newInvoice.company.city,
+        receptorGiro: newInvoice.company.giro,
         fechaEmision: newInvoice.issueDate.toISOString().split('T')[0],
         items: newInvoice.items.map(item => ({
           nombre: item.product.name,
@@ -90,21 +90,27 @@ export class InvoicesService {
     });
   }
 
-  async findAll(page: number, limit: number): Promise<{ data: Invoice[]; total: number; pages: number; currentPage: number }> {
+  async findAll(page: number, limit: number, status?: InvoiceStatus): Promise<{ data: Invoice[]; total: number; pages: number; currentPage: number }> {
     const skip = (page - 1) * limit;
+    const where: Prisma.InvoiceWhereInput = {};
+    if (status) {
+      where.status = status;
+    }
+
     const [data, total] = await this.prisma.$transaction([
       this.prisma.invoice.findMany({
+        where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { client: true },
+        include: { company: true, payments: true },
       }),
-      this.prisma.invoice.count(),
+      this.prisma.invoice.count({ where }),
     ]);
     return { data, total, pages: Math.ceil(total / limit), currentPage: page };
   }
 
   async findOne(id: string): Promise<Invoice | null> {
-    return this.prisma.invoice.findUnique({ where: { id }, include: { items: { include: { product: true } }, client: true, order: true } });
+    return this.prisma.invoice.findUnique({ where: { id }, include: { items: { include: { product: true } }, company: true, order: true, payments: true } });
   }
 }

@@ -1,4 +1,4 @@
-import fetchWithAuth from './api';
+import fetchWithAuth from '../fetchWithAuth';
 import { Quote, CreateQuoteDto, UpdateQuoteDto } from '@/lib/types';
 
 interface PaginatedResponse<T> {

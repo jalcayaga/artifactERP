@@ -3,7 +3,7 @@ import { InvoicesService } from './invoices.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { UserRole, InvoiceStatus } from '@prisma/client';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('invoices')
@@ -21,8 +21,9 @@ export class InvoicesController {
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('status') status?: InvoiceStatus,
   ) {
-    return this.invoicesService.findAll(page, limit);
+    return this.invoicesService.findAll(page, limit, status);
   }
 
   @Get(':id')

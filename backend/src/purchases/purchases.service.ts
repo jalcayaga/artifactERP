@@ -16,7 +16,7 @@ export class PurchasesService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { purchaseDate: 'desc' },
-        include: { supplier: true, items: true },
+        include: { company: true, items: true },
       }),
       this.prisma.purchase.count(),
     ]);
@@ -26,7 +26,7 @@ export class PurchasesService {
   async findOne(id: string): Promise<Purchase | null> {
     return this.prisma.purchase.findUnique({
       where: { id },
-      include: { supplier: true, items: { include: { product: true } } },
+      include: { company: true, items: { include: { product: true } } },
     });
   }
 

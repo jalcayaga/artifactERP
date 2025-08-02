@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Invoice, Payment, PaymentMethod } from '@/lib/types';
 import { formatCurrencyChilean } from '@/lib/utils';
@@ -22,7 +21,7 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({ invoice, onClos
 
   useEffect(() => {
     if (invoice) {
-      PaymentService.getPaymentsForInvoice(invoice.id).then(setPayments);
+      PaymentService.getPaymentsByInvoice(invoice.id).then(setPayments);
     }
   }, [invoice]);
 
@@ -50,9 +49,12 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({ invoice, onClos
       <DialogContent className="max-w-4xl">
         <DialogHeader>
           <DialogTitle>Detalle de Factura - {invoice.invoiceNumber}</DialogTitle>
+          <DialogDescription>
+            Aquí puedes ver los detalles completos de la factura, incluyendo los ítems, pagos registrados y el monto adeudado.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-          <div><strong>Cliente:</strong> {invoice.client.name}</div>
+          <div><strong>Empresa:</strong> {invoice.company?.name}</div>
           <div><strong>Fecha de Emisión:</strong> {new Date(invoice.issueDate).toLocaleDateString()}</div>
           <div><strong>Fecha de Vencimiento:</strong> {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}</div>
           <div><strong>Estado:</strong> {invoice.status}</div>
@@ -130,7 +132,14 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({ invoice, onClos
         {showPaymentForm ? (
           <div className="mt-6">
             <h4 className="font-semibold mb-4">Registrar Nuevo Pago</h4>
-            <PaymentForm invoiceId={invoice.id} onSave={handleSavePayment} onCancel={() => setShowPaymentForm(false)} />
+            <PaymentForm 
+              invoice={invoice} 
+              onSave={() => { 
+                setShowPaymentForm(false);
+                onPaymentSuccess();
+              }}
+              onCancel={() => setShowPaymentForm(false)} 
+            />
           </div>
         ) : (
           amountDue > 0 && (

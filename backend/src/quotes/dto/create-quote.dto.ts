@@ -25,7 +25,7 @@ export class CreateQuoteItemDto {
 
 export class CreateQuoteDto {
   @IsString()
-  clientId: string; // Link to Client model
+  companyId: string; // Link to Company model
 
   @IsDateString()
   quoteDate: string;

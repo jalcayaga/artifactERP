@@ -61,6 +61,7 @@ const PurchaseOrderDetailModal: React.FC<PurchaseOrderDetailModalProps> = ({ ord
         className="bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden border border-border"
         onClick={e => e.stopPropagation()}
       >
+        {/* Cabecera del modal */}
         <div className="flex items-center justify-between p-4 sm:p-5 border-b border-border">
           <h2 id="po-detail-modal-title" className="text-lg sm:text-xl font-semibold text-foreground flex items-center">
             <TruckIcon className="w-6 h-6 mr-2 text-primary" />
@@ -75,9 +76,10 @@ const PurchaseOrderDetailModal: React.FC<PurchaseOrderDetailModalProps> = ({ ord
           </button>
         </div>
 
+        {/* Cuerpo del modal con los detalles */}
         <div className="p-4 sm:p-5 space-y-4 overflow-y-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3 mb-3">
-            <OrderInfoItem label="Proveedor" value={order.supplier?.name} />
+            <OrderInfoItem label="Empresa" value={order.company?.name} />
             <OrderInfoItem label="Fecha de Orden" value={new Date(order.purchaseDate).toLocaleDateString()} icon={CalendarIcon} />
             <OrderInfoItem 
               label="Estado" 
@@ -87,7 +89,7 @@ const PurchaseOrderDetailModal: React.FC<PurchaseOrderDetailModalProps> = ({ ord
             
           </div>
 
-          <h3 className="text-md font-semibold text-foreground mb-1.5">Artículos de la Orden</h3>
+          <h3 className="text-md font-semibold text-foreground mb-1.5">Artículos</h3>
           <div className="overflow-x-auto border border-border rounded-md">
             <table className="min-w-full divide-y divide-border">
               <thead className="bg-muted/50">
@@ -119,6 +121,11 @@ const PurchaseOrderDetailModal: React.FC<PurchaseOrderDetailModalProps> = ({ ord
             <div className="flex justify-between items-center">
               <span className="text-sm font-medium text-muted-foreground">Subtotal (sin IVA):</span>
               <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(order.subTotalAmount)}</span>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-muted-foreground">Total IVA ({order.vatRatePercent}%):</span>
+              <span className="text-sm font-semibold text-foreground">{formatCurrencyChilean(order.totalVatAmount)}</span>
             </div>
             
             <div className="flex justify-between items-center pt-1.5 border-t border-border/50">

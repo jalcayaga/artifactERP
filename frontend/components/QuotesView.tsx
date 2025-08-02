@@ -6,7 +6,7 @@ import QuoteForm from '@/components/QuoteForm';
 import QuoteDetailModal from '@/components/QuoteDetailModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { PlusIcon, DocumentTextIcon, EyeIcon, PencilIcon, TrashIcon } from '@/components/Icons';
-import { Quote, CreateQuoteDto, UpdateQuoteDto, UserRole } from '@/lib/types';
+import { Quote, CreateQuoteDto, UpdateQuoteDto, UserRole, Company } from '@/lib/types';
 import { formatCurrencyChilean } from '@/lib/utils';
 import { QuoteService } from '@/lib/services/quoteService';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -119,7 +119,7 @@ const QuotesView: React.FC = () => {
     }
   }, [editingQuote, fetchQuotes, currentPage, router]);
 
-  const handleCancelQuoteForm = useCallback(() => {
+  const handleCloseForm = useCallback(() => {
     setShowQuoteForm(false);
     setEditingQuote(null);
   }, []);
@@ -168,7 +168,7 @@ const QuotesView: React.FC = () => {
       <QuoteForm
         quoteData={editingQuote}
         onSave={handleSaveQuote}
-        onCancel={handleCancelQuoteForm}
+        onCancel={handleCloseForm}
       />
     );
   }
@@ -197,7 +197,7 @@ const QuotesView: React.FC = () => {
                   <TableHeader className="bg-muted/50">
                     <TableRow>
                       <TableHead>ID Cotización</TableHead>
-                      <TableHead>Cliente</TableHead>
+                      <TableHead>Empresa</TableHead>
                       <TableHead className="hidden sm:table-cell">Fecha</TableHead>
                       <TableHead className="hidden lg:table-cell">Estado</TableHead>
                       <TableHead className="text-right">Total</TableHead>
@@ -209,7 +209,7 @@ const QuotesView: React.FC = () => {
                       <TableRow key={quote.id} className="hover:bg-accent transition-colors duration-150">
                         <TableCell className="font-mono text-muted-foreground">{quote.id.substring(0, 8)}...</TableCell>
                         <TableCell>
-                          <div className="text-sm font-medium text-foreground">{quote.client?.name}</div>
+                          <div className="text-sm font-medium text-foreground">{quote.company?.name}</div>
                         </TableCell>
                         <TableCell className="hidden sm:table-cell text-muted-foreground">{new Date(quote.quoteDate).toLocaleDateString()}</TableCell>
                         <TableCell className="hidden lg:table-cell">
@@ -312,7 +312,7 @@ const QuotesView: React.FC = () => {
           onClose={handleCloseDeleteConfirmModal}
           onConfirm={handleConfirmDeleteQuote}
           title="Confirmar Eliminación de Cotización"
-          message={<>¿Estás seguro de que quieres eliminar la cotización <strong>ID: {quoteToDelete.id.substring(0,8)}...</strong> para el cliente <strong>{quoteToDelete.client?.name}</strong>? Esta acción no se puede deshacer.</>}
+          message={<>¿Estás seguro de que quieres eliminar la cotización <strong>ID: {quoteToDelete.id.substring(0,8)}...</strong> para la empresa <strong>{quoteToDelete.company?.name}</strong>? Esta acción no se puede deshacer.</>}
           confirmText="Eliminar Cotización"
           confirmButtonClass="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           icon={<TrashIcon className="w-5 h-5 mr-2" />}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,13 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { TrashIcon, PlusIcon } from '@/components/Icons';
-import { Client, Product, Quote, QuoteStatus } from '@/lib/types';
-import { ClientService } from '@/lib/services/clientService';
+import { Company, Product, Quote, QuoteStatus } from '@/lib/types';
+import { CompanyService } from '@/lib/services/companyService';
 import { ProductService } from '@/lib/services/productService';
 import { formatCurrencyChilean, parseChileanCurrency } from '@/lib/utils';
 
 const formSchema = z.object({
-  clientId: z.string().min(1, 'El cliente es requerido.'),
+  companyId: z.string().min(1, 'La empresa es requerida.'),
   status: z.nativeEnum(QuoteStatus),
   quoteDate: z.string().min(1, 'La fecha es requerida.'),
   expiryDate: z.string().optional(),
@@ -43,20 +42,20 @@ interface QuoteFormProps {
 }
 
 const QuoteForm: React.FC<QuoteFormProps> = ({ quoteData, onSave, onCancel }) => {
-  const [clients, setClients] = useState<Client[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
 
   const form = useForm<QuoteFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: quoteData ? {
-      clientId: quoteData.clientId,
+      companyId: quoteData.companyId,
       status: quoteData.status,
       quoteDate: quoteData.quoteDate ? new Date(quoteData.quoteDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       expiryDate: quoteData.expiryDate ? new Date(quoteData.expiryDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
       items: quoteData.items || [],
       notes: quoteData.notes || '',
     } : {
-      clientId: '',
+      companyId: '',
       status: QuoteStatus.DRAFT,
       quoteDate: new Date().toISOString().split('T')[0],
       expiryDate: new Date().toISOString().split('T')[0],
@@ -70,19 +69,21 @@ const QuoteForm: React.FC<QuoteFormProps> = ({ quoteData, onSave, onCancel }) =>
     name: "items",
   });
 
-  const fetchClientsAndProducts = useCallback(async () => {
+  const fetchCompaniesAndProducts = useCallback(async () => {
     try {
-      const clientResponse = await ClientService.getAllClients(1, 100); // Fetch up to 100 clients
-      setClients(clientResponse.data);
-      ProductService.getAllProducts('1', 1000).then(response => setProducts(response.data));
+      const companyResponse = await CompanyService.getAllCompanies(1, 100, { isClient: true });
+      setCompanies(companyResponse.data);
+      
+      const productResponse = await ProductService.getAllProducts('1', 1000);
+      setProducts(productResponse.data);
     } catch (error) {
-      console.error("Error fetching clients or products", error);
+      console.error("Error fetching companies or products", error);
     }
   }, []);
 
   useEffect(() => {
-    fetchClientsAndProducts();
-  }, [fetchClientsAndProducts]);
+    fetchCompaniesAndProducts();
+  }, [fetchCompaniesAndProducts]);
 
   const calculateTotals = useCallback(() => {
     const items = form.getValues('items');
@@ -136,19 +137,19 @@ const QuoteForm: React.FC<QuoteFormProps> = ({ quoteData, onSave, onCancel }) =>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="clientId"
+                name="companyId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Cliente</FormLabel>
+                    <FormLabel>Empresa</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Seleccione un cliente" />
+                          <SelectValue placeholder="Seleccione una empresa" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {clients.map(client => (
-                          <SelectItem key={client.id} value={client.id}>{client.name}</SelectItem>
+                        {companies && companies.map(company => (
+                          <SelectItem key={company.id} value={company.id}>{company.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>

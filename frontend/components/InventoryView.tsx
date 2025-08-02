@@ -35,7 +35,7 @@ const InventoryView: React.FC = () => {
       const response = await ProductService.getAllProducts(token, page);
       
       const productsWithStock = await Promise.all(
-        response.data.map(async (product) => {
+        response.data.map(async (product: Product) => {
           if (product.productType === 'PRODUCT') {
             const lots = await ProductService.getProductLots(product.id, token);
             const totalStock = lots.reduce((sum, lot) => sum + lot.currentQuantity, 0);
@@ -104,14 +104,20 @@ const InventoryView: React.FC = () => {
     setViewingProduct(null);
   }, []);
 
-  const handleSaveProduct = useCallback(async (productData: Product) => {
+  const handleSaveProduct = useCallback(async (productData: Product, technicalSheetFile: File | null) => {
     if (!token) return;
     try {
+      let savedProduct: Product;
       if (editingProduct) {
-        await ProductService.updateProduct(productData.id, productData as UpdateProductDto, token);
+        savedProduct = await ProductService.updateProduct(productData.id, productData as UpdateProductDto, token);
       } else {
-        await ProductService.createProduct(productData as CreateProductDto, token);
+        savedProduct = await ProductService.createProduct(productData as CreateProductDto, token);
       }
+
+      if (technicalSheetFile && savedProduct.id) {
+        await ProductService.uploadTechnicalSheet(savedProduct.id, technicalSheetFile, token);
+      }
+
       setShowProductForm(false);
       setEditingProduct(null);
       fetchProducts(currentPage); // Re-fetch products after save

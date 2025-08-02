@@ -6,7 +6,7 @@ import SaleForm from '@/components/SaleForm';
 import SaleDetailModal from '@/components/SaleDetailModal';
 import ConfirmationModal from '@/components/ConfirmationModal';
 import { PlusIcon, ShoppingCartIcon, EyeIcon, PencilIcon, TrashIcon, DocumentTextIcon } from '@/components/Icons'; 
-import { Sale, UserRole, OrderStatus } from '@/lib/types'; 
+import { Sale, UserRole, OrderStatus, Company } from '@/lib/types'; 
 import { formatCurrencyChilean } from '@/lib/utils';
 import { SaleService } from '@/lib/services/saleService';
 import { InvoiceService } from '@/lib/services/invoiceService';
@@ -112,7 +112,7 @@ const SalesView: React.FC = () => {
       setEditingSale(null); 
       fetchSales(currentPage);
     } catch (err: any) {
-      console.error('Error saving sale:', err);
+      console.error("Error saving sale:", err);
       if (err.message && err.message.includes('Unauthorized')) {
         router.push('/login');
       } else {
@@ -201,7 +201,7 @@ const SalesView: React.FC = () => {
                   <TableHeader className="bg-muted/50">
                     <TableRow>
                       <TableHead>ID Venta</TableHead>
-                      <TableHead>Cliente</TableHead>
+                      <TableHead>Empresa</TableHead>
                       <TableHead className="hidden sm:table-cell">Fecha</TableHead>
                       <TableHead className="hidden md:table-cell text-right">Subtotal</TableHead>
                       <TableHead className="hidden lg:table-cell text-right">IVA</TableHead>
@@ -214,7 +214,7 @@ const SalesView: React.FC = () => {
                       <TableRow key={sale.id} className="hover:bg-accent transition-colors duration-150">
                         <TableCell className="font-mono text-muted-foreground">{sale.id.substring(0, 8)}...</TableCell>
                         <TableCell>
-                          <div className="font-medium text-foreground">{sale.user?.firstName} {sale.user?.lastName}</div>
+                          <div className="font-medium text-foreground">{sale.company?.name}</div>
                           <div className="text-xs text-muted-foreground sm:hidden">{new Date(sale.createdAt).toLocaleDateString()} - Total: {formatCurrencyChilean(sale.grandTotalAmount)}</div>
                         </TableCell>
                         <TableCell className="hidden sm:table-cell text-muted-foreground">{new Date(sale.createdAt).toLocaleDateString()}</TableCell>
@@ -318,6 +318,7 @@ const SalesView: React.FC = () => {
         <SaleDetailModal 
           sale={viewingSale}
           onClose={handleCloseSaleDetailModal}
+          onInvoiceCreated={() => fetchSales(currentPage)}
         />
       )}
       {showDeleteConfirmModal && saleToDelete && (
@@ -326,7 +327,7 @@ const SalesView: React.FC = () => {
           onClose={handleCloseDeleteConfirmModal}
           onConfirm={handleConfirmDeleteSale}
           title="Confirmar Eliminación de Venta"
-          message={<>¿Estás seguro de que quieres eliminar la venta <strong>ID: {saleToDelete.id.substring(0,8)}...</strong> para el cliente <strong>{saleToDelete.user?.firstName} {saleToDelete.user?.lastName}</strong>? Esta acción no se puede deshacer.</>}
+          message={<>¿Estás seguro de que quieres eliminar la venta <strong>ID: {saleToDelete.id.substring(0,8)}...</strong> para la empresa <strong>{saleToDelete.company?.name}</strong>? Esta acción no se puede deshacer.</>}
           confirmText="Eliminar Venta"
           confirmButtonClass="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           icon={<TrashIcon className="w-5 h-5 mr-2" />}

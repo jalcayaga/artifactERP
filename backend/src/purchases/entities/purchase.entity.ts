@@ -2,8 +2,7 @@ import { Purchase, PurchaseItem, Prisma } from '@prisma/client';
 
 export class PurchaseEntity implements Purchase {
   id: string;
-  supplierId: string;
-  supplierName: string | null;
+  companyId: string;
   purchaseDate: Date;
   status: string;
   subTotalAmount: Prisma.Decimal;

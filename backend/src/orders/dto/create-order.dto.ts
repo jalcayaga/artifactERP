@@ -30,7 +30,7 @@ export class CreateOrderDto {
 
   @IsString()
   @IsNotEmpty()
-  clientId: string;
+  companyId: string;
 
   @IsOptional()
   @IsString()

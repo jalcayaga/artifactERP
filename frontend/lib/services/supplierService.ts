@@ -1,50 +1,28 @@
-import fetchWithAuth from './api';
-import { Supplier, CreateSupplierDto, UpdateSupplierDto } from '@/lib/types';
-
-interface PaginatedResponse<T> {
-  data: T[];
-  total: number;
-  page: number;
-  limit: number;
-  pages: number;
-}
+import { Company } from '@/lib/types';
+import apiService from './apiService';
 
 export const SupplierService = {
-  async getAllSuppliers(page?: number, limit?: number): Promise<PaginatedResponse<Supplier> | Supplier[]> {
-    if (page && limit) {
-      const data = await fetchWithAuth(`/suppliers?page=${page}&limit=${limit}`);
-      return {
-        data: data.data,
-        total: data.total,
-        page: data.currentPage,
-        limit: limit,
-        pages: data.pages,
-      };
-    }
-    return fetchWithAuth(`/suppliers`);
+  getAllSuppliers: async (): Promise<Company[]> => {
+    const response = await apiService.get<Company[]>('/companies', { params: { isSupplier: true } });
+    return response.data;
   },
 
-  async getSupplierById(id: string): Promise<Supplier> {
-    return fetchWithAuth(`/suppliers/${id}`);
+  getSupplierById: async (id: string): Promise<Company> => {
+    const response = await apiService.get<Company>(`/companies/${id}`);
+    return response.data;
   },
 
-  async createSupplier(supplierData: CreateSupplierDto): Promise<Supplier> {
-    return fetchWithAuth(`/suppliers`, {
-      method: 'POST',
-      body: JSON.stringify(supplierData),
-    });
+  createSupplier: async (supplierData: Partial<Company>): Promise<Company> => {
+    const response = await apiService.post<Company>('/companies', { ...supplierData, isSupplier: true });
+    return response.data;
   },
 
-  async updateSupplier(id: string, supplierData: UpdateSupplierDto): Promise<Supplier> {
-    return fetchWithAuth(`/suppliers/${id}`, {
-      method: 'PATCH',
-      body: JSON.stringify(supplierData),
-    });
+  updateSupplier: async (id: string, supplierData: Partial<Company>): Promise<Company> => {
+    const response = await apiService.patch<Company>(`/companies/${id}`, supplierData);
+    return response.data;
   },
 
-  async deleteSupplier(id: string): Promise<void> {
-    await fetchWithAuth(`/suppliers/${id}`, {
-      method: 'DELETE',
-    });
+  deleteSupplier: async (id: string): Promise<void> => {
+    await apiService.delete(`/companies/${id}`);
   },
 };

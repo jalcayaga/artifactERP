@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Quote } from '@/lib/types';
 import { formatCurrencyChilean } from '@/lib/utils';
@@ -17,9 +16,12 @@ const QuoteDetailModal: React.FC<QuoteDetailModalProps> = ({ quote, onClose }) =
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>Detalle de Cotización - ID: {quote.id.substring(0, 8)}...</DialogTitle>
+          <DialogDescription>
+            Aquí puedes ver los detalles completos de la cotización seleccionada, incluyendo información de la empresa, fechas y los ítems cotizados.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-          <div><strong>Cliente:</strong> {quote.client?.name}</div>
+          <div><strong>Empresa:</strong> {quote.company?.name}</div>
           <div><strong>Fecha:</strong> {new Date(quote.quoteDate).toLocaleDateString()}</div>
           <div><strong>Vencimiento:</strong> {quote.expiryDate ? new Date(quote.expiryDate).toLocaleDateString() : 'N/A'}</div>
           <div><strong>Estado:</strong> {quote.status}</div>

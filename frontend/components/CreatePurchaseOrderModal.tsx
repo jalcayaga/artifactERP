@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { AlertTriangleIcon } from '@/components/Icons';
-import { Supplier } from '@/lib/types';
+import { Company } from '@/lib/types';
 import { SupplierService } from '@/lib/services/supplierService';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
@@ -34,13 +34,13 @@ const CreatePurchaseOrderModal: React.FC<CreatePurchaseOrderModalProps> = ({
   onConfirm,
   stockInfo,
 }) => {
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+  const [suppliers, setSuppliers] = useState<Company[]>([]);
   const [selectedSupplier, setSelectedSupplier] = useState<string>('');
 
   useEffect(() => {
     if (isOpen) {
       SupplierService.getAllSuppliers().then(data => {
-        setSuppliers(data as Supplier[]);
+        setSuppliers(data as Company[]);
       });
     }
   }, [isOpen]);
@@ -62,13 +62,13 @@ const CreatePurchaseOrderModal: React.FC<CreatePurchaseOrderModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
+      <DialogContent aria-describedby="create-purchase-order-description">
         <DialogHeader>
           <DialogTitle className="flex items-center">
             <AlertTriangleIcon className="w-6 h-6 mr-2 text-yellow-500" />
             <span>Stock Insuficiente</span>
           </DialogTitle>
-          <DialogDescription className="pt-2">
+          <DialogDescription id="create-purchase-order-description" className="pt-2">
             No hay suficiente stock para el producto{' '}
             <strong>{stockInfo.productName}</strong>.
             <br />
