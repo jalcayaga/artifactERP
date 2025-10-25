@@ -8,9 +8,13 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.turbo
 dist
 dist-ssr
 *.local
+apps/storefront/.next
+apps/admin/.next
+apps/backend/dist
 
 # Editor directories and files
 .vscode/*

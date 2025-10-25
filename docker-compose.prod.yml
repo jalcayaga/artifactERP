@@ -1,11 +1,31 @@
 version: '3.8'
 
 services:
+  postgres_db:
+    image: postgres:15
+    container_name: subred_erp_postgres_db_prod
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - subred_erp_postgres_data_prod:/var/lib/postgresql/data
+    networks:
+      - internal-net
+    restart: unless-stopped
+
   backend:
-    command: ["tail", "-f", "/dev/null"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: subred-erp-backend
+    container_name: subred-erp-backend-prod
     env_file:
       - ./backend/.env
+    depends_on:
+      - postgres_db
     networks:
+      - internal-net
       - traefik-public
     deploy:
       replicas: 1
@@ -19,6 +39,34 @@ services:
         - "traefik.http.services.subred-backend.loadbalancer.server.port=3001"
         - "traefik.http.routers.subred-backend.tls.certresolver=myresolver"
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    image: subred-erp-frontend
+    container_name: subred-erp-frontend-prod
+    environment:
+      NEXT_PUBLIC_API_URL: https://srapi.subred.cl
+    networks:
+      - traefik-public
+    deploy:
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.subred-frontend.rule=Host(`sr.subred.cl`)"
+        - "traefik.http.routers.subred-frontend.entrypoints=websecure"
+        - "traefik.http.services.subred-frontend.loadbalancer.server.port=3000"
+        - "traefik.http.routers.subred-frontend.tls.certresolver=myresolver"
+
+volumes:
+  subred_erp_postgres_data_prod:
+    driver: local
+
 networks:
+  internal-net:
+    driver: bridge
   traefik-public:
     external: true

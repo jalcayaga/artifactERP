@@ -1,0 +1,20 @@
+{
+  "name": "artifact-monorepo",
+  "private": true,
+  "packageManager": "yarn@1.22.22",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "dev:storefront": "turbo run dev --filter=@artifact/storefront",
+    "dev:admin": "turbo run dev --filter=@artifact/admin",
+    "dev:backend": "turbo run start:dev --filter=@artifact/backend"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "turbo": "^2.0.6"
+  }
+}
