@@ -6,6 +6,7 @@ COPY packages/ packages/
 COPY apps/admin/ apps/admin/
 RUN npm ci
 RUN npx turbo run build --filter=@artifact/admin... --force
+RUN ls -R apps/admin/.next || echo "No .next found"
 
 FROM node:20-alpine AS runner
 WORKDIR /app
