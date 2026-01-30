@@ -8,9 +8,10 @@ import appConfig from './app.config'
       load: [appConfig],
       isGlobal: true, // Ensures ConfigService is available globally
       envFilePath: './.env',
+      ignoreEnvFile: process.env.NODE_ENV === 'production',
     }),
   ],
   providers: [ConfigService], // Provide ConfigService
   exports: [ConfigService], // Export ConfigService if needed by other modules directly
 })
-export class AppConfigModule {}
+export class AppConfigModule { }
