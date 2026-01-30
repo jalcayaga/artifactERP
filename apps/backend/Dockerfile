@@ -28,4 +28,4 @@ COPY --from=builder /app/apps/backend/prisma ./prisma
 # Generate Prisma Client in runner
 RUN npx prisma generate
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
