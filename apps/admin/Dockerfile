@@ -5,7 +5,7 @@ COPY package.json package-lock.json turbo.json tsconfig.base.json ./
 COPY packages/ packages/
 COPY apps/admin/ apps/admin/
 RUN npm ci
-RUN npx turbo run build --filter=@artifact/admin...
+RUN npx turbo run build --filter=@artifact/admin... --force
 
 FROM node:20-alpine AS runner
 WORKDIR /app

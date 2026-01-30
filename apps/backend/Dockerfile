@@ -12,7 +12,7 @@ COPY apps/backend/ apps/backend/
 RUN npm ci
 
 # Build the application
-RUN npx turbo run build --filter=@artifact/backend...
+RUN npx turbo run build --filter=@artifact/backend... --force
 
 # Runner stage
 FROM node:20-alpine AS runner
