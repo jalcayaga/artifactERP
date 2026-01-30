@@ -20,6 +20,7 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 # Copy built artifacts and dependencies
+RUN apk add --no-cache openssl
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/backend/dist ./dist
 COPY --from=builder /app/apps/backend/package.json ./package.json
