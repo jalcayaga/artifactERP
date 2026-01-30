@@ -12,7 +12,7 @@ services:
       - ADMIN_URL=${ADMIN_URL}
       - PORT=3000
     networks:
-      - traefik-public
+      - MangoNet
     deploy:
       replicas: 1
       labels:
@@ -27,7 +27,7 @@ services:
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     networks:
-      - traefik-public
+      - MangoNet
     deploy:
       replicas: 1
       labels:
@@ -43,7 +43,7 @@ services:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - NEXT_PUBLIC_TENANT_ID_HEADER=x-tenant-slug
     networks:
-      - traefik-public
+      - MangoNet
     deploy:
       replicas: 1
       labels:
@@ -54,5 +54,5 @@ services:
         - "traefik.http.services.artifact-storefront.loadbalancer.server.port=3000"
 
 networks:
-  traefik-public:
+  MangoNet:
     external: true
