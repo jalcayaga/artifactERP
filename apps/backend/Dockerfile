@@ -13,6 +13,7 @@ RUN npm ci
 
 # Build the application
 RUN npx turbo run build --filter=@artifact/backend... --force
+RUN ls -R apps/backend/dist || echo "No dist found"
 
 # Runner stage
 FROM node:20-alpine AS runner
