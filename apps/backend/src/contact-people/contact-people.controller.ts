@@ -1,9 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
-import { ContactPeopleService } from './contact-people.service';
-import { CreateContactPersonDto } from './dto/create-contact-person.dto';
-import { UpdateContactPersonDto } from './dto/update-contact-person.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { TenantId } from '../common/decorators/tenant.decorator';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common'
+import { ContactPeopleService } from './contact-people.service'
+import { CreateContactPersonDto } from './dto/create-contact-person.dto'
+import { UpdateContactPersonDto } from './dto/update-contact-person.dto'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { TenantId } from '../common/decorators/tenant.decorator'
 
 @UseGuards(JwtAuthGuard)
 @Controller('companies/:companyId/contact-people')
@@ -14,9 +24,13 @@ export class ContactPeopleController {
   create(
     @TenantId() tenantId: string,
     @Param('companyId') companyId: string,
-    @Body() createContactPersonDto: CreateContactPersonDto,
+    @Body() createContactPersonDto: CreateContactPersonDto
   ) {
-    return this.contactPeopleService.create(tenantId, companyId, createContactPersonDto);
+    return this.contactPeopleService.create(
+      tenantId,
+      companyId,
+      createContactPersonDto
+    )
   }
 
   @Get()
@@ -24,14 +38,18 @@ export class ContactPeopleController {
     @TenantId() tenantId: string,
     @Param('companyId') companyId: string,
     @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Query('limit') limit: number = 10
   ) {
-    return this.contactPeopleService.findAll(tenantId, companyId, page, limit);
+    return this.contactPeopleService.findAll(tenantId, companyId, page, limit)
   }
 
   @Get(':id')
-  findOne(@TenantId() tenantId: string, @Param('companyId') companyId: string, @Param('id') id: string) {
-    return this.contactPeopleService.findOne(tenantId, companyId, id);
+  findOne(
+    @TenantId() tenantId: string,
+    @Param('companyId') companyId: string,
+    @Param('id') id: string
+  ) {
+    return this.contactPeopleService.findOne(tenantId, companyId, id)
   }
 
   @Patch(':id')
@@ -39,13 +57,22 @@ export class ContactPeopleController {
     @TenantId() tenantId: string,
     @Param('companyId') companyId: string,
     @Param('id') id: string,
-    @Body() updateContactPersonDto: UpdateContactPersonDto,
+    @Body() updateContactPersonDto: UpdateContactPersonDto
   ) {
-    return this.contactPeopleService.update(tenantId, companyId, id, updateContactPersonDto);
+    return this.contactPeopleService.update(
+      tenantId,
+      companyId,
+      id,
+      updateContactPersonDto
+    )
   }
 
   @Delete(':id')
-  remove(@TenantId() tenantId: string, @Param('companyId') companyId: string, @Param('id') id: string) {
-    return this.contactPeopleService.remove(tenantId, companyId, id);
+  remove(
+    @TenantId() tenantId: string,
+    @Param('companyId') companyId: string,
+    @Param('id') id: string
+  ) {
+    return this.contactPeopleService.remove(tenantId, companyId, id)
   }
 }

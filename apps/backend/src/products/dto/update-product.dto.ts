@@ -8,9 +8,9 @@ import {
   Min,
   MaxLength,
   IsArray,
-} from "class-validator";
-import { Type } from "class-transformer";
-import { ProductType } from "@prisma/client";
+} from 'class-validator'
+import { Type } from 'class-transformer'
+import { ProductType } from '@prisma/client'
 
 // Explicitly defining UpdateProductDto to ensure properties are recognized
 export class UpdateProductDto {
@@ -18,56 +18,54 @@ export class UpdateProductDto {
   @IsString()
   @IsNotEmpty()
   @MaxLength(255)
-  name?: string;
+  name?: string
 
   @IsOptional()
   @IsEnum(ProductType)
-  productType?: ProductType;
+  productType?: ProductType
 
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  sku?: string;
+  sku?: string
 
   @IsOptional()
   @IsString()
-  description?: string;
+  description?: string
 
   @IsOptional()
   @IsString()
-  longDescription?: string;
+  longDescription?: string
 
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  images?: string[];
+  images?: string[]
 
   @IsOptional()
   @IsString()
   @MaxLength(100)
-  category?: string;
+  category?: string
 
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   @Type(() => Number)
-  price?: number;
+  price?: number
 
   @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   @Type(() => Number)
-  unitPrice?: number;
-
-  
+  unitPrice?: number
 
   @IsOptional()
   @IsNumber()
   @Min(0)
   @Type(() => Number)
-  reorderLevel?: number;
+  reorderLevel?: number
 
   @IsOptional()
   @IsBoolean()
-  isPublished?: boolean;
+  isPublished?: boolean
 }

@@ -1,10 +1,9 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { InvoicesController } from './invoices.controller';
-import { InvoicesService } from './invoices.service';
+import { Test, TestingModule } from '@nestjs/testing'
+import { InvoicesController } from './invoices.controller'
+import { InvoicesService } from './invoices.service'
 
 describe('InvoicesController', () => {
-  let controller: InvoicesController;
-  let invoicesService: InvoicesService;
+  let controller: InvoicesController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -17,13 +16,12 @@ describe('InvoicesController', () => {
           },
         },
       ],
-    }).compile();
+    }).compile()
 
-    controller = module.get<InvoicesController>(InvoicesController);
-    invoicesService = module.get<InvoicesService>(InvoicesService);
-  });
+    controller = module.get<InvoicesController>(InvoicesController)
+  })
 
   it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-});
+    expect(controller).toBeDefined()
+  })
+})

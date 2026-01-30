@@ -1,66 +1,75 @@
-import { IsString, IsOptional, IsDateString, IsNumber, IsArray, ValidateNested, Min, IsEnum } from 'class-validator';
-import { Type } from 'class-transformer';
-import { QuoteStatus } from '@prisma/client'; // Assuming QuoteStatus enum is in Prisma client
+import {
+  IsString,
+  IsOptional,
+  IsDateString,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+  Min,
+  IsEnum,
+} from 'class-validator'
+import { Type } from 'class-transformer'
+import { QuoteStatus } from '@prisma/client' // Assuming QuoteStatus enum is in Prisma client
 
 export class CreateQuoteItemDto {
   @IsString()
-  productId: string;
+  productId: string
 
   @IsNumber()
   @Min(1)
-  quantity: number;
+  quantity: number
 
   @IsNumber()
-  unitPrice: number;
+  unitPrice: number
 
   @IsNumber()
-  totalPrice: number;
+  totalPrice: number
 
   @IsNumber()
-  itemVatAmount: number;
+  itemVatAmount: number
 
   @IsNumber()
-  totalPriceWithVat: number;
+  totalPriceWithVat: number
 }
 
 export class CreateQuoteDto {
   @IsString()
-  companyId: string; // Link to Company model
+  companyId: string // Link to Company model
 
   @IsDateString()
-  quoteDate: string;
+  quoteDate: string
 
   @IsOptional()
   @IsDateString()
-  expiryDate?: string;
+  expiryDate?: string
 
   @IsOptional()
   @IsString()
   @IsEnum(QuoteStatus)
-  status?: QuoteStatus;
+  status?: QuoteStatus
 
   @IsNumber()
-  vatRatePercent: number;
+  vatRatePercent: number
 
   @IsNumber()
-  subTotalAmount: number;
+  subTotalAmount: number
 
   @IsNumber()
-  vatAmount: number;
+  vatAmount: number
 
   @IsNumber()
-  grandTotal: number;
+  grandTotal: number
 
   @IsOptional()
   @IsString()
-  termsAndConditions?: string;
+  termsAndConditions?: string
 
   @IsOptional()
   @IsString()
-  notes?: string;
+  notes?: string
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateQuoteItemDto)
-  items: CreateQuoteItemDto[];
+  items: CreateQuoteItemDto[]
 }

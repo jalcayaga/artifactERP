@@ -1,33 +1,39 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional, IsEnum, IsBoolean } from "class-validator";
-import { UserRole } from "@prisma/client";
+import {
+  IsOptional,
+  IsString,
+  IsArray,
+  IsEmail,
+  IsNotEmpty,
+  MinLength,
+  IsBoolean,
+} from 'class-validator'
 
 export class CreateUserDto {
-  @IsEmail({}, { message: "Please provide a valid email address." })
-  @IsNotEmpty({ message: "Email should not be empty." })
-  email: string;
+  @IsEmail({}, { message: 'Please provide a valid email address.' })
+  @IsNotEmpty({ message: 'Email should not be empty.' })
+  email: string
 
   @IsString()
-  @IsNotEmpty({ message: "Password should not be empty." })
-  @MinLength(6, { message: "Password must be at least 6 characters long." })
-  password: string;
+  @IsNotEmpty({ message: 'Password should not be empty.' })
+  @MinLength(6, { message: 'Password must be at least 6 characters long.' })
+  password: string
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: "First name should not be empty if provided." })
-  firstName?: string;
+  @IsNotEmpty({ message: 'First name should not be empty if provided.' })
+  firstName?: string
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty({ message: "Last name should not be empty if provided." })
-  lastName?: string;
+  @IsNotEmpty({ message: 'Last name should not be empty if provided.' })
+  lastName?: string
 
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  @IsEnum(UserRole, {
-    message: `Invalid role specified. Valid roles are ${Object.values(UserRole).join(", ")}.`,
-  })
-  role?: UserRole;
+  roles?: string[]
 
   @IsOptional()
   @IsBoolean()
-  isActive?: boolean;
+  isActive?: boolean
 }

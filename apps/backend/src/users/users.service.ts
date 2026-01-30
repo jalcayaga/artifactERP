@@ -1,134 +1,196 @@
-import { Injectable, ConflictException, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { User, Prisma, UserRole } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  Injectable,
+  ConflictException,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common'
+import { PrismaService } from '../prisma/prisma.service'
+import { User, Prisma } from '@prisma/client'
+import * as bcrypt from 'bcrypt'
+import { CreateUserDto } from './dto/create-user.dto'
+import { UpdateUserDto } from './dto/update-user.dto'
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(tenantId: string, createUserDto: CreateUserDto): Promise<User> {
-    const { email, password, firstName, lastName, role, isActive } = createUserDto;
+    const { email, password, firstName, lastName, roles, isActive } =
+      createUserDto
     const existingUser = await this.prisma.user.findUnique({
       where: { tenantId_email: { tenantId, email } },
-    });
+    })
     if (existingUser) {
-      throw new ConflictException('User with this email already exists');
+      throw new ConflictException('User with this email already exists')
     }
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10)
+
     return this.prisma.user.create({
       data: {
-        tenantId,
         email,
         password: hashedPassword,
         firstName,
         lastName,
-        role: role ?? UserRole.VIEWER,
-        isActive: isActive ?? true,
+        isActive,
+        tenantId,
+        roles: {
+          connect: roles?.map((role) => ({ name: role })) ?? [],
+        },
       },
-      include: { companies: true },
-    });
+    })
   }
 
   async findAll(tenantId: string): Promise<User[]> {
     return this.prisma.user.findMany({
-      where: { tenantId },
-      include: { companies: true },
-    });
+      where: {
+        tenantId,
+      },
+      include: {
+        roles: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    })
   }
 
   async findOne(tenantId: string, id: string): Promise<User | null> {
     return this.prisma.user.findFirst({
       where: { id, tenantId },
-      include: { companies: true },
-    });
+      include: {
+        companies: true,
+        roles: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    })
   }
 
   async findOneById(tenantId: string, id: string): Promise<User | null> {
     return this.prisma.user.findFirst({
       where: { id, tenantId },
-      include: { companies: true },
-    });
+      include: {
+        companies: true,
+        roles: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    })
   }
 
   async findByEmail(tenantId: string, email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { tenantId_email: { tenantId, email } },
-      include: { companies: true },
-    });
+      include: {
+        roles: {
+          select: {
+            name: true,
+          },
+        },
+        companies: true,
+      },
+    })
   }
 
   async update(
     tenantId: string,
     id: string,
     updateUserDto: UpdateUserDto,
-    options: { allowRoleChange?: boolean; allowStatusChange?: boolean; allowEmailChange?: boolean } = {},
+    options: {
+      allowRoleChange?: boolean
+      allowStatusChange?: boolean
+      allowEmailChange?: boolean
+    } = {}
   ): Promise<User> {
-    const { allowRoleChange = false, allowStatusChange = false, allowEmailChange = false } = options;
-    const existingUser = await this.prisma.user.findFirst({ where: { id, tenantId } });
+    const {
+      allowRoleChange = false,
+      allowStatusChange = false,
+      allowEmailChange = false,
+    } = options
+    const existingUser = await this.prisma.user.findFirst({
+      where: { id, tenantId },
+    })
     if (!existingUser) {
-      throw new NotFoundException(`User with ID ${id} not found.`);
+      throw new NotFoundException(`User with ID ${id} not found.`)
     }
 
-    const data: Prisma.UserUpdateInput = {};
+    const data: Prisma.UserUpdateInput = {}
 
     if (updateUserDto.email && updateUserDto.email !== existingUser.email) {
       if (!allowEmailChange) {
-        throw new ForbiddenException('You are not allowed to change the email.');
+        throw new ForbiddenException('You are not allowed to change the email.')
       }
       const emailInUse = await this.prisma.user.findUnique({
         where: { tenantId_email: { tenantId, email: updateUserDto.email } },
-      });
+      })
       if (emailInUse) {
-        throw new ConflictException('User with this email already exists');
+        throw new ConflictException('User with this email already exists')
       }
-      data.email = updateUserDto.email;
+      data.email = updateUserDto.email
     }
 
     if (updateUserDto.password) {
-      data.password = await bcrypt.hash(updateUserDto.password, 10);
+      data.password = await bcrypt.hash(updateUserDto.password, 10)
     }
 
     if (updateUserDto.firstName !== undefined) {
-      data.firstName = updateUserDto.firstName;
+      data.firstName = updateUserDto.firstName
     }
 
     if (updateUserDto.lastName !== undefined) {
-      data.lastName = updateUserDto.lastName;
+      data.lastName = updateUserDto.lastName
     }
 
-    if (updateUserDto.role !== undefined) {
+    if (updateUserDto.roles !== undefined) {
       if (!allowRoleChange) {
-        throw new ForbiddenException('You are not allowed to change the user role.');
+        throw new ForbiddenException(
+          'You are not allowed to change the user roles.'
+        )
       }
-      data.role = updateUserDto.role;
+      data.roles = {
+        set: updateUserDto.roles.map((role) => ({ name: role })),
+      }
     }
 
     if (updateUserDto.isActive !== undefined) {
       if (!allowStatusChange) {
-        throw new ForbiddenException('You are not allowed to change the active status.');
+        throw new ForbiddenException(
+          'You are not allowed to change the active status.'
+        )
       }
-      data.isActive = updateUserDto.isActive;
+      data.isActive = updateUserDto.isActive
     }
 
     if (updateUserDto.profilePictureUrl !== undefined) {
-      data.profilePictureUrl = updateUserDto.profilePictureUrl;
+      data.profilePictureUrl = updateUserDto.profilePictureUrl
     }
 
     return this.prisma.user.update({
       where: { id },
       data,
-      include: { companies: true },
-    });
+      include: {
+        companies: true,
+        roles: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    })
   }
 
   async remove(tenantId: string, id: string): Promise<void> {
-    const existingUser = await this.prisma.user.findFirst({ where: { id, tenantId } });
+    const existingUser = await this.prisma.user.findFirst({
+      where: { id, tenantId },
+    })
     if (!existingUser) {
-      throw new NotFoundException(`User with ID ${id} not found.`);
+      throw new NotFoundException(`User with ID ${id} not found.`)
     }
-    await this.prisma.user.delete({ where: { id } });
+    await this.prisma.user.delete({ where: { id } })
   }
 }

@@ -20,6 +20,47 @@ enum UserRole {
   CLIENT
 }
 
+enum Action {
+  manage
+  create
+  read
+  update
+  delete
+}
+
+model Role {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  description String?
+  users       User[]         @relation("UserToRole")
+  permissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String         @id @default(cuid())
+  name        String         @unique
+  description String?
+  action      Action
+  subject     String
+  roles       RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  id           String @id @default(cuid())
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@map("role_permissions")
+}
+
 enum ProductType {
   PRODUCT
   SERVICE
@@ -67,6 +108,19 @@ enum InvoiceStatus {
   VOID
 }
 
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  PAUSED
+  TRIALING
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
 // --------------------
 // Multi-tenant core
 // --------------------
@@ -93,6 +147,8 @@ model Tenant {
   quotes        Quote[]
   invoices      Invoice[]
   payments      Payment[]
+
+  subscriptions Subscription[]
   contactPeople ContactPerson[]
 
   @@map("tenants")
@@ -128,7 +184,7 @@ model User {
   password         String
   firstName        String?
   lastName         String?
-  role             UserRole @default(VIEWER)
+    roles            Role[]   @relation("UserToRole")
   isActive         Boolean  @default(true)
   profilePictureUrl String?
   createdAt        DateTime @default(now())
@@ -170,6 +226,8 @@ model Company {
   invoices      Invoice[]
   orders        Order[]
   purchases     Purchase[]
+
+  subscriptions Subscription[]
 
   @@index([tenantId])
   @@index([userId])
@@ -227,6 +285,7 @@ model Product {
   lots          Lot[]
   quoteItems    QuoteItem[]
   invoiceItems  InvoiceItem[]
+  subscriptions Subscription[]
 
   @@index([tenantId])
   @@index([category])
@@ -488,7 +547,39 @@ model Payment {
   tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   invoice Invoice @relation(fields: [invoiceId], references: [id])
 
-  @@index([tenantId])
   @@index([invoiceId])
   @@map("payments")
+}
+
+// --------------------
+// Subscriptions
+// --------------------
+
+model Subscription {
+  id                String             @id @default(cuid())
+  tenantId          String
+  companyId         String
+  productId         String
+  status            SubscriptionStatus @default(ACTIVE)
+  interval          BillingInterval    @default(MONTHLY)
+  currentPeriodStart DateTime
+  currentPeriodEnd  DateTime
+  nextBillingDate   DateTime
+  price             Decimal            @db.Decimal(10, 2)
+  paymentMethod     PaymentMethod?
+  cancelAtPeriodEnd Boolean            @default(false)
+  canceledAt        DateTime?
+  trialEnd          DateTime?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId])
+  @@index([companyId])
+  @@index([status])
+  @@index([nextBillingDate])
+  @@map("subscriptions")
 }

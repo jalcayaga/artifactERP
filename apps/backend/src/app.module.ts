@@ -1,28 +1,33 @@
-import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
-import { ConfigModule as NestConfigModule } from "@nestjs/config";
-import { PrismaModule } from "./prisma/prisma.module";
-import { AuthModule } from "./auth/auth.module";
-import { UsersModule } from "./users/users.module";
-import { AppConfigModule } from "./config/config.module";
-import appConfig from "./config/app.config";
-import { APP_GUARD } from "@nestjs/core";
-import { JwtAuthGuard } from "./auth/guards/jwt-auth.guard";
-import { ProductsModule } from "./products/products.module";
-import { OrdersModule } from "./orders/orders.module";
-import { DashboardModule } from "./dashboard/dashboard.module";
-import { CompaniesModule } from './companies/companies.module';
-import { SalesModule } from "./sales/sales.module";
-import { PurchasesModule } from "./purchases/purchases.module";
-import { QuotesModule } from "./quotes/quotes.module";
-import { LotsModule } from './lots/lots.module';
-import { InvoicesModule } from './invoices/invoices.module';
-import { PaymentsModule } from './payments/payments.module';
-import { UploadsModule } from './uploads/uploads.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
-import { ContactPeopleModule } from './contact-people/contact-people.module';
-import { TenantsModule } from './tenants/tenants.module';
-import { TenantResolverMiddleware } from './tenants/middleware/tenant-resolver.middleware';
+import { RolesModule } from './roles/roles.module'
+import { PermissionsModule } from './permissions/permissions.module'
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
+import { ConfigModule as NestConfigModule } from '@nestjs/config'
+import { PrismaModule } from './prisma/prisma.module'
+import { AuthModule } from './auth/auth.module'
+import { UsersModule } from './users/users.module'
+import { AppConfigModule } from './config/config.module'
+import appConfig from './config/app.config'
+import { APP_GUARD } from '@nestjs/core'
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard'
+import { PermissionsGuard } from './auth/guards/permissions.guard'
+import { ProductsModule } from './products/products.module'
+import { OrdersModule } from './orders/orders.module'
+import { DashboardModule } from './dashboard/dashboard.module'
+import { CompaniesModule } from './companies/companies.module'
+import { SalesModule } from './sales/sales.module'
+import { PurchasesModule } from './purchases/purchases.module'
+import { QuotesModule } from './quotes/quotes.module'
+import { LotsModule } from './lots/lots.module'
+import { InvoicesModule } from './invoices/invoices.module'
+import { PaymentsModule } from './payments/payments.module'
+import { UploadsModule } from './uploads/uploads.module'
+import { ServeStaticModule } from '@nestjs/serve-static'
+import { join } from 'path'
+import { ContactPeopleModule } from './contact-people/contact-people.module'
+import { StorefrontModule } from './storefront/storefront.module'
+import { TenantsModule } from './tenants/tenants.module'
+import { SubscriptionsModule } from './subscriptions/subscriptions.module'
+import { TenantResolverMiddleware } from './tenants/middleware/tenant-resolver.middleware'
 
 @Module({
   imports: [
@@ -34,6 +39,8 @@ import { TenantResolverMiddleware } from './tenants/middleware/tenant-resolver.m
     PrismaModule,
     AuthModule,
     UsersModule,
+    RolesModule,
+    PermissionsModule,
     ProductsModule,
     OrdersModule,
     DashboardModule,
@@ -41,16 +48,18 @@ import { TenantResolverMiddleware } from './tenants/middleware/tenant-resolver.m
     SalesModule,
     PurchasesModule,
     QuotesModule,
-    LotsModule, 
-    InvoicesModule, 
+    LotsModule,
+    InvoicesModule,
     PaymentsModule,
     UploadsModule,
+    StorefrontModule,
     TenantsModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'uploads'),
       serveRoot: '/uploads/',
     }),
     ContactPeopleModule,
+    SubscriptionsModule,
   ],
   controllers: [],
   providers: [
@@ -58,10 +67,14 @@ import { TenantResolverMiddleware } from './tenants/middleware/tenant-resolver.m
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionsGuard,
+    },
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TenantResolverMiddleware).forRoutes('*');
+    consumer.apply(TenantResolverMiddleware).forRoutes('*')
   }
 }

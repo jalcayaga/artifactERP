@@ -1,63 +1,71 @@
-import { registerDecorator, ValidationOptions, ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
+import {
+  registerDecorator,
+  ValidationOptions,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
+} from 'class-validator'
 
 @ValidatorConstraint({ async: false })
 export class IsRutConstraint implements ValidatorConstraintInterface {
-  validate(rut: any, args: ValidationArguments) {
+  validate(rut: any, _args: ValidationArguments) {
+    void _args
     if (typeof rut !== 'string') {
-      return false;
+      return false
     }
 
-    rut = rut.replace(/\./g, '').replace(/-/g, '');
+    rut = rut.replace(/\./g, '').replace(/-/g, '')
 
     if (rut.length < 2) {
-      return false;
+      return false
     }
 
-    const body = rut.slice(0, -1);
-    const dv = rut.slice(-1).toUpperCase();
+    const body = rut.slice(0, -1)
+    const dv = rut.slice(-1).toUpperCase()
 
-    let sum = 0;
-    let multiplier = 2;
+    let sum = 0
+    let multiplier = 2
 
     for (let i = body.length - 1; i >= 0; i--) {
-      const digit = parseInt(body[i], 10);
+      const digit = parseInt(body[i], 10)
       if (isNaN(digit)) {
-        return false;
+        return false
       }
-      sum += digit * multiplier;
-      multiplier++;
+      sum += digit * multiplier
+      multiplier++
       if (multiplier > 7) {
-        multiplier = 2;
+        multiplier = 2
       }
     }
 
-    const calculatedDv = 11 - (sum % 11);
-    let expectedDv = '';
+    const calculatedDv = 11 - (sum % 11)
+    let expectedDv = ''
 
     if (calculatedDv === 11) {
-      expectedDv = '0';
+      expectedDv = '0'
     } else if (calculatedDv === 10) {
-      expectedDv = 'K';
+      expectedDv = 'K'
     } else {
-      expectedDv = calculatedDv.toString();
+      expectedDv = calculatedDv.toString()
     }
 
-    return expectedDv === dv;
+    return expectedDv === dv
   }
 
-  defaultMessage(args: ValidationArguments) {
-    return 'El RUT ($value) no es válido';
+  defaultMessage(_args: ValidationArguments) {
+    void _args
+    return 'El RUT ($value) no es válido'
   }
 }
 
 export function IsRut(validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
       constraints: [],
       validator: IsRutConstraint,
-    });
-  };
+    })
+  }
 }

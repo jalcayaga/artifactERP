@@ -1,20 +1,22 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { unlink } from 'fs/promises';
-import { join } from 'path';
+import { Injectable, InternalServerErrorException } from '@nestjs/common'
+import { unlink } from 'fs/promises'
+import { join } from 'path'
 
 @Injectable()
 export class UploadsService {
   async deleteFile(filename: string): Promise<void> {
-    const filePath = join(__dirname, '..', '..', 'uploads', filename);
+    const filePath = join(__dirname, '..', '..', 'uploads', filename)
     try {
-      await unlink(filePath);
+      await unlink(filePath)
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
         // File already gone; treat as success.
-        return;
+        return
       }
-      console.error(`Error deleting file ${filename}:`, error);
-      throw new InternalServerErrorException(`Failed to delete file ${filename}`);
+      console.error(`Error deleting file ${filename}:`, error)
+      throw new InternalServerErrorException(
+        `Failed to delete file ${filename}`
+      )
     }
   }
 }

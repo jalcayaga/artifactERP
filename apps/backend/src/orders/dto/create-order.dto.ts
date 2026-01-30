@@ -1,88 +1,95 @@
-import { IsString, IsNotEmpty, IsDateString, IsNumber, IsArray, ValidateNested, IsOptional } from 'class-validator';
-import { Type } from 'class-transformer';
-import { OrderStatus, PaymentStatus, PaymentMethod } from '@prisma/client';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+  IsOptional,
+} from 'class-validator'
+import { Type } from 'class-transformer'
+import { OrderStatus, PaymentStatus, PaymentMethod } from '@prisma/client'
 
 export class OrderItemDto {
   @IsString()
   @IsNotEmpty()
-  productId: string;
+  productId: string
 
   @IsNumber()
-  quantity: number;
+  quantity: number
 
   @IsNumber()
-  unitPrice: number;
+  unitPrice: number
 
   @IsNumber()
-  totalPrice: number;
+  totalPrice: number
 
   @IsNumber()
-  itemVatAmount: number;
+  itemVatAmount: number
 
   @IsNumber()
-  totalPriceWithVat: number;
+  totalPriceWithVat: number
 }
 
 export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  userId: string
 
   @IsString()
   @IsNotEmpty()
-  companyId: string;
+  companyId: string
 
   @IsOptional()
   @IsString()
-  status?: OrderStatus;
+  status?: OrderStatus
 
   @IsOptional()
   @IsString()
-  paymentStatus?: PaymentStatus;
+  paymentStatus?: PaymentStatus
 
   @IsNumber()
-  subTotalAmount: number;
+  subTotalAmount: number
 
   @IsNumber()
-  vatAmount: number;
+  vatAmount: number
 
   @IsNumber()
-  grandTotalAmount: number;
-
-  @IsOptional()
-  @IsNumber()
-  vatRatePercent?: number;
+  grandTotalAmount: number
 
   @IsOptional()
   @IsNumber()
-  discountAmount?: number;
+  vatRatePercent?: number
 
   @IsOptional()
   @IsNumber()
-  shippingAmount?: number;
+  discountAmount?: number
+
+  @IsOptional()
+  @IsNumber()
+  shippingAmount?: number
 
   @IsOptional()
   @IsString()
-  currency?: string;
+  currency?: string
 
   @IsOptional()
   @IsString()
-  shippingAddress?: string;
+  shippingAddress?: string
 
   @IsOptional()
   @IsString()
-  billingAddress?: string;
+  billingAddress?: string
 
   @IsOptional()
   @IsString()
-  customerNotes?: string;
+  customerNotes?: string
 
   @IsOptional()
   @IsString()
-  paymentMethod?: PaymentMethod;
+  paymentMethod?: PaymentMethod
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
-  items: OrderItemDto[];
+  items: OrderItemDto[]
 }

@@ -1,60 +1,67 @@
-import { IsString, IsBoolean, IsOptional, IsEmail, IsNotEmpty, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-import { IsRut } from '../../common/validators/is-rut.validator';
-import { CreateContactPersonDto } from '../../contact-people/dto/create-contact-person.dto';
+import {
+  IsString,
+  IsBoolean,
+  IsOptional,
+  IsEmail,
+  IsNotEmpty,
+  ValidateNested,
+} from 'class-validator'
+import { Type } from 'class-transformer'
+import { IsRut } from '../../common/validators/is-rut.validator'
+import { CreateContactPersonDto } from '../../contact-people/dto/create-contact-person.dto'
 
 export class CreateCompanyDto {
   @IsNotEmpty()
   @IsString()
-  name: string;
+  name: string
 
   @IsOptional()
   @IsString()
-  fantasyName?: string;
+  fantasyName?: string
 
   @IsNotEmpty()
   @IsString()
   @IsRut()
-  rut: string;
+  rut: string
 
   @IsOptional()
   @IsString()
-  giro?: string;
+  giro?: string
 
   @IsOptional()
   @IsString()
-  address?: string;
+  address?: string
 
   @IsOptional()
   @IsString()
-  city?: string;
+  city?: string
 
   @IsOptional()
   @IsString()
-  state?: string;
+  state?: string
 
   @IsOptional()
   @IsString()
-  zip?: string;
+  zip?: string
 
   @IsOptional()
   @IsString()
-  phone?: string;
+  phone?: string
 
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email: string
 
   @IsBoolean()
   @IsOptional()
-  isClient?: boolean;
+  isClient?: boolean
 
   @IsBoolean()
   @IsOptional()
-  isSupplier?: boolean;
+  isSupplier?: boolean
 
   @IsOptional()
   @ValidateNested()
   @Type(() => CreateContactPersonDto)
-  contactPerson?: CreateContactPersonDto;
+  contactPerson?: CreateContactPersonDto
 }

@@ -1,20 +1,24 @@
 FROM node:20-slim
 
-# Instalar herramientas de compilación y procps
-RUN apt-get update && apt-get install -y python3 make g++ procps
+ENV NODE_ENV=development
+
+# Herramientas necesarias para dependencias nativas y monitoreo
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 make g++ procps \
+  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copiar archivos de dependencias y el esquema de Prisma ANTES de instalar
-COPY package*.json yarn.lock ./
-COPY prisma ./prisma/
+# Copiar configuración del monorepo y el código del backend
+COPY package.json yarn.lock turbo.json tsconfig.base.json ./
+COPY packages ./packages
+COPY apps/backend ./apps/backend
 
-# Instalar dependencias (esto ejecutará 'prisma generate' via postinstall)
-RUN yarn install --frozen-lockfile
-
-# Copiar el resto del código fuente
-COPY . .
+# Instalar dependencias de workspaces (ejecuta prisma generate via postinstall)
+RUN corepack enable \
+  && corepack prepare yarn@1.22.22 --activate \
+  && yarn install --frozen-lockfile
 
 EXPOSE 3001
 
-CMD ["npm", "run", "start:dev"]
+CMD ["yarn", "workspace", "@artifact/backend", "start:dev"]

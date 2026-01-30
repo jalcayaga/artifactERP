@@ -1,47 +1,53 @@
-import { IsString, IsNotEmpty, IsDateString, IsNumber, IsArray, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-import { Prisma } from '@prisma/client';
+import {
+  IsString,
+  IsNotEmpty,
+  IsDateString,
+  IsNumber,
+  IsArray,
+  ValidateNested,
+} from 'class-validator'
+import { Type } from 'class-transformer'
 
 export class CreatePurchaseItemDto {
   @IsString()
   @IsNotEmpty()
-  productId: string;
+  productId: string
 
   @IsNumber()
-  quantity: number;
+  quantity: number
 
   @IsNumber()
-  unitPrice: number;
+  unitPrice: number
 
   @IsNumber()
-  totalPrice: number;
+  totalPrice: number
 
   @IsNumber()
-  itemVatAmount: number;
+  itemVatAmount: number
 
   @IsNumber()
-  totalPriceWithVat: number;
+  totalPriceWithVat: number
 }
 
 export class CreatePurchaseDto {
   @IsString()
   @IsNotEmpty()
-  companyId: string;
+  companyId: string
 
   @IsDateString()
-  purchaseDate: string;
+  purchaseDate: string
 
   @IsNumber()
-  subTotalAmount: number;
+  subTotalAmount: number
 
   @IsNumber()
-  totalVatAmount: number;
+  totalVatAmount: number
 
   @IsNumber()
-  grandTotal: number;
+  grandTotal: number
 
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreatePurchaseItemDto)
-  items: CreatePurchaseItemDto[];
+  items: CreatePurchaseItemDto[]
 }

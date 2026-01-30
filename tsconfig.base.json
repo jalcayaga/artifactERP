@@ -8,6 +8,16 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@artifact/ui": ["packages/ui/src/index.ts"],
+      "@artifact/core": ["packages/core/src/index.ts"],
+      "@artifact/core/*": ["packages/core/src/*"],
+      "@artifact/ui/*": ["packages/ui/src/*"],
+      "@artifact/config/*": ["packages/config/*"],
+      "@artifact/types/*": ["packages/types/*"],
+      "@artifact/utils/*": ["packages/utils/*"]
+    }
   }
 }

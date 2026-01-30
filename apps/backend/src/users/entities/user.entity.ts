@@ -1,19 +1,13 @@
-import { UserRole } from "@prisma/client";
+import { Role } from './role.entity'
 
-export class UserEntity {
-  id: string;
-  email: string;
-  firstName?: string | null;
-  lastName?: string | null;
-  role: UserRole;
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-
-  constructor(partial: Partial<UserEntity & { password?: string }>) {
-    Object.assign(this, partial);
-    if (partial.role) {
-      this.role = partial.role;
-    }
-  }
+export class User {
+  id: string
+  email: string
+  firstName: string | null
+  lastName: string | null
+  roles: Role[]
+  isActive: boolean
+  profilePictureUrl: string | null
+  createdAt: Date
+  updatedAt: Date
 }

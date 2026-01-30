@@ -1,25 +1,22 @@
-import { IsString, IsInt, IsNumber, IsOptional, IsDecimal, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsInt, IsDecimal, Min } from 'class-validator'
 
 export class CreateSaleItemDto {
   @IsString()
-  productId: string;
+  productId: string
 
   @IsInt()
   @Min(1)
-  quantity: number;
+  quantity: number
 
   @IsDecimal({ decimal_digits: '1,2' })
-  unitPrice: string; // Use string for Decimal type from Prisma
+  unitPrice: string // Use string for Decimal type from Prisma
 
   @IsDecimal({ decimal_digits: '1,2' })
-  totalPrice: string;
+  totalPrice: string
 
   @IsDecimal({ decimal_digits: '1,2' })
-  itemVatAmount: string;
+  itemVatAmount: string
 
   @IsDecimal({ decimal_digits: '1,2' })
-  totalPriceWithVat: string;
-
-  
+  totalPriceWithVat: string
 }

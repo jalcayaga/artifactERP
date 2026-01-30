@@ -1,23 +1,23 @@
-import { IsString, IsOptional, IsEmail, IsNotEmpty } from 'class-validator';
+import { IsString, IsOptional, IsEmail, IsNotEmpty } from 'class-validator'
 
 export class CreateContactPersonDto {
   @IsNotEmpty()
   @IsString()
-  firstName: string;
+  firstName: string
 
   @IsOptional()
   @IsString()
-  lastName?: string;
+  lastName?: string
 
   @IsOptional()
   @IsString()
-  phone?: string;
+  phone?: string
 
   @IsOptional()
   @IsEmail()
-  email?: string;
+  email?: string
 
   @IsOptional()
   @IsString()
-  role?: string;
+  role?: string
 }

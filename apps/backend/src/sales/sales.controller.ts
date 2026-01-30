@@ -1,10 +1,25 @@
-import { Controller, Get, Post, Body, Param, Query, DefaultValuePipe, ParseIntPipe, UseGuards, ConflictException, NotFoundException, Request } from '@nestjs/common';
-import { SalesService } from './sales.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
-import { CreateSaleDto } from './dto/create-sale.dto';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  DefaultValuePipe,
+  ParseIntPipe,
+  UseGuards,
+  NotFoundException,
+  Patch,
+  Delete,
+} from '@nestjs/common'
+import { SalesService } from './sales.service'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { RolesGuard } from '../auth/guards/roles.guard'
+import { Roles } from '../common/decorators/roles.decorator'
+
+import { CreateSaleDto } from './dto/create-sale.dto'
+import { UpdateSaleDto } from './dto/update-sale.dto'
+import { TenantId } from '../common/decorators/tenant.decorator'
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('sales')
@@ -12,38 +27,62 @@ export class SalesController {
   constructor(private readonly salesService: SalesService) {}
 
   @Post()
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
-  async create(@Body() createSaleDto: CreateSaleDto) {
-    try {
-      return await this.salesService.create(createSaleDto);
-    } catch (error) {
-      if (error instanceof ConflictException || error instanceof NotFoundException) {
-        throw error;
-      }
-      throw error; // Re-throw other unexpected errors
+  @Roles('ADMIN', 'EDITOR')
+  async create(
+    @TenantId() tenantId: string,
+    @Body() createSaleDto: CreateSaleDto
+  ) {
+    if (!tenantId) {
+      throw new NotFoundException('Tenant ID is required')
     }
+    return await this.salesService.create(tenantId, createSaleDto)
   }
 
-  @Get()
-  @Roles(UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER)
+  @Roles('ADMIN', 'EDITOR', 'VIEWER')
   findAll(
+    @TenantId() tenantId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @Query('status') status?: string,
+    @Query('status') status?: string
   ) {
-    return this.salesService.findAll(page, limit, { status });
+    if (!tenantId) {
+      throw new NotFoundException('Tenant ID is required')
+    }
+    return this.salesService.findAll(tenantId, page, limit, { status })
   }
 
   @Get(':id')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER)
-  async findOne(@Param('id') id: string) {
-    try {
-      return await this.salesService.findOne(id);
-    } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw error;
+  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  async findOne(@TenantId() tenantId: string, @Param('id') id: string) {
+    if (!tenantId) {
+      throw new NotFoundException('Tenant ID is required')
     }
+    const order = await this.salesService.findOne(tenantId, id)
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`)
+    }
+    return order
+  }
+
+  @Patch(':id')
+  @Roles('ADMIN', 'EDITOR')
+  update(
+    @TenantId() tenantId: string,
+    @Param('id') id: string,
+    @Body() updateSaleDto: UpdateSaleDto
+  ) {
+    if (!tenantId) {
+      throw new NotFoundException('Tenant ID is required')
+    }
+    return this.salesService.update(tenantId, id, updateSaleDto)
+  }
+
+  @Delete(':id')
+  @Roles('ADMIN')
+  remove(@TenantId() tenantId: string, @Param('id') id: string) {
+    if (!tenantId) {
+      throw new NotFoundException('Tenant ID is required')
+    }
+    return this.salesService.remove(tenantId, id)
   }
 }

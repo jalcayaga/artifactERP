@@ -1,24 +1,38 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { Lot, Prisma } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { PrismaService } from '../prisma/prisma.service'
+import { Lot, Prisma } from '@prisma/client'
 
 @Injectable()
 export class LotsService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(): Promise<Lot[]> {
-    return this.prisma.lot.findMany();
+  async findAll(tenantId: string): Promise<Lot[]> {
+    return this.prisma.lot.findMany({
+      where: { tenantId },
+      include: { product: true },
+    })
   }
 
-  async findOne(id: string): Promise<Lot | null> {
-    return this.prisma.lot.findUnique({ where: { id } });
-  }
-
-  async update(id: string, data: Prisma.LotUpdateInput): Promise<Lot> {
-    const lot = await this.prisma.lot.findUnique({ where: { id } });
+  async findOne(tenantId: string, id: string): Promise<Lot> {
+    const lot = await this.prisma.lot.findFirst({
+      where: { id, tenantId },
+      include: { product: true },
+    })
     if (!lot) {
-      throw new NotFoundException(`Lot with ID ${id} not found.`);
+      throw new NotFoundException(`Lot with ID ${id} not found.`)
     }
-    return this.prisma.lot.update({ where: { id }, data });
+    return lot
+  }
+
+  async update(
+    tenantId: string,
+    id: string,
+    data: Prisma.LotUpdateInput
+  ): Promise<Lot> {
+    const lot = await this.prisma.lot.findFirst({ where: { id, tenantId } })
+    if (!lot) {
+      throw new NotFoundException(`Lot with ID ${id} not found.`)
+    }
+    return this.prisma.lot.update({ where: { id }, data })
   }
 }

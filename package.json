@@ -5,10 +5,8 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
-    "lint": "turbo run lint",
-    "dev:storefront": "turbo run dev --filter=@artifact/storefront",
-    "dev:admin": "turbo run dev --filter=@artifact/admin",
-    "dev:backend": "turbo run start:dev --filter=@artifact/backend"
+    "start": "turbo run start",
+    "lint": "turbo run lint"
   },
   "workspaces": [
     "apps/*",

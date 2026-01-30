@@ -39,12 +39,12 @@ services:
         - "traefik.http.services.subred-backend.loadbalancer.server.port=3001"
         - "traefik.http.routers.subred-backend.tls.certresolver=myresolver"
 
-  frontend:
+  storefront:
     build:
-      context: ./frontend
+      context: ./apps/storefront
       dockerfile: Dockerfile
-    image: subred-erp-frontend
-    container_name: subred-erp-frontend-prod
+    image: subred-erp-storefront
+    container_name: subred-erp-storefront-prod
     environment:
       NEXT_PUBLIC_API_URL: https://srapi.subred.cl
     networks:

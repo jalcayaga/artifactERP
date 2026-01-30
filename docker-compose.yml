@@ -1,51 +1,73 @@
-
-
 services:
   postgres_db:
     image: postgres:15
-    container_name: subred_erp_postgres_db
+    container_name: artifact_erp_postgres_db
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-subred_user}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-subred_password}
-      POSTGRES_DB: ${POSTGRES_DB:-subred_erp_db}
+      POSTGRES_USER: ${POSTGRES_USER:-artifact_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-artifact_password}
+      POSTGRES_DB: ${POSTGRES_DB:-artifact_erp_db}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
-      - subred_erp_postgres_data:/var/lib/postgresql/data
+      - artifact_erp_postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "pg_isready -U ${POSTGRES_USER:-subred_user} -d ${POSTGRES_DB:-subred_erp_db}",
+          "pg_isready -U ${POSTGRES_USER:-artifact_user} -d ${POSTGRES_DB:-artifact_erp_db}",
         ]
       interval: 10s
       timeout: 5s
       retries: 5
 
   backend:
-    build: ./backend
-    container_name: subred-erp-backend
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: artifact-erp-backend
     ports:
-      - "3001:3001"
+      - "3002:3002"      # si tu backend corre en 3002
     env_file:
-      - ./backend/.env
+      - ./apps/backend/.env
     depends_on:
       postgres_db:
         condition: service_healthy
     volumes:
-      - ./backend:/app:delegated
+      - ./apps/backend:/app/apps/backend:delegated
+      - ./packages:/app/packages:delegated
 
-  frontend:
-    build: ./frontend
-    container_name: subred-erp-frontend
+  storefront:
+    build:
+      context: .
+      dockerfile: apps/storefront/Dockerfile
+    container_name: artifact-erp-storefront
     ports:
       - "3000:3000"
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_API_URL: http://localhost:3002
+      API_URL_INTERNAL: http://artifact-erp-backend:3002
     volumes:
-      - ./frontend:/app:delegated
+      - ./apps/storefront:/app/apps/storefront:delegated
+      - ./packages:/app/packages:delegated
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    container_name: artifact-erp-admin
+    ports:
+      - "3001:3001"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3002
+      API_URL_INTERNAL: http://artifact-erp-backend:3002
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./apps/admin:/app/apps/admin:delegated
+      - ./packages:/app/packages:delegated
 
 volumes:
-  subred_erp_postgres_data:
+  artifact_erp_postgres_data:
     driver: local

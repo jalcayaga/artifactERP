@@ -1,29 +1,35 @@
-import { IsString, IsInt, IsDecimal, IsOptional, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsDecimal,
+  IsOptional,
+  IsDateString,
+} from 'class-validator'
 
 export class CreateLotDto {
   @IsString()
-  productId: string;
+  productId: string
 
   @IsString()
-  lotNumber: string;
+  lotNumber: string
 
   @IsInt()
-  initialQuantity: number;
+  initialQuantity: number
 
   @IsInt()
-  currentQuantity: number;
+  currentQuantity: number
 
   @IsDecimal()
-  purchasePrice: number;
+  purchasePrice: number
 
   @IsDateString()
-  entryDate: string;
+  entryDate: string
 
   @IsOptional()
   @IsDateString()
-  expirationDate?: string;
+  expirationDate?: string
 
   @IsOptional()
   @IsString()
-  location?: string;
+  location?: string
 }

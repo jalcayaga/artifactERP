@@ -1,14 +1,14 @@
-import { IsString, IsNotEmpty, IsNumber, IsEnum } from 'class-validator';
-import { PaymentMethod } from '@prisma/client';
+import { IsString, IsNotEmpty, IsNumber, IsEnum } from 'class-validator'
+import { PaymentMethod } from '@prisma/client'
 
 export class CreatePaymentDto {
   @IsString()
   @IsNotEmpty()
-  invoiceId: string;
+  invoiceId: string
 
   @IsNumber()
-  amount: number;
+  amount: number
 
   @IsEnum(PaymentMethod)
-  paymentMethod: PaymentMethod;
+  paymentMethod: PaymentMethod
 }

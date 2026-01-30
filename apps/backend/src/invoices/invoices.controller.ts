@@ -1,38 +1,58 @@
-import { Controller, Post, Body, Get, Param, Query, UseGuards, DefaultValuePipe, ParseIntPipe, NotFoundException } from '@nestjs/common';
-import { InvoicesService } from './invoices.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { UserRole, InvoiceStatus } from '@prisma/client';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Param,
+  Query,
+  UseGuards,
+  DefaultValuePipe,
+  ParseIntPipe,
+} from '@nestjs/common'
+import { InvoicesService } from './invoices.service'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { RolesGuard } from '../auth/guards/roles.guard'
+import { Roles } from '../common/decorators/roles.decorator'
+import { InvoiceStatus } from '@prisma/client'
+import { TenantId } from '../common/decorators/tenant.decorator'
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('invoices')
 export class InvoicesController {
-  constructor(private readonly invoicesService: InvoicesService) {}
+  constructor(private readonly invoicesService: InvoicesService) { }
 
   @Post()
-  @Roles(UserRole.ADMIN, UserRole.EDITOR)
-  async createFromOrder(@Body('orderId') orderId: string) {
-    return this.invoicesService.createFromOrder(orderId);
+  @Roles('ADMIN', 'EDITOR')
+  async createFromOrder(
+    @TenantId() tenantId: string,
+    @Body('orderId') orderId: string
+  ) {
+    return this.invoicesService.createFromOrder(tenantId, orderId)
   }
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER)
+  @Roles('ADMIN', 'EDITOR', 'VIEWER')
   async findAll(
+    @TenantId() tenantId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @Query('status') status?: InvoiceStatus,
+    @Query('status') status?: InvoiceStatus
   ) {
-    return this.invoicesService.findAll(page, limit, status);
+    return this.invoicesService.findAll(tenantId, page, limit, status)
+  }
+
+  @Post(':id/factoring')
+  @Roles('ADMIN', 'EDITOR')
+  async cedeToFactoring(
+    @TenantId() tenantId: string,
+    @Param('id') id: string
+  ) {
+    return this.invoicesService.cedeToFactoring(tenantId, id)
   }
 
   @Get(':id')
-  @Roles(UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER)
-  async findOne(@Param('id') id: string) {
-    const invoice = await this.invoicesService.findOne(id);
-    if (!invoice) {
-      throw new NotFoundException(`Invoice with ID ${id} not found.`);
-    }
-    return invoice;
+  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  async findOne(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.invoicesService.findOne(tenantId, id)
   }
 }

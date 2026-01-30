@@ -1,12 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { InvoicesService } from './invoices.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { DteService } from '../dte/dte.service';
+import { Test, TestingModule } from '@nestjs/testing'
+import { InvoicesService } from './invoices.service'
+import { PrismaService } from '../prisma/prisma.service'
+import { DteService } from '../dte/dte.service'
 
 describe('InvoicesService', () => {
-  let service: InvoicesService;
-  let prismaService: PrismaService;
-  let dteService: DteService;
+  let service: InvoicesService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -25,14 +23,12 @@ describe('InvoicesService', () => {
           },
         },
       ],
-    }).compile();
+    }).compile()
 
-    service = module.get<InvoicesService>(InvoicesService);
-    prismaService = module.get<PrismaService>(PrismaService);
-    dteService = module.get<DteService>(DteService);
-  });
+    service = module.get<InvoicesService>(InvoicesService)
+  })
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-});
+    expect(service).toBeDefined()
+  })
+})
