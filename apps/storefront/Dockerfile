@@ -1,7 +1,7 @@
 
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* turbo.json tsconfig.base.json ./
+COPY package.json package-lock.json turbo.json tsconfig.base.json ./
 COPY packages/ packages/
 COPY apps/storefront/ apps/storefront/
 RUN npm ci
