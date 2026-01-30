@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { apiClient } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { Button, Input } from "@artifact/ui";
-import Link from "next/link";
+import { Loader2, CheckCircle2, ArrowRight } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,7 +27,6 @@ export default function LoginPage() {
   };
 
   const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Auto-slugify: lowercase, replace spaces with hyphens, remove special chars
     const val = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     setFormData(prev => ({ ...prev, slug: val }));
   };
@@ -39,13 +38,11 @@ export default function LoginPage() {
 
     try {
       if (isLogin) {
-        // Login Logic (Stub for now, or real if Auth is ready)
-        // For SaaS demo, we focus on Register
         await apiClient.post('/auth/login', { email: formData.email, password: formData.password });
-        alert("Login exitoso (Simulado/Real)");
+        // Simulating login for demo purposes if backend isn't full auth yet
+        // In real app, we'd store token here.
         router.push('/');
       } else {
-        // Register Logic -> SaaS Onboarding
         const payload = {
           companyName: formData.name,
           email: formData.email,
@@ -54,18 +51,17 @@ export default function LoginPage() {
         };
 
         const res: any = await apiClient.post('/tenants/register', payload);
-        console.log("Registration Success:", res);
 
         if (res.order) {
           setSuccessData(res);
         } else {
-          alert("Cuenta creada exitosamente. Por favor inicia sesión.");
+          // Fallback if no order returned
           setIsLogin(true);
         }
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Ocurrió un error inesperado.");
+      setError(err.message || "Ocurrió un error inesperado al procesar su solicitud.");
     } finally {
       setIsLoading(false);
     }
@@ -73,48 +69,59 @@ export default function LoginPage() {
 
   if (successData) {
     return (
-      <div className="container mx-auto p-4 flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <div className="w-full max-w-lg bg-white p-8 rounded-lg shadow-xl border border-green-100">
+      <div className="relative min-h-[calc(100vh-64px)] flex items-center justify-center p-4">
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50 to-slate-100 " />
+        <div className="absolute inset-x-0 top-[-100px] h-[500px] bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.15),transparent_70%)] blur-3xl" />
+
+        <div className="relative w-full max-w-lg bg-white/80 backdrop-blur-xl p-8 md:p-10 rounded-3xl shadow-2xl ring-1 ring-slate-200/60">
           <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100 mb-4">
-              <svg className="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-emerald-100/50 mb-6 ring-8 ring-emerald-50">
+              <CheckCircle2 className="h-8 w-8 text-emerald-600" />
             </div>
-            <h2 className="text-3xl font-extrabold text-gray-900 mb-2">¡Cuenta Creada!</h2>
-            <p className="text-gray-600 mb-6">
-              Bienvenido a <strong>{successData.tenant.name}</strong>.
+            <h2 className="text-3xl font-display font-bold text-slate-900 mb-3 tracking-tight">¡Cuenta Creada!</h2>
+            <p className="text-slate-600 mb-8 text-lg">
+              Bienvenido a <strong className="text-slate-900">{successData.tenant.name}</strong>.
             </p>
 
-            <div className="bg-blue-50 p-6 rounded-md text-left mb-6 border border-blue-100">
-              <h3 className="text-lg font-semibold text-blue-900 mb-2">Suscripción Pro Pendiente</h3>
-              <p className="text-sm text-blue-800 mb-4">
-                Para activar su cuenta, por favor complete el pago de su suscripción.
-              </p>
-              <div className="flex justify-between items-center text-sm mb-2">
-                <span className="text-gray-600">Orden:</span>
-                <span className="font-mono font-bold">{successData.order?.id?.slice(0, 8).toUpperCase() || 'N/A'}</span>
+            <div className="bg-slate-50/80 p-6 rounded-2xl text-left mb-8 border border-slate-200/60 shadow-sm">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-slate-900">Suscripción Pro</h3>
+                  <p className="text-sm text-slate-500">Activación inmediata tras el pago.</p>
+                </div>
               </div>
-              <div className="flex justify-between items-center text-lg font-bold border-t border-blue-200 pt-2 mt-2">
-                <span className="text-blue-900">Total a Pagar:</span>
-                <span className="text-blue-900">
-                  ${parseInt(successData.order?.grandTotalAmount || 0).toLocaleString('es-CL')}
-                </span>
+
+              <div className="space-y-3 pt-4 border-t border-slate-200/60">
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-slate-500">Orden de Compra</span>
+                  <span className="font-mono font-medium text-slate-700 bg-white px-2 py-1 rounded border border-slate-200">{successData.order?.id?.slice(0, 8).toUpperCase() || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center text-lg font-bold">
+                  <span className="text-slate-900">Total a Pagar</span>
+                  <span className="text-brand">
+                    ${parseInt(successData.order?.grandTotalAmount || 0).toLocaleString('es-CL')}
+                  </span>
+                </div>
               </div>
             </div>
 
             <a
               href={successData.paymentLink || '#'}
               target="_blank"
-              className="w-full block bg-brand hover:bg-brand-dark text-white font-bold py-3 px-4 rounded transition duration-200"
               rel="noreferrer"
+              className="group w-full flex items-center justify-center gap-2 bg-brand hover:bg-brand-dark text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-brand/20 hover:shadow-brand/40 hover:-translate-y-0.5"
             >
-              Pagar Suscripción
+              <span>Ir a Pagar y Activar</span>
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </a>
 
             <button
               onClick={() => { setSuccessData(null); setIsLogin(true); }}
-              className="mt-4 text-sm text-gray-500 hover:text-gray-700 underline"
+              className="mt-6 text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors"
             >
               Volver al inicio
             </button>
@@ -125,23 +132,32 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 flex justify-center items-center min-h-[calc(100vh-200px)]">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-center mb-6">
-          {isLogin ? "Iniciar Sesión" : "Registrar Empresa"}
-        </h2>
+    <div className="relative min-h-[calc(100vh-64px)] flex items-center justify-center p-4">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-white via-slate-50 to-slate-100" />
+      <div className="absolute inset-x-0 top-[-100px] h-[500px] bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.15),transparent_70%)] blur-3xl" />
+
+      <div className="relative w-full max-w-md bg-white/70 backdrop-blur-xl p-8 rounded-3xl shadow-2xl ring-1 ring-slate-200/50">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-display font-bold text-slate-900 tracking-tight">
+            {isLogin ? "Bienvenido de nuevo" : "Comienza gratis"}
+          </h2>
+          <p className="text-slate-500 mt-2 text-sm">
+            {isLogin ? "Accede a tu panel de control ERP" : "Crea tu cuenta y digitaliza tu negocio hoy"}
+          </p>
+        </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200">
+          <div className="mb-6 p-4 bg-red-50/80 backdrop-blur-sm text-red-700 text-sm rounded-xl border border-red-200 shadow-sm animate-in fade-in slide-in-from-top-2">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {!isLogin && (
-            <>
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">Nombre de la Empresa</label>
+            <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <div className="space-y-1.5">
+                <label htmlFor="name" className="block text-sm font-semibold text-slate-700">Nombre de la Empresa</label>
                 <Input
                   type="text"
                   id="name"
@@ -149,22 +165,20 @@ export default function LoginPage() {
                   value={formData.name}
                   onChange={(e) => {
                     handleChange(e);
-                    // Auto-gen slug from name if slug is empty or previously auto-genned
                     if (!formData.slug || formData.slug === formData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')) {
                       const val = e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
                       setFormData(prev => ({ ...prev, name: e.target.value, slug: val }));
-                      return;
                     }
                   }}
                   required={!isLogin}
-                  className="mt-1 block w-full"
-                  placeholder="Mi Pyme SpA"
+                  placeholder="Ej: Comercial Limitada"
+                  className="bg-white/50 border-slate-200 focus:bg-white transition-colors h-11"
                 />
               </div>
-              <div>
-                <label htmlFor="slug" className="block text-sm font-medium text-gray-700">URL del ERP (Slug)</label>
-                <div className="flex mt-1">
-                  <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+              <div className="space-y-1.5">
+                <label htmlFor="slug" className="block text-sm font-semibold text-slate-700">URL del ERP</label>
+                <div className="flex shadow-sm rounded-md">
+                  <span className="inline-flex items-center px-4 rounded-l-md border border-r-0 border-slate-200 bg-slate-50/50 text-slate-500 text-sm font-medium">
                     artifact.cl/
                   </span>
                   <Input
@@ -174,16 +188,17 @@ export default function LoginPage() {
                     value={formData.slug}
                     onChange={handleSlugChange}
                     required={!isLogin}
-                    className="block w-full rounded-none rounded-r-md"
-                    placeholder="mi-pyme"
+                    className="rounded-l-none bg-white/50 border-slate-200 focus:bg-white transition-colors h-11"
+                    placeholder="mi-empresa"
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Identificador único para tu empresa.</p>
+                <p className="text-[11px] text-slate-400 font-medium">Esta será la dirección web de tu plataforma.</p>
               </div>
-            </>
+            </div>
           )}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email Administrador</label>
+
+          <div className="space-y-1.5">
+            <label htmlFor="email" className="block text-sm font-semibold text-slate-700">Email Corporativo</label>
             <Input
               type="email"
               id="email"
@@ -191,12 +206,13 @@ export default function LoginPage() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="mt-1 block w-full"
-              placeholder="admin@empresa.cl"
+              placeholder="nombre@empresa.com"
+              className="bg-white/50 border-slate-200 focus:bg-white transition-colors h-11"
             />
           </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
+
+          <div className="space-y-1.5">
+            <label htmlFor="password" className="block text-sm font-semibold text-slate-700">Contraseña</label>
             <Input
               type="password"
               id="password"
@@ -204,25 +220,36 @@ export default function LoginPage() {
               value={formData.password}
               onChange={handleChange}
               required
-              className="mt-1 block w-full"
               placeholder="••••••••"
+              className="bg-white/50 border-slate-200 focus:bg-white transition-colors h-11"
             />
           </div>
-          <Button type="submit" className="w-full py-2" disabled={isLoading}>
-            {isLoading ? "Procesando..." : (isLogin ? "Iniciar Sesión" : "Crear Cuenta")}
+
+          <Button
+            type="submit"
+            className="w-full h-12 text-base font-semibold bg-brand hover:bg-brand-dark shadow-lg shadow-brand/20 hover:shadow-brand/30 transition-all hover:-translate-y-0.5"
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Procesando...</>
+            ) : (
+              isLogin ? "Iniciar Sesión" : "Crear Cuenta Gratis"
+            )}
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-600">
-          {isLogin ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"}{" "}
-          <button
-            type="button"
-            onClick={() => { setIsLogin((prev) => !prev); setError(""); }}
-            className="font-medium text-brand hover:text-brand-dark"
-          >
-            {isLogin ? "Regístrate aquí" : "Inicia sesión"}
-          </button>
-        </p>
+        <div className="mt-8 text-center pt-6 border-t border-slate-200/60">
+          <p className="text-sm text-slate-600">
+            {isLogin ? "¿Aún no tienes cuenta?" : "¿Ya tienes una cuenta?"}{" "}
+            <button
+              type="button"
+              onClick={() => { setIsLogin((prev) => !prev); setError(""); }}
+              className="font-bold text-brand hover:text-brand-dark hover:underline transition-colors"
+            >
+              {isLogin ? "Crea una ahora" : "Inicia sesión"}
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,24 +1,30 @@
-FROM node:20-slim
 
-ENV NODE_ENV=development
+FROM node:20-alpine AS builder
+WORKDIR /app
+# Copy shared files
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* turbo.json tsconfig.base.json ./
+# Copy workspace packages
+COPY packages/ packages/
+# Copy application source
+COPY apps/backend/ apps/backend/
 
-# Herramientas necesarias para dependencias nativas y monitoreo
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ procps \
-  && rm -rf /var/lib/apt/lists/*
+# Install dependencies
+RUN npm ci
 
+# Build the application
+RUN npx turbo run build --filter=@artifact/backend...
+
+# Runner stage
+FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Copiar configuración del monorepo y el código del backend
-COPY package.json yarn.lock turbo.json tsconfig.base.json ./
-COPY packages ./packages
-COPY apps/backend ./apps/backend
+# Copy built artifacts and dependencies
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/backend/dist ./dist
+COPY --from=builder /app/apps/backend/package.json ./package.json
+COPY --from=builder /app/apps/backend/prisma ./prisma
 
-# Instalar dependencias de workspaces (ejecuta prisma generate via postinstall)
-RUN corepack enable \
-  && corepack prepare yarn@1.22.22 --activate \
-  && yarn install --frozen-lockfile
+# Generate Prisma Client in runner
+RUN npx prisma generate
 
-EXPOSE 3001
-
-CMD ["yarn", "workspace", "@artifact/backend", "start:dev"]
+CMD ["node", "dist/main.js"]

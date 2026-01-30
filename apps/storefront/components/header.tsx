@@ -12,9 +12,9 @@ import CartDrawer from "./store/CartDrawer";
 
 const NAV_LINKS = [
   { label: "Productos", href: "/products" },
-  { label: "Soluciones", href: "/solutions" },
-  { label: "Precios", href: "/pricing" },
-  { label: "Contacto", href: "/contact" },
+  // { label: "Soluciones", href: "/solutions" },
+  // { label: "Precios", href: "/pricing" },
+  // { label: "Contacto", href: "/contact" },
 ];
 
 export function Header() {

@@ -1,23 +1,18 @@
-FROM node:20-slim
 
+FROM node:20-alpine AS builder
 WORKDIR /app
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* turbo.json tsconfig.base.json ./
+COPY packages/ packages/
+COPY apps/storefront/ apps/storefront/
+RUN npm ci
+RUN npx turbo run build --filter=storefront...
 
-ENV NODE_ENV=development
-
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ \
-  && rm -rf /var/lib/apt/lists/*
-
-COPY package.json yarn.lock turbo.json tsconfig.base.json ./
-COPY packages ./packages
-COPY apps/storefront ./apps/storefront
-
-RUN corepack enable \
-  && corepack prepare yarn@1.22.22 --activate \
-  && yarn install --frozen-lockfile
-
+FROM node:20-alpine AS runner
 WORKDIR /app
+ENV NODE_ENV production
+COPY --from=builder /app/apps/storefront/public ./public
+COPY --from=builder /app/apps/storefront/.next/standalone ./
+COPY --from=builder /app/apps/storefront/.next/static ./apps/storefront/.next/static
 
 EXPOSE 3000
-
-CMD ["yarn", "workspace", "@artifact/storefront", "dev"]
+CMD ["node", "apps/storefront/server.js"]

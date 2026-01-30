@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/
 import { SubscriptionsService } from './subscriptions.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { ApiKeyGuard } from '../auth/guards/api-key.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 
 @Controller('subscriptions')
@@ -20,5 +21,12 @@ export class SubscriptionsController {
     async manualRenewal() {
         await this.subscriptionsService.processRenewals();
         return { message: 'Renewal process triggered manually' };
+    }
+
+    @Post('cron-renewal')
+    @UseGuards(ApiKeyGuard)
+    async cronRenewal() {
+        await this.subscriptionsService.processRenewals();
+        return { message: 'Renewal cron triggered successfully' };
     }
 }
