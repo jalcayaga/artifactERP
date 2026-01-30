@@ -5,7 +5,7 @@ COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* turbo.json tscon
 COPY packages/ packages/
 COPY apps/storefront/ apps/storefront/
 RUN npm ci
-RUN npx turbo run build --filter=storefront...
+RUN npx turbo run build --filter=@artifact/storefront...
 
 FROM node:20-alpine AS runner
 WORKDIR /app
