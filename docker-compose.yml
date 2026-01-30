@@ -2,11 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    build:
-      context: .
-      dockerfile: apps/backend/Dockerfile
-    container_name: artifact_backend
-    restart: unless-stopped
+    image: ghcr.io/jalcayaga/artifacterp-backend:latest
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - DIRECT_URL=${DIRECT_URL}
@@ -17,47 +13,45 @@ services:
       - PORT=3000
     networks:
       - traefik_public
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.artifact-backend.rule=Host(`api.artifact.cl`)"
-      - "traefik.http.routers.artifact-backend.entrypoints=websecure"
-      - "traefik.http.routers.artifact-backend.tls.certresolver=myresolver"
-      - "traefik.http.services.artifact-backend.loadbalancer.server.port=3000"
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.artifact-backend.rule=Host(`api.artifact.cl`)"
+        - "traefik.http.routers.artifact-backend.entrypoints=websecure"
+        - "traefik.http.routers.artifact-backend.tls.certresolver=myresolver"
+        - "traefik.http.services.artifact-backend.loadbalancer.server.port=3000"
 
   admin:
-    build:
-      context: .
-      dockerfile: apps/admin/Dockerfile
-    container_name: artifact_admin
-    restart: unless-stopped
+    image: ghcr.io/jalcayaga/artifacterp-admin:latest
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     networks:
       - traefik_public
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.artifact-admin.rule=Host(`app.artifact.cl`)"
-      - "traefik.http.routers.artifact-admin.entrypoints=websecure"
-      - "traefik.http.routers.artifact-admin.tls.certresolver=myresolver"
-      - "traefik.http.services.artifact-admin.loadbalancer.server.port=3000"
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.artifact-admin.rule=Host(`app.artifact.cl`)"
+        - "traefik.http.routers.artifact-admin.entrypoints=websecure"
+        - "traefik.http.routers.artifact-admin.tls.certresolver=myresolver"
+        - "traefik.http.services.artifact-admin.loadbalancer.server.port=3000"
 
   storefront:
-    build:
-      context: .
-      dockerfile: apps/storefront/Dockerfile
-    container_name: artifact_storefront
-    restart: unless-stopped
+    image: ghcr.io/jalcayaga/artifacterp-storefront:latest
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - NEXT_PUBLIC_TENANT_ID_HEADER=x-tenant-slug
     networks:
       - traefik_public
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.artifact-storefront.rule=Host(`artifact.cl`)"
-      - "traefik.http.routers.artifact-storefront.entrypoints=websecure"
-      - "traefik.http.routers.artifact-storefront.tls.certresolver=myresolver"
-      - "traefik.http.services.artifact-storefront.loadbalancer.server.port=3000"
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.artifact-storefront.rule=Host(`artifact.cl`)"
+        - "traefik.http.routers.artifact-storefront.entrypoints=websecure"
+        - "traefik.http.routers.artifact-storefront.tls.certresolver=myresolver"
+        - "traefik.http.services.artifact-storefront.loadbalancer.server.port=3000"
 
 networks:
   traefik_public:
