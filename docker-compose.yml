@@ -1,72 +1,64 @@
 version: '3.8'
 
 services:
-  postgres_db:
-    image: postgres:15
-    container_name: subred_erp_postgres_db_prod
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    volumes:
-      - subred_erp_postgres_data_prod:/var/lib/postgresql/data
-    networks:
-      - internal-net
-    restart: unless-stopped
-
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
-    image: subred-erp-backend
-    container_name: subred-erp-backend-prod
-    env_file:
-      - ./backend/.env
-    depends_on:
-      - postgres_db
+      context: .
+      dockerfile: apps/backend/Dockerfile
+    container_name: artifact_backend
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+      - STOREFRONT_URL=${STOREFRONT_URL}
+      - ADMIN_URL=${ADMIN_URL}
+      - PORT=3000
     networks:
-      - internal-net
-      - traefik-public
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.subred-backend.rule=Host(`srapi.subred.cl`)"
-        - "traefik.http.routers.subred-backend.entrypoints=websecure"
-        - "traefik.http.services.subred-backend.loadbalancer.server.port=3001"
-        - "traefik.http.routers.subred-backend.tls.certresolver=myresolver"
+      - traefik_public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.artifact-backend.rule=Host(`api.artifact.cl`)"
+      - "traefik.http.routers.artifact-backend.entrypoints=websecure"
+      - "traefik.http.routers.artifact-backend.tls.certresolver=myresolver"
+      - "traefik.http.services.artifact-backend.loadbalancer.server.port=3000"
+
+  admin:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile
+    container_name: artifact_admin
+    restart: unless-stopped
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    networks:
+      - traefik_public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.artifact-admin.rule=Host(`app.artifact.cl`)"
+      - "traefik.http.routers.artifact-admin.entrypoints=websecure"
+      - "traefik.http.routers.artifact-admin.tls.certresolver=myresolver"
+      - "traefik.http.services.artifact-admin.loadbalancer.server.port=3000"
 
   storefront:
     build:
-      context: ./apps/storefront
-      dockerfile: Dockerfile
-    image: subred-erp-storefront
-    container_name: subred-erp-storefront-prod
+      context: .
+      dockerfile: apps/storefront/Dockerfile
+    container_name: artifact_storefront
+    restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: https://srapi.subred.cl
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_TENANT_ID_HEADER=x-tenant-slug
     networks:
-      - traefik-public
-    deploy:
-      replicas: 1
-      placement:
-        constraints:
-          - node.role == manager
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.subred-frontend.rule=Host(`sr.subred.cl`)"
-        - "traefik.http.routers.subred-frontend.entrypoints=websecure"
-        - "traefik.http.services.subred-frontend.loadbalancer.server.port=3000"
-        - "traefik.http.routers.subred-frontend.tls.certresolver=myresolver"
-
-volumes:
-  subred_erp_postgres_data_prod:
-    driver: local
+      - traefik_public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.artifact-storefront.rule=Host(`artifact.cl`)"
+      - "traefik.http.routers.artifact-storefront.entrypoints=websecure"
+      - "traefik.http.routers.artifact-storefront.tls.certresolver=myresolver"
+      - "traefik.http.services.artifact-storefront.loadbalancer.server.port=3000"
 
 networks:
-  internal-net:
-    driver: bridge
-  traefik-public:
+  traefik_public:
     external: true
