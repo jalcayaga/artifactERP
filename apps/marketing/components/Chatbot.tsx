@@ -16,6 +16,37 @@ const TypingIndicator = () => (
 );
 
 const Chatbot = () => {
+    const chatwootToken = process.env.NEXT_PUBLIC_CHATWOOT_TOKEN;
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    // Load Chatwoot Script
+    useEffect(() => {
+        if (chatwootToken && isMounted) {
+            // @ts-ignore
+            (function (d, t) {
+                var BASE_URL = process.env.NEXT_PUBLIC_CHATWOOT_BASE_URL || "https://chat.artifact.cl";
+                var g = d.createElement(t) as HTMLScriptElement;
+                var s = d.getElementsByTagName(t)[0] as HTMLScriptElement;
+                g.src = BASE_URL + "/packs/js/sdk.js";
+                g.defer = true;
+                g.async = true;
+                if (s && s.parentNode) s.parentNode.insertBefore(g, s);
+                g.onload = function () {
+                    // @ts-ignore
+                    window.chatwootSDK.run({
+                        websiteToken: chatwootToken,
+                        baseUrl: BASE_URL
+                    })
+                }
+            })(document, "script");
+        }
+    }, [chatwootToken, isMounted]);
+
+    // State for Mock Chatbot
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
@@ -29,9 +60,9 @@ const Chatbot = () => {
 
     useEffect(scrollToBottom, [messages, isTyping]);
 
-    // Staggered welcome messages on open
+    // Staggered welcome messages on open (Mock Mode only)
     useEffect(() => {
-        if (isOpen) {
+        if (isOpen && !chatwootToken) {
             setMessages([]); // Clear previous conversation
             setShowOptions(true);
             setIsTyping(true);
@@ -47,7 +78,11 @@ const Chatbot = () => {
                 }, 800);
             }, 1200);
         }
-    }, [isOpen]);
+    }, [isOpen, chatwootToken]);
+
+    if (chatwootToken) {
+        return null; // Chatwoot renders its own launcher
+    }
 
     const responses: { [key: string]: { message: string } } = {
         'quiero-diagnostico': {

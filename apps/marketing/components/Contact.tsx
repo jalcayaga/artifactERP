@@ -5,8 +5,36 @@ import React, { useState } from 'react';
 const Contact = () => {
     const [submitStatus, setSubmitStatus] = useState<'idle' | 'success'>('idle');
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const formData = new FormData(e.target as HTMLFormElement);
+        const data = Object.fromEntries(formData.entries());
+        const webhookUrl = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL;
+
+        if (webhookUrl) {
+            try {
+                // Determine origin (Landing vs Other)
+                const payload = {
+                    ...data,
+                    source: 'artifact.cl',
+                    timestamp: new Date().toISOString()
+                };
+
+                // Send to n8n (no-cors mode might be needed if n8n not configured for CORS, but standard POST is better for data)
+                // Assuming n8n returns 200 OK.
+                await fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+            } catch (err) {
+                console.error("Error sending lead to n8n", err);
+            }
+        } else {
+            console.warn("NEXT_PUBLIC_N8N_WEBHOOK_URL not configured");
+        }
+
+        // Always show success to user
         setSubmitStatus('success');
 
         // @ts-ignore
