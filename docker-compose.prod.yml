@@ -1,0 +1,168 @@
+version: '3.8'
+
+services:
+  backend:
+    image: ghcr.io/jalcayaga/artifacterp-backend:latest
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+      - STOREFRONT_URL=${STOREFRONT_URL}
+      - ADMIN_URL=${ADMIN_URL}
+      - PORT=3000
+    networks:
+      - MangoNet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.artifact-backend.rule=Host(`api.artifact.cl`)"
+      - "traefik.http.routers.artifact-backend.entrypoints=websecure"
+      - "traefik.http.routers.artifact-backend.tls.certresolver=myresolver"
+      - "traefik.http.services.artifact-backend.loadbalancer.server.port=3000"
+
+  admin:
+    image: ghcr.io/jalcayaga/artifacterp-admin:latest
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    networks:
+      - MangoNet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.artifact-admin.rule=Host(`app.artifact.cl`)"
+      - "traefik.http.routers.artifact-admin.entrypoints=websecure"
+      - "traefik.http.routers.artifact-admin.tls.certresolver=myresolver"
+      - "traefik.http.services.artifact-admin.loadbalancer.server.port=3000"
+
+  storefront:
+    image: ghcr.io/jalcayaga/artifacterp-storefront:latest
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_TENANT_ID_HEADER=x-tenant-slug
+      - API_URL=http://backend:3000
+    networks:
+      - MangoNet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.artifact-storefront.rule=Host(`store.artifact.cl`)"
+      - "traefik.http.routers.artifact-storefront.entrypoints=websecure"
+      - "traefik.http.routers.artifact-storefront.tls.certresolver=myresolver"
+      - "traefik.http.services.artifact-storefront.loadbalancer.server.port=3000"
+
+  marketing:
+    image: ghcr.io/jalcayaga/artifacterp-marketing:latest
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    environment:
+      - API_URL=http://backend:3000
+      - NEXT_PUBLIC_API_URL=http://backend:3000
+      - NEXT_PUBLIC_N8N_WEBHOOK_URL=${NEXT_PUBLIC_N8N_WEBHOOK_URL}
+      - NEXT_PUBLIC_CHATWOOT_TOKEN=${NEXT_PUBLIC_CHATWOOT_TOKEN}
+    networks:
+      - MangoNet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.artifact-marketing.rule=Host(`artifact.cl`)"
+      - "traefik.http.routers.artifact-marketing.entrypoints=websecure"
+      - "traefik.http.routers.artifact-marketing.tls.certresolver=myresolver"
+      - "traefik.http.services.artifact-marketing.loadbalancer.server.port=3000"
+
+  chatwoot_db:
+    image: postgres:12
+    volumes:
+      - chatwoot_db_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=chatwoot
+      - POSTGRES_USER=chatwoot
+      - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD}
+    networks:
+      - MangoNet
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  chatwoot_redis:
+    image: redis:6.2-alpine
+    volumes:
+      - chatwoot_redis_data:/data
+    networks:
+      - MangoNet
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  chatwoot_app:
+    image: chatwoot/chatwoot:latest
+    environment:
+      - FRONTEND_URL=https://chat.artifact.cl
+      - SECRET_KEY_BASE=${CHATWOOT_SECRET_KEY}
+      - POSTGRES_DATABASE=chatwoot
+      - POSTGRES_HOST=chatwoot_db
+      - POSTGRES_USERNAME=chatwoot
+      - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD}
+      - REDIS_URL=redis://chatwoot_redis:6379
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+    networks:
+      - MangoNet
+    depends_on:
+      - chatwoot_db
+      - chatwoot_redis
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.chatwoot.rule=Host(`chat.artifact.cl`)"
+      - "traefik.http.routers.chatwoot.entrypoints=websecure"
+      - "traefik.http.routers.chatwoot.tls.certresolver=myresolver"
+      - "traefik.http.services.chatwoot.loadbalancer.server.port=3000"
+
+  chatwoot_sidekiq:
+    image: chatwoot/chatwoot:latest
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    environment:
+      - FRONTEND_URL=https://chat.artifact.cl
+      - SECRET_KEY_BASE=${CHATWOOT_SECRET_KEY}
+      - POSTGRES_DATABASE=chatwoot
+      - POSTGRES_HOST=chatwoot_db
+      - POSTGRES_USERNAME=chatwoot
+      - POSTGRES_PASSWORD=${CHATWOOT_DB_PASSWORD}
+      - REDIS_URL=redis://chatwoot_redis:6379
+      - NODE_ENV=production
+      - RAILS_ENV=production
+      - INSTALLATION_ENV=docker
+    networks:
+      - MangoNet
+    depends_on:
+      - chatwoot_db
+      - chatwoot_redis
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+networks:
+  MangoNet:
+    external: true
+
+volumes:
+  chatwoot_db_data:
+  chatwoot_redis_data:
