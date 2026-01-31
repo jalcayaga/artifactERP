@@ -44,7 +44,7 @@ const Header = () => {
                     </a>
 
                     <a
-                        href="http://localhost:3001"
+                        href={process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001"}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="cta-button"
