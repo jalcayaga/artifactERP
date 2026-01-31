@@ -13,6 +13,8 @@ async function main() {
       name: 'Artifact Platform',
       displayName: 'Artifact',
       logoUrl: process.env.DEFAULT_TENANT_LOGO || null,
+      primaryDomain: 'artifact.cl',
+      domains: ['artifact.cl'],
     },
     {
       slug: 'subred',
@@ -31,11 +33,16 @@ async function main() {
   for (const tenantData of tenantsToSeed) {
     await prisma.tenant.upsert({
       where: { slug: tenantData.slug },
-      update: {},
+      update: {
+        primaryDomain: tenantData.primaryDomain,
+        domains: tenantData.domains,
+      },
       create: {
         slug: tenantData.slug,
         name: tenantData.name,
         displayName: tenantData.displayName,
+        primaryDomain: tenantData.primaryDomain,
+        domains: tenantData.domains,
         settings: {},
         branding: {
           create: {
