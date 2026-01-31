@@ -103,7 +103,8 @@ export default function RegisterPage() {
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             // Call Backend API
-            const response = await fetch('http://localhost:3002/tenants/register', {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+            const response = await fetch(`${apiUrl}/tenants/register`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
