@@ -48,7 +48,7 @@ const Header = () => {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="cta-button"
-                        style={{ padding: '8px 20px', fontSize: '0.9rem' }}
+                        style={{ padding: '8px 20px', fontSize: '0.9rem', color: '#00ff7f', borderColor: '#00ff7f' }}
                     >
                         Ingresar
                     </a>
