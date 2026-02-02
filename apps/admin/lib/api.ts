@@ -22,7 +22,7 @@ class ApiClient {
   ): Promise<T> {
     const url = `${resolveBaseUrl()}${endpoint}`;
     if (typeof window !== 'undefined') {
-      console.log('API Request:', options.method, url, 'Base resolved from:', resolveBaseUrl());
+      console.log('API Request [Build: 15:58]:', options.method, url, 'Base resolved from:', resolveBaseUrl(), 'Source:', process.env.NEXT_PUBLIC_API_URL);
     }
 
     const headers: HeadersInit = {
