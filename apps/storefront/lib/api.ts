@@ -21,7 +21,10 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${resolveBaseUrl()}${endpoint}`;
-    
+    if (typeof window !== 'undefined') {
+      console.log('Storefront API Request [Build: 16:47]:', options.method, url, 'Source:', process.env.NEXT_PUBLIC_API_URL);
+    }
+
     const response = await fetch(url, {
       ...options,
       headers: {
