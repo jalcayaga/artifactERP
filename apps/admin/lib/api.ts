@@ -21,6 +21,9 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${resolveBaseUrl()}${endpoint}`;
+    if (typeof window !== 'undefined') {
+      console.log('API Request:', options.method, url, 'Base resolved from:', resolveBaseUrl());
+    }
 
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
