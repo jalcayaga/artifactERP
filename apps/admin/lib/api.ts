@@ -5,7 +5,7 @@
 const PUBLIC_API_URL =
   process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
 const INTERNAL_API_URL =
-  process.env.API_URL_INTERNAL || PUBLIC_API_URL;
+  process.env.API_URL_INTERNAL || process.env.API_URL || PUBLIC_API_URL;
 
 const resolveBaseUrl = () =>
   typeof window === 'undefined' ? INTERNAL_API_URL : PUBLIC_API_URL;
