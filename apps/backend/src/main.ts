@@ -20,6 +20,11 @@ async function bootstrap() {
       /^(http:\/\/|https:\/\/)?([a-z0-9-]+\.)*localhost:3000$/,
       /^(http:\/\/|https:\/\/)?([a-z0-9-]+\.)*localhost:3001$/,
       /^(http:\/\/|https:\/\/)?([a-z0-9-]+\.)*localhost:3003$/,
+      'https://app.artifact.cl',
+      'https://store.artifact.cl',
+      'https://marketing.artifact.cl',
+      'https://artifact.cl',
+      /\.artifact\.cl$/,
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   })
