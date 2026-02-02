@@ -106,7 +106,7 @@ export class ProductsService {
     })
 
     const assetBaseUrl =
-      process.env.PUBLIC_ASSET_BASE_URL || 'http://localhost:3001'
+      process.env.PUBLIC_ASSET_BASE_URL || 'http://localhost:3002'
     const dataWithResolvedImages = assetBaseUrl
       ? data.map((product) => ({
         ...product,

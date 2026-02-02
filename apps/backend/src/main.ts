@@ -65,7 +65,7 @@ async function bootstrap() {
       },
       'JWT-auth' // Este nombre se usará en los controladores
     )
-    .addServer('http://localhost:3002', 'Servidor de desarrollo')
+    .addServer(process.env.PUBLIC_API_URL || 'http://localhost:3002', 'Servidor Principal')
     .build()
 
   const document = SwaggerModule.createDocument(app, config)

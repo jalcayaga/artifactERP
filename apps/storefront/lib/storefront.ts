@@ -73,7 +73,7 @@ function mapProduct(p: any): Product {
  */
 export async function getTenantTheme(host: string): Promise<TenantTheme | null> {
   try {
-    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
     // Ensure we use the container URL if on server
     const res = await fetch(`${apiUrl}/tenants/public/resolve?host=${host.split(':')[0]}`, {
       next: { revalidate: 3600 }

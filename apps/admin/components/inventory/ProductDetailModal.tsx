@@ -153,11 +153,10 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 {product.name}
               </h2>
               <span
-                className={`mt-1 px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                  product.productType === 'PRODUCT'
+                className={`mt-1 px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${product.productType === 'PRODUCT'
                     ? 'bg-primary/10 text-primary'
                     : 'bg-secondary/10 text-secondary-foreground'
-                }`}
+                  }`}
               >
                 {product.productType}
               </span>
@@ -221,7 +220,7 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                 icon={DocumentTextIcon}
                 value={
                   <a
-                    href={`http://localhost:3001${product.technicalSheetUrl}`}
+                    href={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002'}${product.technicalSheetUrl}`}
                     target='_blank'
                     rel='noopener noreferrer'
                     className='inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary'

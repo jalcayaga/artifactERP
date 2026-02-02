@@ -507,7 +507,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <div className='flex items-center gap-3 mt-2'>
                 <DocumentTextIcon className='w-5 h-5 text-muted-foreground' />
                 <a
-                  href={`http://localhost:3001${existingTechnicalSheetUrl}`}
+                  href={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002'}${existingTechnicalSheetUrl}`}
                   target='_blank'
                   rel='noopener noreferrer'
                   className='text-sm font-medium text-primary hover:underline'
