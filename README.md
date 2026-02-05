@@ -148,8 +148,9 @@ El sistema está integrado con el proveedor de Documentos Tributarios Electróni
 - ✅ **Multi-tenancy**: Implementado con middleware de resolución de tenant
 - ✅ **Autenticación**: JWT con 5 roles (SUPERADMIN, ADMIN, EDITOR, VIEWER, CLIENT)
 - ✅ **Documentación API**: Swagger disponible en `/api/docs`
-- ✅ **Storefront**: UI completa implementada (Next.js) 
-- ✅ **Admin Panel**: UI completa implementada (Next.js)
+- ✅ **Storefront**: UI completa implementada (Next.js) - *Plantilla de eCommerce para clientes SaaS*.
+- ✅ **Admin Panel**: UI completa implementada (Next.js) - *ERP de gestión*.
+- ✅ **Marketing Site**: Nueva aplicación en `/apps/marketing` - *Landing Corporativa de Artifact*.
 
 ### Métricas del Código
 
@@ -400,29 +401,26 @@ Se ha completado la implementación de la capa visual para las aplicaciones `sto
 
 #### Configuración General
 
--   **Gestión de Puertos**: `storefront` (3000), `admin` (3001), `backend` (3002) configurados para evitar conflictos.
--   **Estilo Global**: Tailwind CSS configurado en ambas aplicaciones.
+-   **Gestión de Puertos**:
+    - `marketing` (3000): Landing Corporativa (`artifact.cl`)
+    - `storefront` (3001): Plantilla eCommerce Cliente (`store.artifact.cl`)
+    - `admin` (3002): ERP (`app.artifact.cl`)
+    - `backend` (3333): API NestJS
+-   **Estilo Global**: Tailwind CSS configurado en todas las aplicaciones.
 -   **Temas Dinámicos**: `theme.ts` creado e inyectado en `layout.tsx` para branding (colores, logo, radio de bordes, fuente).
 -   **Resolución de Módulos**: `tsconfig.json` configurado para alias de rutas (`@/*`).
 -   **Gestión de Estado**: TanStack Query para fetching de datos y Zustand para estado local (carrito).
 -   **Mocks**: Se eliminó la configuración de MSW por solicitud, las aplicaciones ahora intentan conectar directamente al backend.
 
-#### Storefront (`apps/storefront`)
+#### Marketing (`apps/marketing`)
+-   **Propósito**: Sitio web corporativo de Artifact. Vende la "Transformación Digital".
+-   **Estructura**: `Home`, `Nosotros`, `Servicios`, `Contacto`.
+-   **Estilo**: Branding corporativo fuerte, ventas B2B.
 
--   **Estructura de Páginas**:
-    -   `/` (Home): Página principal con `HeroSection` y `ProductGrid`.
-    -   `/products`: Listado de productos (PLP) con paginación y filtros dummy.
-    -   `/products/[handle]`: Detalles del producto (PDP) con galería, precio, selector de cantidad y botón "Agregar al Carrito".
-    -   `/cart`: Página del carrito con listado de ítems, totales y acciones (eliminar, vaciar, proceder al pago).
-    -   `/checkout`: Formulario de checkout dummy sin procesamiento real.
-    -   `/login`: UI básica para iniciar sesión y registrarse.
--   **Componentes de UI**:
-    -   `Header`: Con logo dinámico, navegación principal, botón de carrito y login.
-    -   `Footer`: Con enlaces básicos.
-    -   `HeroSection`: Sección destacada en la página de inicio.
-    -   `ProductCard`, `ProductGrid`, `Price`, `AddToCartButton`, `CartDrawer`.
-    -   Componentes genéricos (`Button`, `Input`, `Badge`, `Drawer`, `Modal`).
--   **Funcionalidad de Carrito**: Implementado con el hook `useCart` de Zustand, con persistencia en `localStorage`.
+#### Storefront (`apps/storefront`)
+-   **Propósito**: Plantilla de tienda online que se despliega para CADA cliente SaaS.
+-   **Arquitectura**: Multi-tenant. El contenido (Productos, Nombre de Tienda) cambia dinámicamente según el dominio o tenant.
+-   **Homepage**: Hero dinámico "Pro" (Tu Tienda) + Catálogo de Productos.
 
 #### Admin Panel (`apps/admin`)
 

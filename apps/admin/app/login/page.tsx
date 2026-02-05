@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@artifact/core/client'; // Use the new Supabase hook
 import { Button, Input, Card, CardHeader, CardTitle, CardContent, CardFooter } from '@artifact/ui';
+import ParticleBackground from '@/components/ParticleBackground';
 import { Mail, Loader2 } from 'lucide-react';
 
 const GoogleIcon = () => (
@@ -47,24 +48,25 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2 bg-slate-950 text-white">
+    <div className="min-h-screen grid lg:grid-cols-2 relative bg-black">
+      <ParticleBackground />
+
       {/* Branding - Admin Side */}
-      <div className="hidden lg:flex flex-col justify-center items-center bg-slate-900 border-r border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.1),transparent_70%)]" />
+      <div className="hidden lg:flex flex-col justify-center items-center relative overflow-hidden z-10 bg-black/40 backdrop-blur-sm border-r border-white/5">
         <div className="relative z-10 text-center p-12">
-          <div className="w-24 h-24 bg-cyan-500 rounded-3xl mx-auto mb-8 flex items-center justify-center transform -rotate-3 shadow-[0_0_40px_rgba(6,182,212,0.3)]">
-            <span className="text-4xl font-bold text-black">A</span>
+          <div className="w-24 h-24 bg-brand/20 border border-brand/30 rounded-3xl mx-auto mb-8 flex items-center justify-center transform -rotate-3 shadow-[0_0_40px_rgba(0,224,116,0.2)]">
+            <span className="text-4xl font-bold text-white">A</span>
           </div>
-          <h1 className="text-4xl font-bold tracking-tight mb-4">Panel de Administración</h1>
-          <p className="text-lg text-slate-400 max-w-sm mx-auto">
+          <h1 className="text-4xl font-bold tracking-tight mb-4 text-white">Panel de Administración</h1>
+          <p className="text-lg text-neutral-400 max-w-sm mx-auto">
             Control total de tu negocio. Inventario, ventas y facturación en un solo lugar.
           </p>
         </div>
       </div>
 
       {/* Login Form */}
-      <div className="flex items-center justify-center p-6 lg:p-12">
-        <Card className="w-full max-w-md bg-white/5 border border-white/10 backdrop-blur-xl">
+      <div className="flex items-center justify-center p-6 lg:p-12 relative z-10">
+        <Card className="w-full max-w-md bg-black/60 border border-white/10 backdrop-blur-xl shadow-2xl">
           <CardHeader className="text-center pb-8">
             <CardTitle className="text-2xl font-bold mb-2 text-white">Bienvenido de nuevo</CardTitle>
             <p className="text-slate-400">Accede a Artifact ERP</p>

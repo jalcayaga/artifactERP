@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@artifact/core/client';
 import { Button } from '@artifact/ui';
 import { Eye, EyeOff } from 'lucide-react';
+import ParticleBackground from '@/components/ParticleBackground';
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -66,23 +67,17 @@ export default function LoginPage() {
   ];
 
   return (
-    <div className="min-h-screen grid lg:grid-cols-2">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-black relative">
+      <ParticleBackground />
 
-      {/* LEFT SIDE - Marketing */}
-      <div className="hidden lg:flex flex-col justify-center items-center bg-gradient-to-br from-slate-950 via-slate-900 to-black p-12 relative overflow-hidden">
-
-        {/* Animated Background */}
-        <div className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-brand/20 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob"></div>
-          <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-emerald-500/20 rounded-full mix-blend-multiply filter blur-3xl opacity-40 animate-blob animation-delay-2000"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-brand/10 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
-        </div>
+      {/* LEFT SIDE - Marketing (Transparent to show Background) */}
+      <div className="hidden lg:flex flex-col justify-center items-center p-12 relative overflow-hidden z-10 bg-black/40 backdrop-blur-sm border-r border-white/10">
 
         <div className="relative z-10 max-w-lg w-full">
           {/* Logo */}
           <div className="flex items-center gap-3 mb-16">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand to-emerald-400 flex items-center justify-center shadow-2xl shadow-brand/50 rotate-3 hover:rotate-0 transition-transform duration-300">
-              <span className="text-3xl font-bold text-black">A</span>
+            <div className="w-14 h-14 rounded-2xl bg-brand/20 border border-brand/30 flex items-center justify-center shadow-2xl shadow-brand/50 rotate-3 hover:rotate-0 transition-transform duration-300">
+              <span className="text-3xl font-bold text-white">A</span>
             </div>
             <span className="text-3xl font-bold text-white tracking-tight">Artifact</span>
           </div>
@@ -91,11 +86,11 @@ export default function LoginPage() {
           <div className="mb-16">
             <h1 className="text-6xl font-bold text-white mb-6 leading-[1.1]">
               Tu negocio,
-              <span className="block bg-gradient-to-r from-brand to-emerald-400 bg-clip-text text-transparent">
+              <span className="block text-brand opacity-90">
                 digitalizado
               </span>
             </h1>
-            <p className="text-xl text-slate-400 leading-relaxed">
+            <p className="text-xl text-neutral-400 leading-relaxed">
               Plataforma unificada para e-commerce, inventario y facturación.
             </p>
           </div>
@@ -104,32 +99,32 @@ export default function LoginPage() {
           <div className="grid grid-cols-2 gap-8 mb-16">
             {features.map((feature, idx) => (
               <div key={idx} className="space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-brand/20 to-emerald-500/20 border border-brand/30 flex items-center justify-center text-4xl backdrop-blur-sm">
+                <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl backdrop-blur-sm">
                   {feature.icon}
                 </div>
                 <h3 className="font-bold text-white text-base">{feature.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{feature.description}</p>
+                <p className="text-sm text-neutral-500 leading-relaxed">{feature.description}</p>
               </div>
             ))}
           </div>
 
           {/* Social Proof */}
-          <div className="flex items-center gap-8 text-sm text-slate-500">
+          <div className="flex items-center gap-8 text-sm text-neutral-500">
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-brand/20 flex items-center justify-center">
-                <span className="text-brand text-xs">✓</span>
+              <div className="w-5 h-5 rounded-full bg-brand/10 flex items-center justify-center text-brand">
+                ✓
               </div>
               <span>Certificado SII</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-brand/20 flex items-center justify-center">
-                <span className="text-brand text-xs">✓</span>
+              <div className="w-5 h-5 rounded-full bg-brand/10 flex items-center justify-center text-brand">
+                ✓
               </div>
               <span>SSL Seguro</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-full bg-brand/20 flex items-center justify-center">
-                <span className="text-brand text-xs">✓</span>
+              <div className="w-5 h-5 rounded-full bg-brand/10 flex items-center justify-center text-brand">
+                ✓
               </div>
               <span>Soporte 24/7</span>
             </div>
@@ -138,29 +133,29 @@ export default function LoginPage() {
       </div>
 
       {/* RIGHT SIDE - Login Form */}
-      <div className="flex items-center justify-center p-6 lg:p-12 bg-black">
+      <div className="flex items-center justify-center p-6 lg:p-12 relative z-10">
         <div className="w-full max-w-md">
 
           {/* Mobile Logo */}
           <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-brand to-emerald-400 mb-4 shadow-lg shadow-brand/50">
-              <span className="text-3xl font-bold text-black">A</span>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-brand/20 border border-brand/30 mb-4 shadow-lg shadow-brand/50">
+              <span className="text-3xl font-bold text-white">A</span>
             </div>
             <h1 className="text-3xl font-bold text-white">Bienvenido</h1>
           </div>
 
           {/* Login Card */}
-          <div className="bg-slate-900/50 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl">
+          <div className="bg-black/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
 
             <div className="hidden lg:block mb-8">
               <h2 className="text-3xl font-bold text-white mb-2">Iniciar Sesión</h2>
-              <p className="text-slate-400">Accede a tu cuenta</p>
+              <p className="text-neutral-400">Accede a tu cuenta</p>
             </div>
 
             {/* Google Login */}
             <Button
               variant="outline"
-              className="w-full h-14 text-base font-medium border-slate-700 hover:bg-slate-800 hover:border-slate-600 bg-slate-800/50 text-white mb-6 transition-all rounded-xl"
+              className="w-full h-14 text-base font-medium border-white/10 hover:bg-white/5 hover:border-white/20 bg-transparent text-white mb-6 transition-all rounded-xl"
               onClick={handleGoogleLogin}
               disabled={isLoading}
             >
@@ -171,34 +166,29 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-800"></div>
+                <div className="w-full border-t border-white/10"></div>
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-slate-900 px-4 text-slate-500 font-medium">O con email</span>
+                <span className="bg-black px-4 text-neutral-500 font-medium">O con email</span>
               </div>
             </div>
 
             {/* Email/Password Form */}
             <form onSubmit={handlePasswordLogin} className="space-y-5">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-300 ml-1">Email</label>
+                <label className="text-sm font-semibold text-neutral-300 ml-1">Email</label>
                 <input
                   type="email"
                   placeholder="nombre@empresa.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  style={{
-                    backgroundColor: '#0f172a',
-                    borderColor: '#334155',
-                    color: '#ffffff'
-                  }}
-                  className="w-full h-14 px-4 rounded-xl border-2 text-base placeholder:text-slate-600 focus:border-brand/50 focus:ring-2 focus:ring-brand/20 focus:outline-none transition-all"
+                  className="w-full h-14 px-4 rounded-xl border-2 border-white/10 bg-black/20 text-white placeholder:text-neutral-600 focus:border-brand/50 focus:ring-0 focus:outline-none transition-all"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-300 ml-1">Contraseña</label>
+                <label className="text-sm font-semibold text-neutral-300 ml-1">Contraseña</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -206,17 +196,12 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    style={{
-                      backgroundColor: '#0f172a',
-                      borderColor: '#334155',
-                      color: '#ffffff'
-                    }}
-                    className="w-full h-14 px-4 pr-12 rounded-xl border-2 text-base placeholder:text-slate-600 focus:border-brand/50 focus:ring-2 focus:ring-brand/20 focus:outline-none transition-all"
+                    className="w-full h-14 px-4 pr-12 rounded-xl border-2 border-white/10 bg-black/20 text-white placeholder:text-neutral-600 focus:border-brand/50 focus:ring-0 focus:outline-none transition-all"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-white transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                   </button>
@@ -233,7 +218,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading || isLoading}
-                className="w-full h-14 bg-gradient-to-r from-brand to-emerald-400 hover:from-brand/90 hover:to-emerald-400/90 text-black font-bold text-base rounded-xl shadow-lg shadow-brand/30 hover:shadow-brand/50 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full h-14 bg-brand hover:bg-brand/90 text-black font-bold text-base rounded-xl shadow-lg shadow-brand/30 hover:shadow-brand/50 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -250,8 +235,8 @@ export default function LoginPage() {
             </form>
 
             {/* Footer */}
-            <div className="mt-8 pt-6 border-t border-slate-800 text-center">
-              <p className="text-sm text-slate-500">
+            <div className="mt-8 pt-6 border-t border-white/10 text-center">
+              <p className="text-sm text-neutral-500">
                 ¿No tienes cuenta?{' '}
                 <a href="/register" className="text-brand hover:text-brand/80 font-semibold transition-colors">
                   Regístrate gratis
@@ -261,23 +246,6 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-                @keyframes blob {
-                    0%, 100% { transform: translate(0px, 0px) scale(1); }
-                    33% { transform: translate(30px, -50px) scale(1.1); }
-                    66% { transform: translate(-20px, 20px) scale(0.9); }
-                }
-                .animate-blob {
-                    animation: blob 7s infinite;
-                }
-                .animation-delay-2000 {
-                    animation-delay: 2s;
-                }
-                .animation-delay-4000 {
-                    animation-delay: 4s;
-                }
-            `}</style>
     </div>
   );
 }
