@@ -12,20 +12,13 @@ const SpaceInvadersBackground = () => {
         if (!ctx) return;
 
         let invaders: Invader[] = [];
+        const invaderScale = 2; // Pixel scale
+        const invaderWidth = 11 * invaderScale * 2; // Approx width
+        const invaderHeight = 8 * invaderScale * 2; // Approx height
+        const hGap = 40;
+        const vGap = 40;
 
-        // Pixel art definition
-        // 5x3 Grid concept scaled up
-        const invaderShape1 = [
-            [0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 1, 0, 0, 0, 0],
-            [0, 0, 1, 1, 1, 1, 1, 0],
-            [0, 1, 1, 0, 1, 1, 1, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 0, 1, 1, 1, 1, 1, 1],
-            [1, 0, 1, 0, 0, 0, 0, 1],
-            [0, 0, 0, 1, 1, 0, 1, 1]
-        ];
-
+        // Classic Space Invader (Crab)
         const crabShape = [
             [0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0],
             [0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
@@ -50,12 +43,6 @@ const SpaceInvadersBackground = () => {
 
         const shapes = [crabShape, squidShape];
 
-        const resizeCanvas = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            initInvaders();
-        };
-
         class Invader {
             x: number;
             y: number;
@@ -68,7 +55,7 @@ const SpaceInvadersBackground = () => {
                 this.y = y;
                 this.type = type;
                 this.shape = shapes[type % shapes.length];
-                this.scale = 2; // Pixel scale
+                this.scale = invaderScale;
             }
 
             draw() {
@@ -90,51 +77,86 @@ const SpaceInvadersBackground = () => {
             }
         }
 
+        let direction = 1; // 1 = right, -1 = left
+        let speed = 1.5;   // Horizontal speed
+
         const initInvaders = () => {
             invaders = [];
-            const cols = Math.floor(canvas.width / 60);
-            const rows = Math.floor(canvas.height / 60);
+            const cols = Math.floor(canvas.width / (invaderWidth + hGap));
+            const rows = Math.min(6, Math.floor(canvas.height / 3 / (invaderHeight + vGap))); // Limit rows to not overfill
+
+            // Create a structured fleet
+            const startX = (canvas.width - (cols * (invaderWidth + hGap))) / 2;
 
             for (let r = 0; r < rows; r++) {
                 for (let c = 0; c < cols; c++) {
-                    if (Math.random() > 0.85) {
-                        invaders.push(new Invader(c * 60, r * 60, Math.floor(Math.random() * 2)));
+                    // 80% chance to exist, gaps make it look 'damaged' or interesting
+                    if (Math.random() > 0.2) {
+                        const type = r % 2; // Alternating rows
+                        const x = startX + c * (invaderWidth + hGap);
+                        const y = 50 + r * (invaderHeight + vGap);
+                        invaders.push(new Invader(x, y, type));
                     }
                 }
             }
         };
 
+        const resizeCanvas = () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initInvaders();
+        };
+
         let animationFrameId: number;
-        let tick = 0;
 
         const animate = () => {
             if (!ctx) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            let hitEdge = false;
+
+            // Update positions
             invaders.forEach(invader => {
-                invader.y += 0.2;
-                if (invader.y > canvas.height) {
+                invader.x += speed * direction;
+            });
+
+            // Check boundaries
+            for (const invader of invaders) {
+                if ((direction === 1 && invader.x + invaderWidth > canvas.width) ||
+                    (direction === -1 && invader.x < 0)) {
+                    hitEdge = true;
+                    break;
+                }
+            }
+
+            if (hitEdge) {
+                direction *= -1;
+                invaders.forEach(invader => {
+                    invader.y += 20; // Drop down
+                });
+            }
+
+            // Draw
+            invaders.forEach(invader => {
+                // Reset if they fall too far (infinite loop effect)
+                if (invader.y > canvas.height + 50) {
                     invader.y = -50;
-                    invader.x = Math.random() * canvas.width;
                 }
                 invader.draw();
             });
 
-            if (Math.random() > 0.98) {
+            // Occasional "Laser" effect (Alien shooting down)
+            if (Math.random() > 0.97 && invaders.length > 0) {
+                const shooter = invaders[Math.floor(Math.random() * invaders.length)];
                 ctx.fillStyle = "rgba(0, 224, 116, 0.1)";
-                const x = Math.random() * canvas.width;
-                ctx.fillRect(x, 0, 2, canvas.height);
+                ctx.fillRect(shooter.x + invaderWidth / 2, shooter.y + invaderHeight, 2, canvas.height);
             }
 
-            tick++;
             animationFrameId = requestAnimationFrame(animate);
         };
 
-        const handleResize = () => {
-            resizeCanvas();
-        };
-
         window.addEventListener('resize', handleResize);
+        function handleResize() { resizeCanvas(); }
 
         resizeCanvas();
         animate();
