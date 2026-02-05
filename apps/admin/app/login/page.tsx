@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@artifact/core/client'; // Use the new Supabase hook
 import { Button, Input, Card, CardHeader, CardTitle, CardContent, CardFooter } from '@artifact/ui';
-import ParticleBackground from '@/components/ParticleBackground';
+import SpaceInvadersBackground from '@/components/SpaceInvadersBackground';
 import { Mail, Loader2 } from 'lucide-react';
 
 const GoogleIcon = () => (
@@ -49,10 +49,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 relative bg-black">
-      <ParticleBackground />
+      <SpaceInvadersBackground />
 
       {/* Branding - Admin Side */}
-      <div className="hidden lg:flex flex-col justify-center items-center relative overflow-hidden z-10 bg-black/40 backdrop-blur-sm border-r border-white/5">
+      <div className="hidden lg:flex flex-col justify-center items-center relative overflow-hidden z-10 bg-black/40 backdrop-blur-sm">
         <div className="relative z-10 text-center p-12">
           <div className="w-24 h-24 bg-brand/20 border border-brand/30 rounded-3xl mx-auto mb-8 flex items-center justify-center transform -rotate-3 shadow-[0_0_40px_rgba(0,224,116,0.2)]">
             <span className="text-4xl font-bold text-white">A</span>

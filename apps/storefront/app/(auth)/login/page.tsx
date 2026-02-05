@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@artifact/core/client';
 import { Button } from '@artifact/ui';
 import { Eye, EyeOff } from 'lucide-react';
-import ParticleBackground from '@/components/ParticleBackground';
+import SpaceInvadersBackground from '@/components/SpaceInvadersBackground';
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -68,10 +68,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-black relative">
-      <ParticleBackground />
+      <SpaceInvadersBackground />
 
       {/* LEFT SIDE - Marketing (Transparent to show Background) */}
-      <div className="hidden lg:flex flex-col justify-center items-center p-12 relative overflow-hidden z-10 bg-black/40 backdrop-blur-sm border-r border-white/10">
+      <div className="hidden lg:flex flex-col justify-center items-center p-12 relative overflow-hidden z-10 bg-black/40 backdrop-blur-sm">
 
         <div className="relative z-10 max-w-lg w-full">
           {/* Logo */}
