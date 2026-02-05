@@ -73,8 +73,8 @@ const Footer = () => {
                     <div className="footer-column">
                         <h4>Legal</h4>
                         <ul>
-                            <li><a href="#">Política de Privacidad</a></li>
-                            <li><a href="#">Términos de Servicio</a></li>
+                            <li><a href={`${process.env.NEXT_PUBLIC_STORE_URL || "http://localhost:3001"}/privacy`}>Política de Privacidad</a></li>
+                            <li><a href={`${process.env.NEXT_PUBLIC_STORE_URL || "http://localhost:3001"}/terms`}>Términos de Servicio</a></li>
                         </ul>
                     </div>
                 </div>

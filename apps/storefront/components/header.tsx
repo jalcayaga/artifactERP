@@ -16,6 +16,8 @@ const NAV_LINKS = [
   { label: "Inicio", href: "/" },
   { label: "Tienda", href: "/products" },
   { label: "Nosotros", href: "/about" },
+  { label: "Términos", href: "/terms" },
+  { label: "Privacidad", href: "/privacy" },
 ];
 
 export function Header() {
