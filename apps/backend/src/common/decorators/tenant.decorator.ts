@@ -17,7 +17,10 @@ export const TenantContext = createParamDecorator(
 export const TenantId = createParamDecorator(
   (_: unknown, ctx: ExecutionContext) => {
     const request = ctx.switchToHttp().getRequest<Record<string, unknown>>()
-    return request['tenantId'] as string | undefined
+    return (
+      (request['tenantId'] as string | undefined) ||
+      (request['user'] as any)?.tenantId
+    )
   }
 )
 

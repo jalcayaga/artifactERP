@@ -1,4 +1,3 @@
-
 {
   "compilerOptions": {
     "module": "commonjs",
@@ -18,6 +17,16 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "jsx": "preserve",
+    "paths": {
+      "@artifact/core": [
+        "../../packages/core/src/index.ts"
+      ],
+      "@artifact/core/*": [
+        "../../packages/core/src/*"
+      ]
+    }
   }
 }

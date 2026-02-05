@@ -1,0 +1,51 @@
+turbo 2.5.8
+
+ WARNING  An issue occurred while attempting to parse /home/astrodev/artifactERP/yarn.lock. Turborepo will still function, but some features may not be available:
+   x Could not
+  | resolve
+  | workspaces.
+  `-> Lockfile not
+      found at /
+      home/astrodev/
+      artifactERP/
+      yarn.lock
+
+• Packages in scope: @artifact/storefront
+• Running build in 1 packages
+• Remote caching disabled
+@artifact/storefront:build: cache miss, executing ccf6112f33a05e2e
+@artifact/storefront:build: yarn run v1.22.22
+@artifact/storefront:build: $ next build
+@artifact/storefront:build:  ⚠ Invalid next.config.js options detected: 
+@artifact/storefront:build:  ⚠     Unrecognized key(s) in object: 'transpilePackages' at "experimental"
+@artifact/storefront:build:  ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+@artifact/storefront:build:  ⚠ `transpilePackages` has been moved out of `experimental`. Please update your next.config.js file accordingly.
+@artifact/storefront:build:   ▲ Next.js 14.2.30
+@artifact/storefront:build: 
+@artifact/storefront:build:    Creating an optimized production build ...
+@artifact/storefront:build:  ✓ Compiled successfully
+@artifact/storefront:build:    Linting and checking validity of types ...
+@artifact/storefront:build: Failed to compile.
+@artifact/storefront:build: 
+@artifact/storefront:build: ./components/product-card.tsx:52:11
+@artifact/storefront:build: Type error: Type '"secondary"' is not assignable to type '"default" | "outline" | "ghost" | null | undefined'.
+@artifact/storefront:build: 
+@artifact/storefront:build: [0m [90m 50 |[39m         [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m[0m
+@artifact/storefront:build: [0m [90m 51 |[39m         [33m<[39m[33mButton[39m[0m
+@artifact/storefront:build: [0m[31m[1m>[22m[39m[90m 52 |[39m           variant[33m=[39m[32m"secondary"[39m[0m
+@artifact/storefront:build: [0m [90m    |[39m           [31m[1m^[22m[39m[0m
+@artifact/storefront:build: [0m [90m 53 |[39m           className[33m=[39m[32m"rounded-full bg-[#0071e3] text-white hover:bg-[#0077ed] px-5 py-5 text-[13px] font-medium transition-transform active:scale-95"[39m[0m
+@artifact/storefront:build: [0m [90m 54 |[39m         [33m>[39m[0m
+@artifact/storefront:build: [0m [90m 55 |[39m           [33mComprar[39m[0m
+@artifact/storefront:build: Next.js build worker exited with code: 1 and signal: null
+@artifact/storefront:build: error Command failed with exit code 1.
+@artifact/storefront:build: info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.
+@artifact/storefront:build: ERROR: command finished with error: command (/home/astrodev/artifactERP/apps/storefront) /usr/local/bin/yarn run build exited (1)
+@artifact/storefront#build: command (/home/astrodev/artifactERP/apps/storefront) /usr/local/bin/yarn run build exited (1)
+
+ Tasks:    0 successful, 1 total
+Cached:    0 cached, 1 total
+  Time:    10.425s 
+Failed:    @artifact/storefront#build
+
+ ERROR  run failed: command  exited (1)

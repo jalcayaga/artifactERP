@@ -14,7 +14,7 @@ export interface TenantPublicConfig {
     branding: TenantBranding | null;
 }
 
-const BACKEND_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+const BACKEND_URL = process.env.API_URL || process.env.NEXT_PUBLIC_API_URL || 'https://api.artifact.cl';
 
 export async function getTenantConfig(host: string | null): Promise<TenantPublicConfig | null> {
     try {

@@ -10,6 +10,9 @@ import { SubscriptionsService } from '../subscriptions/subscriptions.service'
 
 @Injectable()
 export class TenantsService {
+  private cache = new Map<string, { data: any; expires: number }>()
+  private readonly CACHE_TTL = 60 * 1000 // 60 seconds
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly paymentsService: PaymentsService,
@@ -32,16 +35,44 @@ export class TenantsService {
   async findBySlug(
     slug: string
   ): Promise<(Tenant & { branding: TenantBranding | null }) | null> {
-    return this.prisma.tenant.findUnique({
+    const cacheKey = `slug:${slug}`
+    const now = Date.now()
+    const cached = this.cache.get(cacheKey)
+
+    if (cached && cached.expires > now) {
+      return cached.data
+    }
+
+    const tenant = await this.prisma.tenant.findUnique({
       where: { slug },
       include: { branding: true },
     })
+
+    if (tenant) {
+      this.cache.set(cacheKey, { data: tenant, expires: now + this.CACHE_TTL })
+    }
+
+    if (!tenant) {
+      // Don't throw here for middleware logic to handle fallback, or throw if consistent with previous
+      // Original code threw NotFoundException, but middleware catches it.
+      // Let's keep consistency.
+      throw new NotFoundException(`Tenant with slug ${slug} not found`)
+    }
+    return tenant
   }
 
   async findByDomain(
     domain: string
   ): Promise<(Tenant & { branding: TenantBranding | null }) | null> {
-    return this.prisma.tenant.findFirst({
+    const cacheKey = `domain:${domain}`
+    const now = Date.now()
+    const cached = this.cache.get(cacheKey)
+
+    if (cached && cached.expires > now) {
+      return cached.data
+    }
+
+    const tenant = await this.prisma.tenant.findFirst({
       where: {
         OR: [
           { primaryDomain: domain },
@@ -50,6 +81,15 @@ export class TenantsService {
       },
       include: { branding: true },
     })
+
+    if (tenant) {
+      this.cache.set(cacheKey, { data: tenant, expires: now + this.CACHE_TTL })
+    }
+
+    if (!tenant) {
+      throw new NotFoundException(`Tenant with domain ${domain} not found`)
+    }
+    return tenant
   }
 
   async list(): Promise<Array<Tenant & { branding: TenantBranding | null }>> {

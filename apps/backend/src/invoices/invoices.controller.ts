@@ -22,7 +22,7 @@ export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) { }
 
   @Post()
-  @Roles('ADMIN', 'EDITOR')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR')
   async createFromOrder(
     @TenantId() tenantId: string,
     @Body('orderId') orderId: string
@@ -31,7 +31,7 @@ export class InvoicesController {
   }
 
   @Get()
-  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER')
   async findAll(
     @TenantId() tenantId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -42,7 +42,7 @@ export class InvoicesController {
   }
 
   @Post(':id/factoring')
-  @Roles('ADMIN', 'EDITOR')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR')
   async cedeToFactoring(
     @TenantId() tenantId: string,
     @Param('id') id: string
@@ -51,7 +51,7 @@ export class InvoicesController {
   }
 
   @Get(':id')
-  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER')
   async findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.invoicesService.findOne(tenantId, id)
   }

@@ -20,12 +20,14 @@ import {
   OrderStatus,
   PaymentStatus,
   formatCurrencyChilean,
+} from '@artifact/core';
+import {
   ProductService,
   SaleService,
   CompanyService,
   PurchaseService,
   useAuth,
-} from '@artifact/core';
+} from '@artifact/core/client';
 import { Input } from '@artifact/ui';
 import { Button } from '@artifact/ui';
 import { Label } from '@artifact/ui';

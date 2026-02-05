@@ -1,7 +1,7 @@
 import { useRouter } from 'next/navigation'
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api'
+  process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.artifact.cl/api'
 
 interface RequestOptions extends RequestInit {
   token?: string

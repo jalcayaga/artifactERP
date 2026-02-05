@@ -24,10 +24,10 @@ import { TenantId } from '../common/decorators/tenant.decorator'
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('sales')
 export class SalesController {
-  constructor(private readonly salesService: SalesService) {}
+  constructor(private readonly salesService: SalesService) { }
 
   @Post()
-  @Roles('ADMIN', 'EDITOR')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR')
   async create(
     @TenantId() tenantId: string,
     @Body() createSaleDto: CreateSaleDto
@@ -38,7 +38,8 @@ export class SalesController {
     return await this.salesService.create(tenantId, createSaleDto)
   }
 
-  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  @Get()
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER')
   findAll(
     @TenantId() tenantId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -52,7 +53,7 @@ export class SalesController {
   }
 
   @Get(':id')
-  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER')
   async findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     if (!tenantId) {
       throw new NotFoundException('Tenant ID is required')
@@ -65,7 +66,7 @@ export class SalesController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN', 'EDITOR')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR')
   update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -78,7 +79,7 @@ export class SalesController {
   }
 
   @Delete(':id')
-  @Roles('ADMIN')
+  @Roles('SUPERADMIN', 'ADMIN')
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     if (!tenantId) {
       throw new NotFoundException('Tenant ID is required')

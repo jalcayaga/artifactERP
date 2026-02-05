@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useAuth } from '@artifact/core';
+import { useAuth } from '@artifact/core/client';
 import { useRouter, usePathname } from 'next/navigation';
 
 // A simple loading spinner component
@@ -9,7 +9,7 @@ const SplashScreen = () => (
   <div className="flex items-center justify-center h-screen w-screen bg-gray-100 fixed top-0 left-0 z-50">
     <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-indigo-500"></div>
     <div className="text-center absolute">
-        <p className="text-lg font-semibold">Cargando...</p>
+      <p className="text-lg font-semibold">Cargando...</p>
     </div>
   </div>
 );

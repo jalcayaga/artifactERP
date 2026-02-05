@@ -1,9 +1,9 @@
 'use client';
 
-// apps/admin/components/dashboard/SalesChart.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
-import { useTheme, formatCurrencyChilean } from '@artifact/core';
+import { formatCurrencyChilean } from '@artifact/core';
+import { useTheme } from '@artifact/core/client';
 
 const SalesChart: React.FC = () => {
   const chartRef = useRef<HTMLCanvasElement>(null);
@@ -29,15 +29,19 @@ const SalesChart: React.FC = () => {
 
     const labels = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'];
     const salesData = [1250000, 1980000, 1530000, 2250000, 1870000, 2560000];
+    const previousData = [1100000, 1750000, 1400000, 2000000, 1600000, 2200000];
 
-    // This part is tricky as it depends on CSS variables that might not be present.
-    // For now, we'll provide fallback values to ensure the chart renders.
-    const primaryColor = 'hsl(262.1 83.3% 57.8%)'; // Fallback purple
-    const primaryColorTransparent = 'hsla(262.1 83.3% 57.8%, 0.2)';
-    const textColor = theme === 'dark' ? 'white' : 'black';
-    const mutedTextColor = theme === 'dark' ? '#a1a1aa' : '#71717a'; // zinc-400 and zinc-500
-    const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-    const cardBgColor = theme === 'dark' ? '#09090b' : 'white'; // zinc-950
+    // Brand color based on theme
+    const primaryColor = 'rgb(0, 255, 127)'; // Neon green
+    const secondaryColor = 'rgba(99, 102, 241, 0.8)'; // Indigo
+    const textColor = theme === 'dark' ? '#fff' : '#1f2937';
+    const mutedTextColor = theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)';
+    const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
+    // Create gradient
+    const gradient = canvasCtx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(0, 255, 127, 0.3)');
+    gradient.addColorStop(1, 'rgba(0, 255, 127, 0)');
 
     chartInstanceRef.current = new Chart(canvasCtx, {
       type: 'line',
@@ -45,33 +49,58 @@ const SalesChart: React.FC = () => {
         labels: labels,
         datasets: [
           {
-            label: 'Ventas del Mes',
+            label: 'Este Período',
             data: salesData,
             borderColor: primaryColor,
-            backgroundColor: primaryColorTransparent,
+            backgroundColor: gradient,
             fill: true,
-            tension: 0.35,
+            tension: 0.4,
             pointBackgroundColor: primaryColor,
-            pointBorderColor: cardBgColor,
-            pointBorderWidth: 2,
-            pointRadius: 4,
+            pointBorderColor: 'transparent',
+            pointBorderWidth: 0,
+            pointRadius: 0,
             pointHoverRadius: 6,
             pointHoverBackgroundColor: primaryColor,
-            pointHoverBorderColor: cardBgColor,
+            pointHoverBorderColor: '#000',
             pointHoverBorderWidth: 2,
+            borderWidth: 3,
+          },
+          {
+            label: 'Período Anterior',
+            data: previousData,
+            borderColor: secondaryColor,
+            backgroundColor: 'transparent',
+            fill: false,
+            tension: 0.4,
+            pointRadius: 0,
+            pointHoverRadius: 4,
+            borderWidth: 2,
+            borderDash: [5, 5],
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false,
+        },
         scales: {
           y: {
             beginAtZero: false,
-            grid: { color: gridColor },
+            grid: {
+              color: gridColor,
+            },
+            border: {
+              display: false,
+            },
             ticks: {
               color: mutedTextColor,
-              padding: 8,
+              padding: 12,
+              font: {
+                size: 11,
+              },
               callback: function (value: number | string) {
                 if (typeof value === 'number') {
                   if (Math.abs(value) >= 1000000)
@@ -85,22 +114,51 @@ const SalesChart: React.FC = () => {
             },
           },
           x: {
-            grid: { display: false },
-            ticks: { color: mutedTextColor, padding: 8 },
+            grid: {
+              display: false,
+            },
+            border: {
+              display: false,
+            },
+            ticks: {
+              color: mutedTextColor,
+              padding: 8,
+              font: {
+                size: 11,
+              },
+            },
           },
         },
         plugins: {
-          legend: { display: false },
+          legend: {
+            display: true,
+            position: 'top',
+            align: 'end',
+            labels: {
+              color: mutedTextColor,
+              usePointStyle: true,
+              pointStyle: 'circle',
+              padding: 20,
+              font: {
+                size: 11,
+              },
+            },
+          },
           tooltip: {
-            backgroundColor: cardBgColor,
+            backgroundColor: theme === 'dark' ? 'rgba(0,0,0,0.9)' : 'rgba(255,255,255,0.95)',
             titleColor: textColor,
             bodyColor: textColor,
-            borderColor: gridColor,
+            borderColor: 'rgba(0, 255, 127, 0.3)',
             borderWidth: 1,
-            padding: 12,
-            cornerRadius: 4,
+            padding: 16,
+            cornerRadius: 12,
+            displayColors: true,
+            boxPadding: 6,
             usePointStyle: true,
             callbacks: {
+              title: function (context: any) {
+                return context[0].label;
+              },
               label: function (context: any) {
                 let label = context.dataset.label || '';
                 if (label) {
@@ -114,7 +172,6 @@ const SalesChart: React.FC = () => {
             },
           },
         },
-        interaction: { mode: 'index', intersect: false },
       },
     });
 
@@ -127,11 +184,11 @@ const SalesChart: React.FC = () => {
   }, [theme, chartKey]);
 
   return (
-    <div style={{ height: '350px', position: 'relative' }} key={chartKey}>
+    <div style={{ height: '320px', position: 'relative' }} key={chartKey}>
       <canvas
         ref={chartRef}
         role='img'
-        aria-label='Gráfico de resumen de ventas mensuales'
+        aria-label='Gráfico de tendencia de ventas mensuales comparando período actual vs anterior'
       ></canvas>
     </div>
   );

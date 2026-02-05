@@ -11,7 +11,7 @@ const Price: React.FC<PriceProps> = ({ amount, currencyCode }) => {
     currency: currencyCode,
   }).format(amount);
 
-  return <p className="text-lg font-semibold text-gray-900">{formattedPrice}</p>;
+  return <p className="text-xl font-bold text-brand">{formattedPrice}</p>;
 };
 
 export default Price;

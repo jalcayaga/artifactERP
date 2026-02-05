@@ -28,10 +28,10 @@ import { QuoteStatus } from '@prisma/client'
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('quotes')
 export class QuotesController {
-  constructor(private readonly quotesService: QuotesService) {}
+  constructor(private readonly quotesService: QuotesService) { }
 
   @Post()
-  @Roles('ADMIN', 'EDITOR')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR')
   async create(
     @TenantId() tenantId: string,
     @Body() createQuoteDto: CreateQuoteDto,
@@ -47,7 +47,7 @@ export class QuotesController {
     )
   }
 
-  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER')
   findAll(
     @TenantId() tenantId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -59,7 +59,7 @@ export class QuotesController {
     return this.quotesService.findAll(tenantId, page, limit, normalizedStatus)
   }
 
-  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER')
   async findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     if (!tenantId) {
       throw new NotFoundException('Tenant ID is required')
@@ -68,7 +68,7 @@ export class QuotesController {
   }
 
   @Get(':id/pdf')
-  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER')
   @HttpCode(HttpStatus.NOT_FOUND)
   getPdf() {
     // This functionality is deprecated in favor of official DTE PDFs.
@@ -79,7 +79,7 @@ export class QuotesController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN', 'EDITOR')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR')
   async update(
     @TenantId() tenantId: string,
     @Param('id') id: string,
@@ -98,7 +98,7 @@ export class QuotesController {
   }
 
   @Delete(':id')
-  @Roles('ADMIN')
+  @Roles('SUPERADMIN', 'ADMIN')
   async remove(@TenantId() tenantId: string, @Param('id') id: string) {
     if (!tenantId) {
       throw new NotFoundException('Tenant ID is required')

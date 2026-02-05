@@ -25,7 +25,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
   @Post()
-  @Roles('ADMIN')
+  @Roles('SUPERADMIN', 'ADMIN')
   create(@TenantId() tenantId: string, @Body() createUserDto: CreateUserDto) {
     return this.usersService.create(tenantId, createUserDto)
   }
@@ -44,7 +44,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Roles('ADMIN')
+  @Roles('SUPERADMIN', 'ADMIN')
   findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.usersService.findOne(tenantId, id)
   }
@@ -82,7 +82,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles('ADMIN')
+  @Roles('SUPERADMIN', 'ADMIN')
   remove(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.usersService.remove(tenantId, id)
   }

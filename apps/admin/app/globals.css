@@ -2,6 +2,237 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: sans-serif;
+/* Import Inter font for premium typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@layer base {
+  :root {
+    /* Brand Colors - Standard Blue/Cyan from MaterialM */
+    --brand-color: 6 182 212;
+    /* Cyan-500 #06b6d4 */
+    --brand-dark: 8 145 178;
+
+    /* Semantic Colors */
+    --color-primary: 59 130 246;
+    /* Blue-500 */
+    --color-success: 34 197 94;
+    /* Green-500 */
+    --color-warning: 234 179 8;
+    /* Yellow-500 */
+    --color-danger: 239 68 68;
+    /* Red-500 */
+    --color-info: 168 85 247;
+    /* Purple-500 */
+
+    /* Base Colors - Will be overridden by themes */
+    --bg-primary: 255 255 255;
+    --bg-secondary: 243 244 246;
+    --text-primary: 17 24 39;
+    --text-secondary: 75 85 99;
+    --border-color: 229 231 235;
+    --card-bg: 255 255 255;
+  }
+
+  /* DARK THEME (MaterialM Style) */
+  :root[data-theme='dark'] {
+    --bg-primary: 17 24 39;
+    /* Gray-900 #111827 - Main Background */
+    --bg-secondary: 31 41 55;
+    /* Gray-800 #1f2937 - Sidebar/Secondary */
+    --card-bg: 31 41 55;
+    /* Gray-800 #1f2937 - Card Background */
+    --text-primary: 243 244 246;
+    /* Gray-100 */
+    --text-secondary: 156 163 175;
+    /* Gray-400 */
+    --border-color: 55 65 81;
+    /* Gray-700 */
+  }
+
+  /* LIGHT THEME (Clean Material) */
+  :root[data-theme='light'] {
+    --bg-primary: 243 244 246;
+    /* Gray-100 */
+    --bg-secondary: 255 255 255;
+    /* White */
+    --card-bg: 255 255 255;
+    /* White */
+    --text-primary: 17 24 39;
+    /* Gray-900 */
+    --text-secondary: 107 114 128;
+    /* Gray-500 */
+    --border-color: 229 231 235;
+    /* Gray-200 */
+  }
+
+  /* CONTRAST THEME */
+  :root[data-theme='contrast'] {
+    --bg-primary: 0 0 0;
+    --bg-secondary: 20 20 20;
+    --card-bg: 0 0 0;
+    --text-primary: 255 255 0;
+    --text-secondary: 0 255 255;
+    --border-color: 255 255 255;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    @apply bg-[rgb(var(--bg-primary))] text-[rgb(var(--text-primary))] antialiased transition-colors duration-300;
+    /* Subtle grid pattern for depth */
+    background-image:
+      radial-gradient(circle at 25% 25%, rgba(var(--brand-color), 0.03) 0%, transparent 50%),
+      radial-gradient(circle at 75% 75%, rgba(var(--brand-color), 0.02) 0%, transparent 50%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+
+  /* Glassmorphism Classes - Artifact Style */
+  .glass {
+    background-color: rgba(var(--card-bg), 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(var(--border-color), 0.15);
+  }
+
+  /* Interactive Elements Hover Effect */
+  .glass-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-hover:hover {
+    background-color: rgba(var(--brand-color), 0.05);
+    /* Very subtle tint */
+    border-color: rgba(var(--brand-color), 0.4);
+    box-shadow: 0 0 15px rgba(var(--brand-color), 0.1);
+    transform: translateY(-1px);
+  }
+
+  /* Premium Card (Dashboard/Lists) */
+  .card-premium {
+    background-color: rgba(var(--card-bg), 0.6);
+    /* Slightly more transparent */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(var(--border-color), 0.1);
+    border-radius: 1rem;
+    /* Rounded-2xl look */
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    /* Glassmorphism shadow */
+    transition: all 0.3s ease;
+  }
+
+  .card-premium:hover {
+    border-color: rgba(var(--brand-color), 0.3);
+    box-shadow: 0 0 20px rgba(var(--brand-color), 0.15);
+  }
+
+  /* Inputs & Selects - Integrated Look */
+  .input-primary {
+    background-color: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(var(--border-color), 0.2);
+    color: rgb(var(--text-primary));
+    border-radius: 0.5rem;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s;
+  }
+
+  .input-primary:focus {
+    outline: none;
+    border-color: rgb(var(--brand-color));
+    box-shadow: 0 0 0 1px rgba(var(--brand-color), 0.5);
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  /* Buttons - Marketing Style */
+  .btn-primary {
+    background-color: transparent;
+    border: 1px solid rgb(var(--brand-color));
+    color: rgb(var(--brand-color));
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(var(--brand-color), 0.1);
+  }
+
+  .btn-primary:hover {
+    background-color: rgba(var(--brand-color), 0.1);
+    box-shadow: 0 0 20px rgba(var(--brand-color), 0.3);
+    transform: translateY(-1px);
+  }
+
+  /* Shimmer Animation for Skeletons */
+  @keyframes shimmer {
+    0% {
+      background-position: 200% 0;
+    }
+
+    100% {
+      background-position: -200% 0;
+    }
+  }
+
+  .skeleton {
+    background: linear-gradient(90deg,
+        rgba(var(--bg-secondary), 0.8) 25%,
+        rgba(var(--bg-secondary), 0.4) 50%,
+        rgba(var(--bg-secondary), 0.8) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Pulse Glow for Live Indicators */
+  @keyframes pulse-glow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(var(--brand-color), 0.4);
+    }
+
+    70% {
+      box-shadow: 0 0 0 10px rgba(var(--brand-color), 0);
+    }
+
+    100% {
+      box-shadow: 0 0 0 0 rgba(var(--brand-color), 0);
+    }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+
+  /* Count Up Animation */
+  @keyframes count-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-count-up {
+    animation: count-up 0.5s ease-out forwards;
+  }
+
+  /* Slide In Animation */
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  .animate-slide-in {
+    animation: slide-in 0.3s ease-out forwards;
+  }
 }

@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json package-lock.json turbo.json tsconfig.base.json ./
 COPY packages/ packages/
 COPY apps/storefront/ apps/storefront/
-RUN npm ci
+RUN npm install
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_ADMIN_URL
 ARG NEXT_PUBLIC_API_BASE_URL
@@ -23,7 +23,7 @@ RUN npx turbo run build --filter=@artifact/storefront... --force
 
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV production
+ENV NODE_ENV=production
 COPY --from=builder /app/apps/storefront/public ./public
 COPY --from=builder /app/apps/storefront/.next/standalone ./
 COPY --from=builder /app/apps/storefront/.next/static ./apps/storefront/.next/static

@@ -21,7 +21,7 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) { }
 
   @Post()
-  @Roles('ADMIN', 'EDITOR')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR')
   async create(
     @TenantId() tenantId: string,
     @Body() createPaymentDto: CreatePaymentDto
@@ -33,7 +33,7 @@ export class PaymentsController {
   }
 
   @Get()
-  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER')
   findAll(
     @TenantId() tenantId: string,
     @Query('invoiceId') invoiceId?: string
@@ -42,7 +42,7 @@ export class PaymentsController {
   }
 
   @Post('link')
-  @Roles('ADMIN', 'EDITOR')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR')
   async generateLink(
     @TenantId() tenantId: string,
     @Body() body: { invoiceId: string; amount: number }

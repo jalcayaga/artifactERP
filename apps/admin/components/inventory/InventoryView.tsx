@@ -7,9 +7,11 @@ import {
   UpdateProductDto,
   UserRole,
   formatCurrencyChilean,
+} from '@artifact/core';
+import {
   ProductService,
   useAuth,
-} from '@artifact/core';
+} from '@artifact/core/client';
 import {
   Card,
   CardContent,

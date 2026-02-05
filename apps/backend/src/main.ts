@@ -16,17 +16,12 @@ async function bootstrap() {
 
   // Configuración de CORS actualizada
   app.enableCors({
-    origin: [
-      /^(http:\/\/|https:\/\/)?([a-z0-9-]+\.)*localhost:3000$/,
-      /^(http:\/\/|https:\/\/)?([a-z0-9-]+\.)*localhost:3001$/,
-      /^(http:\/\/|https:\/\/)?([a-z0-9-]+\.)*localhost:3003$/,
-      'https://app.artifact.cl',
-      'https://store.artifact.cl',
-      'https://marketing.artifact.cl',
-      'https://artifact.cl',
-      /\.artifact\.cl$/,
-    ],
+    origin: (reqOrigin, callback) => {
+      // Allow all origins for now to debug/fix connectivity
+      callback(null, true)
+    },
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
   })
 
   app.useGlobalPipes(
@@ -70,7 +65,7 @@ async function bootstrap() {
       },
       'JWT-auth' // Este nombre se usará en los controladores
     )
-    .addServer(process.env.PUBLIC_API_URL || 'http://localhost:3002', 'Servidor Principal')
+    .addServer(process.env.PUBLIC_API_URL || 'https://api.artifact.cl', 'Servidor Principal')
     .build()
 
   const document = SwaggerModule.createDocument(app, config)

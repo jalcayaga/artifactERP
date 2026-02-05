@@ -14,5 +14,11 @@
   ],
   "devDependencies": {
     "turbo": "^2.0.6"
+  },
+  "dependencies": {
+    "@supabase/auth-helpers-nextjs": "^0.15.0",
+    "@supabase/auth-helpers-react": "^0.15.0",
+    "@supabase/supabase-js": "^2.94.1",
+    "pg": "^8.18.0"
   }
 }

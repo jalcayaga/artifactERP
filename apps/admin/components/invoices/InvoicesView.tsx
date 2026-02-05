@@ -2,13 +2,15 @@
 
 import React, { useMemo, useState } from 'react';
 import {
-    InvoiceService,
     Invoice,
     InvoiceStatus,
     formatCurrencyChilean,
+} from '@artifact/core';
+import {
+    InvoiceService,
     PaymentService,
     useCompany
-} from '@artifact/core';
+} from '@artifact/core/client';
 import {
     Card,
     CardContent,

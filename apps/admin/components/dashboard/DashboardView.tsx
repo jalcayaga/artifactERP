@@ -15,7 +15,8 @@ import {
   CheckCircleIcon,
 } from '@artifact/ui'; // Asumiremos que Icons.tsx será migrado
 import SalesChart from './SalesChart'; // Apunta al componente en la misma carpeta
-import { DashboardService, useCompany, DashboardStats, formatCurrencyChilean } from '@artifact/core';
+import { DashboardStats, formatCurrencyChilean } from '@artifact/core';
+import { DashboardService, useCompany } from '@artifact/core/client';
 
 // Interfaz y componente para las tarjetas de estadísticas.
 interface StatCardProps {

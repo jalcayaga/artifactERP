@@ -1,156 +1,123 @@
 'use client';
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter,
-  Input,
-  Label,
-  Button,
-} from '@artifact/ui';
-import { useAuth } from '@artifact/core';
+import { useSupabaseAuth } from '@artifact/core/client'; // Use the new Supabase hook
+import { Button, Input, Card, CardHeader, CardTitle, CardContent, CardFooter } from '@artifact/ui';
+import { Mail, Loader2 } from 'lucide-react';
 
-const LoginPage: React.FC = () => {
+const GoogleIcon = () => (
+  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+  </svg>
+);
+
+export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading } = useAuth();
+  const { loginWithGoogle, loginWithEmail, isLoading, user } = useSupabaseAuth();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [sendingLink, setSendingLink] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError(null);
-
-    const result = await login({ email, password });
-    if (result.success) {
+  useEffect(() => {
+    if (!isLoading && user) {
       router.push('/');
-      return;
     }
-    setError(result.error || 'No pudimos iniciar sesión. Intenta nuevamente.');
+  }, [user, isLoading, router]);
+
+  const handleGoogleLogin = async () => {
+    await loginWithGoogle();
   };
 
-  return (
-    <div className="min-h-screen bg-slate-950 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.15)_0,_rgba(15,23,42,0.95)_65%)]" />
-      <div className="relative z-10 flex min-h-screen flex-col lg:flex-row">
-        <div className="hidden lg:flex lg:w-1/2 flex-col justify-center px-16 text-white">
-          <span className="text-sm uppercase tracking-[0.35em] text-white/60">
-            Artifact ERP Admin
-          </span>
-          <h1 className="mt-6 text-4xl font-semibold leading-tight">
-            Controla tu operación, inventario y facturación en un solo panel
-          </h1>
-          <p className="mt-6 text-white/70 text-base max-w-md">
-            Conecta tu tienda online, emite DTE certificados y administra tus clientes y proveedores sin hojas de cálculo.
-          </p>
-          <dl className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-white/70">
-            <div>
-              <dt className="uppercase text-white/50">Ventas conciliadas</dt>
-              <dd className="text-2xl font-medium text-white">+12K al mes</dd>
-            </div>
-            <div>
-              <dt className="uppercase text-white/50">Tiempo de emisión DTE</dt>
-              <dd className="text-2xl font-medium text-emerald-400">&lt; 5 segundos</dd>
-            </div>
-            <div>
-              <dt className="uppercase text-white/50">Usuarios activos</dt>
-              <dd className="text-2xl font-medium text-white">Más de 150 pymes</dd>
-            </div>
-            <div>
-              <dt className="uppercase text-white/50">Soporte</dt>
-              <dd className="text-2xl font-medium text-white">24/7 en Chile</dd>
-            </div>
-          </dl>
-        </div>
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSendingLink(true);
+    await loginWithEmail(email);
+    setSendingLink(false);
+  };
 
-        <div className="flex w-full lg:w-1/2 items-center justify-center px-6 py-16">
-          <Card className="w-full max-w-md border border-white/10 bg-white/5 backdrop-blur">
-            <CardHeader className="space-y-2 text-center">
-              <CardTitle className="text-2xl font-semibold text-white">
-                Inicia sesión en Artifact
-              </CardTitle>
-              <CardDescription className="text-white/60">
-                Ingresa con tu correo corporativo para continuar.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="space-y-2 text-left">
-                  <Label htmlFor="email" className="text-white/80">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    autoComplete="email"
-                    required
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="ej: contacto@tuempresa.cl"
-                    className="bg-white text-slate-900 placeholder:text-slate-500"
-                  />
-                </div>
-                <div className="space-y-2 text-left">
-                  <Label htmlFor="password" className="text-white/80">
-                    Contraseña
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    autoComplete="current-password"
-                    required
-                    value={password}
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder="Ingresa tu contraseña"
-                    className="bg-white text-slate-900 placeholder:text-slate-500"
-                  />
-                </div>
-                {error && (
-                  <div className="rounded-lg border border-red-400 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {error}
-                  </div>
-                )}
-                <Button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-brand text-white hover:bg-brand/90"
-                >
-                  {isLoading ? 'Iniciando sesión…' : 'Iniciar sesión'}
-                </Button>
-              </form>
-              <div className="mt-8 space-y-3 text-center">
-                <p className="text-xs uppercase tracking-widest text-white/30">
-                  Próximamente
-                </p>
-                <div className="flex items-center justify-center gap-3">
-                  <Button disabled variant="ghost" className="w-1/2 border border-white/20 text-white/60">
-                    Google
-                  </Button>
-                  <Button disabled variant="ghost" className="w-1/2 border border-white/20 text-white/60">
-                    Microsoft
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-3 text-center">
-              <Link href="/forgot-password" className="text-sm text-white/70 hover:text-white">
-                ¿Olvidaste tu contraseña?
-              </Link>
-              <p className="text-xs text-white/40">
-                ¿Necesitas una cuenta? Escríbenos a soporte@artifact.cl y te ayudamos con la activación.
-              </p>
-            </CardFooter>
-          </Card>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen grid lg:grid-cols-2 bg-slate-950 text-white">
+      {/* Branding - Admin Side */}
+      <div className="hidden lg:flex flex-col justify-center items-center bg-slate-900 border-r border-white/5 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.1),transparent_70%)]" />
+        <div className="relative z-10 text-center p-12">
+          <div className="w-24 h-24 bg-cyan-500 rounded-3xl mx-auto mb-8 flex items-center justify-center transform -rotate-3 shadow-[0_0_40px_rgba(6,182,212,0.3)]">
+            <span className="text-4xl font-bold text-black">A</span>
+          </div>
+          <h1 className="text-4xl font-bold tracking-tight mb-4">Panel de Administración</h1>
+          <p className="text-lg text-slate-400 max-w-sm mx-auto">
+            Control total de tu negocio. Inventario, ventas y facturación en un solo lugar.
+          </p>
         </div>
+      </div>
+
+      {/* Login Form */}
+      <div className="flex items-center justify-center p-6 lg:p-12">
+        <Card className="w-full max-w-md bg-white/5 border border-white/10 backdrop-blur-xl">
+          <CardHeader className="text-center pb-8">
+            <CardTitle className="text-2xl font-bold mb-2 text-white">Bienvenido de nuevo</CardTitle>
+            <p className="text-slate-400">Accede a Artifact ERP</p>
+          </CardHeader>
+          <CardContent className="space-y-6">
+
+            <Button
+              variant="outline"
+              className="w-full h-12 text-base font-medium border-white/10 hover:bg-white/5 hover:text-white bg-transparent text-slate-200"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+            >
+              <GoogleIcon />
+              Ingresar con Google
+            </Button>
+
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-white/10" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-slate-950 px-2 text-slate-500 rounded-sm">o usa tu email</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleEmailLogin} className="space-y-4">
+              <div className="space-y-2">
+                <Input
+                  type="email"
+                  placeholder="admin@empresa.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-black/20 border-white/10 text-white placeholder:text-slate-600 focus:border-cyan-500/50 h-11"
+                />
+              </div>
+              <Button
+                type="submit"
+                className="w-full h-11 bg-cyan-500 text-black hover:bg-cyan-400 font-semibold"
+                disabled={sendingLink || isLoading}
+              >
+                {sendingLink ? 'Enviando...' : 'Enviar enlace de acceso'}
+                <Mail className="w-4 h-4 ml-2" />
+              </Button>
+            </form>
+          </CardContent>
+          <CardFooter className="flex justify-center border-t border-white/5 pt-6">
+            <p className="text-xs text-slate-500 text-center max-w-xs">
+              Acceso restringido a personal autorizado.
+            </p>
+          </CardFooter>
+        </Card>
       </div>
     </div>
   );
-};
-
-export default LoginPage;
+}

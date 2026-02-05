@@ -8,10 +8,10 @@ interface StatsCardProps {
 
 const StatsCard: React.FC<StatsCardProps> = ({ title, value, description }) => {
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md">
-      <h3 className="text-lg font-semibold text-gray-500">{title}</h3>
-      <p className="text-3xl font-bold text-gray-900 mt-1">{value}</p>
-      {description && <p className="text-sm text-gray-500 mt-2">{description}</p>}
+    <div className="card-premium p-6">
+      <h3 className="text-sm font-medium text-[rgb(var(--text-secondary))]uppercase tracking-wider">{title}</h3>
+      <p className="text-3xl font-bold text-[rgb(var(--brand-color))] mt-2">{value}</p>
+      {description && <p className="text-sm text-[rgb(var(--text-secondary))] mt-2 opacity-80">{description}</p>}
     </div>
   );
 };

@@ -8,15 +8,15 @@ interface TableProps<T> {
 
 const Table = <T extends { id: string | number }>({ data, columns, renderRowActions }: TableProps<T>) => {
   return (
-    <div className="overflow-x-auto bg-white rounded-lg shadow-md">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
+    <div className="overflow-x-auto card-premium">
+      <table className="min-w-full divide-y divide-[rgba(var(--border-color),0.1)]">
+        <thead className="bg-[rgba(var(--bg-secondary),0.5)]">
           <tr>
             {columns.map((column) => (
               <th
                 key={String(column.key)}
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                className="px-6 py-3 text-left text-xs font-medium text-[rgb(var(--text-secondary))] uppercase tracking-wider"
               >
                 {column.header}
               </th>
@@ -28,11 +28,11 @@ const Table = <T extends { id: string | number }>({ data, columns, renderRowActi
             )}
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody className="divide-y divide-[rgba(var(--border-color),0.1)]">
           {data.map((item) => (
-            <tr key={item.id}>
+            <tr key={item.id} className="hover:bg-[rgba(var(--brand-color),0.05)] transition-colors">
               {columns.map((column) => (
-                <td key={String(column.key)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                <td key={String(column.key)} className="px-6 py-4 whitespace-nowrap text-sm text-[rgb(var(--text-primary))]">
                   {String(item[column.key])}
                 </td>
               ))}

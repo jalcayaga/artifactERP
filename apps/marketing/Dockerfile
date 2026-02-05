@@ -22,7 +22,7 @@ RUN npx turbo run build --filter=@artifact/marketing... --force
 
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV production
+ENV NODE_ENV=production
 COPY --from=builder /app/apps/marketing/public ./public
 COPY --from=builder /app/apps/marketing/.next/standalone ./
 COPY --from=builder /app/apps/marketing/.next/static ./apps/marketing/.next/static

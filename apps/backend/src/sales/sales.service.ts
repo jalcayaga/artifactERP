@@ -79,7 +79,7 @@ export class SalesService {
         skip: (page - 1) * limit,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: { company: true, orderItems: { include: { product: true } } },
+        include: { company: true },
       }),
       this.prisma.order.count({ where: whereClause }),
     ])
@@ -184,6 +184,17 @@ export class SalesService {
     })
   }
 
+  private async ensureSaleBelongsToTenant(tenantId: string, saleId: string) {
+    const sale = await this.prisma.order.findFirst({
+      where: { id: saleId, tenantId },
+    })
+    if (!sale) {
+      throw new ForbiddenException(
+        `Order ${saleId} does not belong to tenant ${tenantId}`
+      )
+    }
+  }
+
   private async ensureCompanyBelongsToTenant(
     tenantId: string,
     companyId: string
@@ -209,14 +220,84 @@ export class SalesService {
     }
   }
 
-  private async ensureSaleBelongsToTenant(tenantId: string, saleId: string) {
-    const sale = await this.prisma.order.findFirst({
-      where: { id: saleId, tenantId },
-    })
-    if (!sale) {
-      throw new ForbiddenException(
-        `Order ${saleId} does not belong to tenant ${tenantId}`
-      )
+  async createGuestSale(tenantId: string, guestData: any): Promise<Order> {
+    const { items, customer } = guestData
+
+    // 1. Find a Default User (Admin) to assign this sale to
+    // Since Order requires userId, we assign it to the tenant owner/admin
+    const defaultUser = await this.prisma.user.findFirst({
+      where: { tenantId, roles: { some: { name: { in: ['SUPERADMIN', 'ADMIN'] } } } }
+    });
+
+    if (!defaultUser) {
+      throw new ForbiddenException('No admin user found to assign guest sale');
     }
+
+    // 2. Find or Create the Client Company
+    let client = await this.prisma.company.findFirst({
+      where: { tenantId, email: customer.email }
+    });
+
+    if (!client) {
+      client = await this.prisma.company.create({
+        data: {
+          tenant: { connect: { id: tenantId } },
+          user: { connect: { id: defaultUser.id } }, // Managed by Admin
+          name: customer.name || 'Invitado Web',
+          email: customer.email,
+          rut: customer.rut,
+          address: customer.address,
+          city: customer.city,
+          isClient: true
+        }
+      });
+    }
+
+    // 3. Prepare Order Data
+    return this.prisma.$transaction(async (tx) => {
+      const orderItemsData = []
+
+      for (const item of items) {
+        const product = await tx.product.findUnique({ where: { id: item.id } });
+        if (!product) continue;
+
+        orderItemsData.push({
+          quantity: item.quantity,
+          unitPrice: product.price,
+          totalPrice: product.price.mul(item.quantity),
+          itemVatAmount: product.price.mul(item.quantity).mul(0.19),
+          totalPriceWithVat: product.price.mul(item.quantity).mul(1.19),
+          product: { connect: { id: product.id } }
+        });
+      }
+
+      const subTotal = orderItemsData.reduce((sum, i) => sum.add(i.totalPrice), new Prisma.Decimal(0));
+      const vatAmount = subTotal.mul(0.19);
+      const grandTotal = subTotal.add(vatAmount);
+
+      // 4. Create Order
+      const newOrder = await tx.order.create({
+        data: {
+          tenant: { connect: { id: tenantId } },
+          company: { connect: { id: client!.id } },
+          user: { connect: { id: defaultUser.id } },
+          status: 'PENDING_PAYMENT',
+          paymentStatus: 'PENDING',
+          subTotalAmount: subTotal,
+          vatAmount: vatAmount,
+          grandTotalAmount: grandTotal,
+          shippingAddress: customer.address + ', ' + customer.city,
+          customerNotes: `Venta Web - Documento: ${customer.documentType}`,
+          orderItems: {
+            create: orderItemsData
+          }
+        },
+        include: { company: true, orderItems: { include: { product: true } } }
+      });
+
+      // TODO: Generate Payment Link Here if needed
+
+      return newOrder;
+    });
   }
 }

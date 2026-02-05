@@ -27,6 +27,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@artifact/core": "*",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.2",
     "@nestjs/core": "^11.0.2",

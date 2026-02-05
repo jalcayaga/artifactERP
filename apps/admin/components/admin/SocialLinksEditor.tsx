@@ -66,8 +66,8 @@ const SocialLinksEditor = () => {
     if (isLoading) return null;
 
     return (
-        <form onSubmit={handleSave} className="space-y-6 bg-white p-6 rounded-lg shadow-md mt-6 max-w-2xl mx-auto">
-            <h2 className="text-xl font-bold border-b pb-2">Redes Sociales</h2>
+        <form onSubmit={handleSave} className="space-y-6 card-premium p-6 mt-6 max-w-2xl mx-auto">
+            <h2 className="text-xl font-bold border-b border-[rgba(var(--border-color),0.2)] pb-2">Redes Sociales</h2>
 
             <div className="grid grid-cols-1 gap-4">
                 <SocialInput
@@ -111,7 +111,7 @@ const SocialLinksEditor = () => {
                 <button
                     type="submit"
                     disabled={isSaving}
-                    className="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                    className="btn-primary"
                 >
                     {isSaving ? "Guardando..." : "Guardar Redes Sociales"}
                 </button>
@@ -130,7 +130,7 @@ interface SocialInputProps {
 
 const SocialInput = ({ icon, label, value, onChange, placeholder }: SocialInputProps) => (
     <div>
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+        <label className="flex items-center gap-2 text-sm font-medium text-[rgb(var(--text-secondary))] mb-1">
             {icon}
             {label}
         </label>
@@ -138,7 +138,7 @@ const SocialInput = ({ icon, label, value, onChange, placeholder }: SocialInputP
             type="text"
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            className="block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm"
+            className="input-primary block w-full"
             placeholder={placeholder}
         />
     </div>

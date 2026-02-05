@@ -4,13 +4,15 @@ import {
   CreateCompanyDto,
   UpdateCompanyDto,
   ContactPerson,
-  CompanyService,
-  ContactPersonService,
-  useAuth,
   validateRut,
   chileanRegions,
   countries,
 } from '@artifact/core';
+import {
+  CompanyService,
+  ContactPersonService,
+  useAuth,
+} from '@artifact/core/client';
 import {
   Select,
   SelectContent,
@@ -290,7 +292,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({
       if (error.response && error.response.status === 409) {
         toast.error(
           error.response.data.message ||
-            'Ya existe una empresa con el mismo RUT o email.'
+          'Ya existe una empresa con el mismo RUT o email.'
         );
       } else {
         toast.error(error.message || 'Error al guardar la empresa.');

@@ -3,7 +3,7 @@
  */
 
 const PUBLIC_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+  process.env.NEXT_PUBLIC_API_URL || 'https://api.artifact.cl';
 const INTERNAL_API_URL =
   process.env.API_URL_INTERNAL || process.env.API_URL || PUBLIC_API_URL;
 
@@ -85,6 +85,18 @@ class ApiClient {
   ): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+    });
+  }
+
+  async patch<T>(
+    endpoint: string,
+    data?: unknown,
+    headers?: HeadersInit
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      method: 'PATCH',
       headers,
       body: data ? JSON.stringify(data) : undefined,
     });

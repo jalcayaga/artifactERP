@@ -1,15 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  useAuth,
   Quote,
   CreateQuoteDto,
   UpdateQuoteDto,
   UserRole,
   QuoteStatus,
   formatCurrencyChilean,
-  QuoteService,
 } from '@artifact/core';
+import {
+  useAuth,
+  QuoteService,
+} from '@artifact/core/client';
 import {
   Card,
   CardContent,

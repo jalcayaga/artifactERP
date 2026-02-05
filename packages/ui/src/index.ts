@@ -11,3 +11,4 @@ export * from './select';
 export * from './icons';
 export * from './textarea';
 export * from './form';
+export * from './sonner';

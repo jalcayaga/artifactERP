@@ -3,11 +3,20 @@ const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
+      },
+    ],
   },
   experimental: {
-    transpilePackages: ['@artifact/ui', '@artifact/core'],
   },
+  transpilePackages: ['@artifact/ui', '@artifact/core'],
 };
 
 module.exports = nextConfig;

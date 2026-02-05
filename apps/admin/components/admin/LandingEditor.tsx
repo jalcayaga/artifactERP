@@ -66,36 +66,36 @@ const LandingEditor = () => {
     if (isLoading) return null;
 
     return (
-        <form onSubmit={handleSave} className="space-y-6 bg-white p-6 rounded-lg shadow-md mt-6 max-w-2xl mx-auto">
-            <h2 className="text-xl font-bold border-b pb-2">Contenido de la Landing</h2>
+        <form onSubmit={handleSave} className="space-y-6 card-premium p-6 mt-6 max-w-2xl mx-auto">
+            <h2 className="text-xl font-bold border-b border-[rgba(var(--border-color),0.2)] pb-2">Contenido de la Landing</h2>
 
             <div className="space-y-4">
-                <h3 className="font-semibold text-gray-700">Sección Principal (Hero)</h3>
+                <h3 className="font-semibold text-[rgb(var(--text-secondary))]">Sección Principal (Hero)</h3>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Título</label>
+                    <label className="block text-sm font-medium text-[rgb(var(--text-secondary))]">Título</label>
                     <input
                         type="text"
                         value={sections.hero?.title || ""}
                         onChange={(e) => handleChange("hero", "title", e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm"
+                        className="input-primary mt-1 block w-full"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Subtítulo</label>
+                    <label className="block text-sm font-medium text-[rgb(var(--text-secondary))]">Subtítulo</label>
                     <textarea
                         value={sections.hero?.subtitle || ""}
                         onChange={(e) => handleChange("hero", "subtitle", e.target.value)}
                         rows={3}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm"
+                        className="input-primary mt-1 block w-full"
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Texto Botón (CTA)</label>
+                    <label className="block text-sm font-medium text-[rgb(var(--text-secondary))]">Texto Botón (CTA)</label>
                     <input
                         type="text"
                         value={sections.hero?.ctaText || ""}
                         onChange={(e) => handleChange("hero", "ctaText", e.target.value)}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm"
+                        className="input-primary mt-1 block w-full"
                     />
                 </div>
             </div>
@@ -104,7 +104,7 @@ const LandingEditor = () => {
                 <button
                     type="submit"
                     disabled={isSaving}
-                    className="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                    className="btn-primary"
                 >
                     {isSaving ? "Guardando..." : "Guardar Contenido"}
                 </button>

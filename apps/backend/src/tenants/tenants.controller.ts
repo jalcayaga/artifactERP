@@ -46,6 +46,10 @@ export class TenantsController {
 
     if (isPlatformSubdomain) {
       const slug = host.replace(`.${rootDomain}`, '');
+      // FIX: Map 'store' and 'www' subdomain to 'artifact' tenant to allow main storefront to work
+      if (slug === 'store' || slug === 'www') {
+        return this.tenantsService.findBySlug('artifact');
+      }
       return this.tenantsService.findBySlug(slug);
     }
 

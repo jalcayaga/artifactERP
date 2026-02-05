@@ -80,7 +80,7 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({ onSave }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg shadow-md max-w-2xl mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-4 card-premium p-6 max-w-2xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold">Personalizar Apariencia</h2>
         <div
@@ -100,7 +100,7 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({ onSave }) => {
               name="brandColor"
               value={theme.brandColor}
               onChange={handleChange}
-              className="block w-12 h-10 rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand p-1 cursor-pointer"
+              className="block w-12 h-10 rounded-md shadow-sm p-1 cursor-pointer"
             />
             <input
               type="text"
@@ -122,7 +122,7 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({ onSave }) => {
               name="textColor"
               value={theme.textColor}
               onChange={handleChange}
-              className="block w-12 h-10 rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand p-1 cursor-pointer"
+              className="block w-12 h-10 rounded-md shadow-sm p-1 cursor-pointer"
             />
             <input
               type="text"
@@ -145,7 +145,7 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({ onSave }) => {
             name="logoUrl"
             value={theme.logoUrl}
             onChange={handleChange}
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm"
+            className="input-primary mt-1 block w-full"
             placeholder="https://ejemplo.com/logo.png"
           />
         </div>
@@ -158,7 +158,7 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({ onSave }) => {
               name="radius"
               value={theme.radius}
               onChange={(e: any) => handleChange(e)}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-brand focus:ring-brand sm:text-sm"
+              className="input-primary mt-1 block w-full"
             >
               <option value="0">Sin redondeo</option>
               <option value="0.25rem">Pequeño (4px)</option>
@@ -188,12 +188,11 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({ onSave }) => {
         </div>
       </div>
 
-      <div className="pt-6 border-t border-gray-100 flex justify-end">
+      <div className="pt-6 border-t border-[rgba(var(--border-color),0.2)] flex justify-end">
         <button
           type="submit"
           disabled={isSaving}
-          className={`inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white ${isSaving ? 'bg-gray-400' : 'bg-brand hover:bg-brand/90'
-            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand transition-colors`}
+          className="btn-primary"
         >
           {isSaving ? "Guardando..." : "Guardar Cambios"}
         </button>

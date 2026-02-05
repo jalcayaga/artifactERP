@@ -92,6 +92,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       logout()
     }
 
+    if (storedToken && storedUser) {
+      console.log("AuthContext: Found token in localStorage");
+      try {
+        const user = JSON.parse(storedUser);
+        // ...
+      } catch (e) {
+        console.error("AuthContext: Error parsing user", e);
+      }
+    } else {
+      console.log("AuthContext: No token found in localStorage");
+    }
+
     window.addEventListener('auth-error', handleAuthError)
 
     // Cleanup listener on component unmount

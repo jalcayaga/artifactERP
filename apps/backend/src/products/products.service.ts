@@ -106,7 +106,7 @@ export class ProductsService {
     })
 
     const assetBaseUrl =
-      process.env.PUBLIC_ASSET_BASE_URL || 'http://localhost:3002'
+      process.env.PUBLIC_ASSET_BASE_URL || 'https://api.artifact.cl'
     const dataWithResolvedImages = assetBaseUrl
       ? data.map((product) => ({
         ...product,

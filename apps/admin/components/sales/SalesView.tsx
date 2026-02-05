@@ -2,13 +2,15 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  useCompany,
-  SaleService,
-  InvoiceService,
   Sale,
   OrderStatus,
   formatCurrencyChilean,
 } from '@artifact/core';
+import {
+  useCompany,
+  SaleService,
+  InvoiceService,
+} from '@artifact/core/client';
 import {
   Card,
   CardContent,

@@ -7,8 +7,8 @@ export type Theme = {
 };
 
 export const defaultTheme: Theme = {
-  brandColor: "#6366F1", // Indigo 500
-  textColor: "#1F2937", // Gray 800
+  brandColor: "#00E074", // Cyberpunk Neon Green
+  textColor: "#FFFFFF", // White text
   logoUrl: "/placeholder.svg",
   radius: "0.5rem", // rounded-md
   font: "sans-serif",

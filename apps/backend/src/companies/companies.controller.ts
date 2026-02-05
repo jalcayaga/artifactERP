@@ -9,17 +9,22 @@ import {
   UseGuards,
   Req,
   Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common'
 import { CompaniesService } from './companies.service'
 import { CreateCompanyDto } from './dto/create-company.dto'
 import { UpdateCompanyDto } from './dto/update-company.dto'
+import { Roles } from '../common/decorators/roles.decorator'
+import { UserRole } from '@artifact/core'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { TenantId } from '../common/decorators/tenant.decorator'
 
 @UseGuards(JwtAuthGuard)
 @Controller('companies')
+@Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER)
 export class CompaniesController {
-  constructor(private readonly companiesService: CompaniesService) {}
+  constructor(private readonly companiesService: CompaniesService) { }
 
   @Post()
   create(
@@ -36,8 +41,8 @@ export class CompaniesController {
     @Req() req,
     @Query('isClient') isClient?: string,
     @Query('isSupplier') isSupplier?: string,
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page?: number,
+    @Query('limit', new DefaultValuePipe(100), ParseIntPipe) limit?: number
   ) {
     const filters: any = {}
     if (isClient) filters.isClient = isClient === 'true'
@@ -46,8 +51,8 @@ export class CompaniesController {
       tenantId,
       req.user.id,
       filters,
-      page,
-      limit
+      page || 1,
+      limit || 100
     )
   }
 

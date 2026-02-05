@@ -8,10 +8,10 @@ import { TenantId } from '../common/decorators/tenant.decorator'
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('dashboard')
 export class DashboardController {
-  constructor(private readonly dashboardService: DashboardService) {}
+  constructor(private readonly dashboardService: DashboardService) { }
 
   @Get()
-  @Roles('ADMIN', 'EDITOR', 'VIEWER')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER')
   getDashboardData(
     @TenantId() tenantId: string,
     @Query('companyId') companyId?: string

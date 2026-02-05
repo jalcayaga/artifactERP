@@ -1,77 +1,70 @@
-import type { Metadata } from "next";
-import { headers } from "next/headers";
-import type { CSSProperties, ReactNode } from "react";
-import { Inter, Space_Grotesk } from "next/font/google";
+import type { Metadata } from 'next';
+import { Inter, Space_Grotesk } from 'next/font/google';
+import './globals.css';
+import { Providers } from './providers';
+import { TenantProvider } from '@/context/tenant-context';
+import { Header } from '@/components/header';
+import { Toaster } from '@artifact/ui';
+import { Footer } from '@/components/footer';
+import { getTenantTheme } from '@/lib/storefront';
+import { defaultTheme } from '@/lib/theme';
+import { headers } from 'next/headers';
 
 const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
 });
 
 const spaceGrotesk = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-display",
-  display: "swap",
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+  display: 'swap',
 });
 
-import { Header } from "@/components/header";
-import { Footer } from "@/components/footer";
-import { TenantProvider } from "@/context/tenant-context";
-import { getTenantTheme } from "@/lib/storefront";
-import { defaultTheme } from "@/lib/theme";
-import { Providers } from "./providers";
-import "./globals.css";
-
 export const metadata: Metadata = {
-  title: "SubRed Storefront",
-  description: "Tu ecommerce con ERP y facturación electrónica para el SII",
+  title: 'Artifact Storefront',
+  description: 'Tu ecommerce con ERP y facturación electrónica para el SII',
 };
 
 export default async function RootLayout({
   children,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
 }) {
   const host = headers().get("host") || "";
+  // Mock tenant theme or fetch it
   const tenantTheme = await getTenantTheme(host) || {
-    tenant: {
-      slug: "artifact",
-      name: "Artifact Storefront",
-    },
-    branding: {
-      logoUrl: defaultTheme.logoUrl,
-      primaryColor: defaultTheme.brandColor,
-      secondaryColor: defaultTheme.textColor,
-    },
-  };
-
-  const currentTheme = {
-    brandColor: tenantTheme.branding?.primaryColor || defaultTheme.brandColor,
-    textColor: tenantTheme.branding?.secondaryColor || defaultTheme.textColor,
-    logoUrl: tenantTheme.branding?.logoUrl || defaultTheme.logoUrl,
-    radius: defaultTheme.radius,
-    font: defaultTheme.font,
+    tenant: { slug: "artifact", name: "Artifact Storefront" },
+    branding: { primaryColor: defaultTheme.brandColor, secondaryColor: defaultTheme.textColor, logoUrl: defaultTheme.logoUrl }
   };
 
   return (
-    <html
-      lang="es"
-      style={{
-        "--color-brand": currentTheme.brandColor,
-        "--color-text": currentTheme.textColor,
-        "--radius": currentTheme.radius,
-      } as CSSProperties}
-      className={`${inter.variable} ${spaceGrotesk.variable}`}
-    >
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased">
+    <html lang="es" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <head>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              :root {
+                --brand-color: ${tenantTheme.branding?.primaryColor || defaultTheme.brandColor};
+                --text-color: ${tenantTheme.branding?.secondaryColor || defaultTheme.textColor};
+              }
+            `,
+          }}
+        />
+      </head>
+      <body className="min-h-screen bg-black text-white antialiased">
+        {/* Dynamic Background */}
+        <div className="fixed inset-0 -z-10 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,224,116,0.03),transparent_70%)]" />
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-3xl" />
+        </div>
+
         <Providers>
           <TenantProvider tenant={tenantTheme}>
-            <Header />
-            <main className="flex min-h-[calc(100vh-200px)] flex-col">
-              {children}
-            </main>
-            <Footer />
+            {children}
+            <Toaster />
           </TenantProvider>
         </Providers>
       </body>

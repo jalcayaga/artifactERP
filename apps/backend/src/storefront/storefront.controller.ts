@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Query } from '@nestjs/common'
+import { Controller, Get, Param, Query, Body, Post } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger'
 import { Public } from '../common/decorators/public.decorator'
 import { ProductsService } from '../products/products.service'
+import { SalesService } from '../sales/sales.service'
 import {
   TenantContext,
   TenantId,
@@ -12,10 +13,22 @@ import { DefaultValuePipe, ParseIntPipe } from '@nestjs/common'
 @ApiTags('storefront')
 @Controller('storefront')
 export class StorefrontController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly salesService: SalesService
+  ) { }
+
+  @Public()
+  @Post('checkout')
+  @ApiOperation({ summary: 'Procesar compra (Guest/User)' })
+  async checkout(@TenantId() tenantId: string, @Body() orderData: any) {
+    // Basic validation should be added here
+    return this.salesService.createGuestSale(tenantId, orderData);
+  }
 
   @Public()
   @Get('theme')
+  // ... (rest of the file)
   @ApiOperation({
     summary: 'Obtener tema y branding del tenant',
     description:
@@ -37,18 +50,18 @@ export class StorefrontController {
 
     const branding = tenant.branding
       ? {
-          ...tenant.branding,
-          logoUrl: tenant.branding.logoUrl
-            ? assetBaseUrl
-              ? `${assetBaseUrl}${tenant.branding.logoUrl}`
-              : tenant.branding.logoUrl
-            : null,
-          secondaryLogoUrl: tenant.branding.secondaryLogoUrl
-            ? assetBaseUrl
-              ? `${assetBaseUrl}${tenant.branding.secondaryLogoUrl}`
-              : tenant.branding.secondaryLogoUrl
-            : null,
-        }
+        ...tenant.branding,
+        logoUrl: tenant.branding.logoUrl
+          ? assetBaseUrl
+            ? `${assetBaseUrl}${tenant.branding.logoUrl}`
+            : tenant.branding.logoUrl
+          : null,
+        secondaryLogoUrl: tenant.branding.secondaryLogoUrl
+          ? assetBaseUrl
+            ? `${assetBaseUrl}${tenant.branding.secondaryLogoUrl}`
+            : tenant.branding.secondaryLogoUrl
+          : null,
+      }
       : null
 
     return {

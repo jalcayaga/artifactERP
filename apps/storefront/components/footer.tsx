@@ -1,88 +1,110 @@
-import React from "react";
-import Link from "next/link";
-import { useTenant } from "@/hooks/use-tenant";
-import { Instagram, Facebook, Linkedin, Twitter } from "lucide-react";
+import Link from 'next/link';
+import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
 
-const footerLinks = [
+const footerSections = [
   {
-    title: "Plataforma",
+    title: 'Plataforma',
     links: [
-      { label: "Funciones", href: "/features" },
-      { label: "Precios", href: "/pricing" },
-      { label: "Integraciones", href: "/integrations" },
-    ],
+      { label: 'Funciones', href: '/#features' },
+      { label: 'Precios', href: '/#planes' },
+      { label: 'Integraciones', href: '/#features' },
+      { label: 'Seguridad', href: '/privacy' }
+    ]
   },
   {
-    title: "Recursos",
+    title: 'Compañía',
     links: [
-      { label: "Documentación", href: "/docs" },
-      { label: "Blog", href: "/blog" },
-      { label: "Soporte", href: "/support" },
-    ],
+      { label: 'Nosotros', href: '/about' },
+      { label: 'Contacto', href: '/#contacto' }
+    ]
   },
   {
-    title: "Compañía",
+    title: 'Legal',
     links: [
-      { label: "Nosotros", href: "/about" },
-      { label: "Contacto", href: "/contact" },
-      { label: "Privacidad", href: "/privacy" },
-    ],
-  },
+      { label: 'Privacidad', href: '/privacy' },
+      { label: 'Términos', href: '/terms' }
+    ]
+  }
+];
+
+const socialLinks = [
+  { icon: Twitter, href: '#', label: 'Twitter' },
+  { icon: Github, href: '#', label: 'GitHub' },
+  { icon: Linkedin, href: '#', label: 'LinkedIn' },
+  { icon: Mail, href: '#', label: 'Email' }
 ];
 
 export function Footer() {
-  const { tenant } = useTenant();
-  const branding = tenant?.branding;
-  const socialLinks = branding?.socialLinks as any;
-  const storeName = tenant?.tenant?.name || "Artifact Storefront";
-
   return (
-    <footer className="relative mt-20 overflow-hidden bg-slate-950 text-slate-200">
-      <div className="absolute inset-x-0 top-[-120px] h-[220px] bg-[radial-gradient(circle,_rgba(99,102,241,0.35),_transparent_60%)] blur-3xl" />
+    <footer className="relative pt-16 pb-8 text-neutral-200">
+      {/* Background Gradient for readability without hard cut */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent -z-10" />
+
+      {/* Top gradient glow */}
+      <div className="absolute inset-x-0 top-[-120px] h-[220px] bg-[radial-gradient(circle,var(--color-brand),transparent_60%)] opacity-20 blur-3xl" />
+
       <div className="relative container mx-auto px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid gap-10 border-b border-white/10 pb-10 md:grid-cols-4">
-          <div className="space-y-4">
-            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-white/70">
-              {storeName}
-            </span>
-            <p className="text-sm text-slate-300/80">
-              SaaS para pymes chilenas que necesitan vender online, controlar su operación y
-              emitir DTE sin estrés.
+        {/* Main footer content */}
+        <div className="grid gap-12 border-b border-white/10 pb-12 md:grid-cols-2 lg:grid-cols-6">
+          {/* Brand column - spans 2 columns on large screens */}
+          <div className="space-y-6 lg:col-span-2">
+            {/* Logo */}
+            <Link href="/" className="inline-flex items-center gap-3 group">
+              <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#00E074]/20 via-[#00E074]/30 to-[#00E074]/60 shadow-lg shadow-[#00E074]/20 transition-transform group-hover:scale-105">
+                <svg
+                  className="h-6 w-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 10V3L4 14h7v7l9-11h-7z"
+                  />
+                </svg>
+              </div>
+              <span className="text-lg font-bold text-white">
+                Artifact Storefront
+              </span>
+            </Link>
+
+            {/* Description */}
+            <p className="max-w-sm text-sm leading-relaxed text-neutral-400">
+              SaaS para pymes chilenas que necesitan vender online, controlar su operación y emitir DTE sin estrés.
             </p>
-            <div className="flex items-center gap-4 pt-2">
-              {socialLinks?.instagram && (
-                <a href={socialLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
-                  <Instagram className="h-5 w-5" />
-                </a>
-              )}
-              {socialLinks?.facebook && (
-                <a href={socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
-                  <Facebook className="h-5 w-5" />
-                </a>
-              )}
-              {socialLinks?.linkedin && (
-                <a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
-                  <Linkedin className="h-5 w-5" />
-                </a>
-              )}
-              {socialLinks?.twitter && (
-                <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-slate-400 hover:text-white transition-colors">
-                  <Twitter className="h-5 w-5" />
-                </a>
-              )}
+
+            {/* Social Links */}
+            <div className="flex items-center gap-3">
+              {socialLinks.map((social) => {
+                const Icon = social.icon;
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    aria-label={social.label}
+                    className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-400 transition-all hover:border-[#00E074]/50 hover:bg-[#00E074]/10 hover:text-[#00E074]"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </a>
+                );
+              })}
             </div>
           </div>
-          {footerLinks.map((section) => (
-            <div key={section.title} className="space-y-3">
-              <h3 className="text-sm font-semibold uppercase tracking-widest text-white/70">
+
+          {/* Link columns */}
+          {footerSections.map((section) => (
+            <div key={section.title} className="space-y-4">
+              <h3 className="text-sm font-semibold uppercase tracking-widest text-white/90">
                 {section.title}
               </h3>
-              <ul className="space-y-2 text-sm">
+              <ul className="space-y-3">
                 {section.links.map((link) => (
                   <li key={link.label}>
                     <Link
                       href={link.href}
-                      className="text-slate-300 transition hover:text-white"
+                      className="text-sm text-neutral-400 transition-colors hover:text-[#00E074]"
                     >
                       {link.label}
                     </Link>
@@ -92,21 +114,28 @@ export function Footer() {
             </div>
           ))}
         </div>
-        <div className="flex flex-col items-center justify-between gap-4 py-6 text-xs text-slate-400 sm:flex-row">
-          <p>&copy; {new Date().getFullYear()} {storeName}. Todos los derechos reservados.</p>
-          <div className="flex items-center gap-4">
-            <Link href="/privacy" className="hover:text-white">
+
+        {/* Bottom bar */}
+        <div className="flex flex-col items-center justify-between gap-4 py-8 text-sm text-neutral-500 sm:flex-row">
+          <p>
+            © {new Date().getFullYear()}{' '}
+            <span className="text-neutral-400">Artifact Storefront</span>. Todos los derechos
+            reservados.
+          </p>
+
+          <div className="flex items-center gap-6">
+            <Link href="/privacy" className="transition-colors hover:text-white">
               Privacidad
             </Link>
-            <Link href="/terms" className="hover:text-white">
+            <Link href="/terms" className="transition-colors hover:text-white">
               Términos
-            </Link>
-            <Link href="/status" className="hover:text-white">
-              Status
             </Link>
           </div>
         </div>
       </div>
+
+      {/* Bottom gradient */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00E074]/50 to-transparent" />
     </footer>
   );
 }

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: ghcr.io/jalcayaga/artifacterp-backend:latest
+    image: ghcr.io/jalcayaga/artifacterp-backend:v3
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - DIRECT_URL=${DIRECT_URL}
@@ -23,7 +23,7 @@ services:
         - "traefik.http.services.artifact-backend.loadbalancer.server.port=3000"
 
   admin:
-    image: ghcr.io/jalcayaga/artifacterp-admin:latest
+    image: ghcr.io/jalcayaga/artifacterp-admin:v3
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
     networks:
@@ -38,7 +38,7 @@ services:
         - "traefik.http.services.artifact-admin.loadbalancer.server.port=3000"
 
   storefront:
-    image: ghcr.io/jalcayaga/artifacterp-storefront:latest
+    image: ghcr.io/jalcayaga/artifacterp-storefront:v3
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
       - NEXT_PUBLIC_TENANT_ID_HEADER=x-tenant-slug

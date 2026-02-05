@@ -41,7 +41,16 @@ export class TenantResolverMiddleware implements NestMiddleware {
     let tenant: (any & { branding: any | null }) | null = null;
 
     if (resolvedSlug) {
-      tenant = await this.tenantsService.findBySlug(resolvedSlug)
+      // Mapping specific for storefront and marketing
+      if (resolvedSlug === 'store' || resolvedSlug === 'www') {
+        resolvedSlug = 'artifact';
+      }
+
+      try {
+        tenant = await this.tenantsService.findBySlug(resolvedSlug)
+      } catch (error) {
+        console.warn(`Tenant not found for slug: ${resolvedSlug}, falling back to default resolution.`);
+      }
     }
 
     if (!tenant) {
@@ -53,7 +62,11 @@ export class TenantResolverMiddleware implements NestMiddleware {
         tenant = await this.tenantsService.findBySlug(slug);
       } else {
         // Try searching by custom domain
-        tenant = await this.tenantsService.findByDomain(hostname);
+        try {
+          tenant = await this.tenantsService.findByDomain(hostname);
+        } catch (error) {
+          // Ignore domain not found to allow fallback to defaultSlug
+        }
       }
     }
 

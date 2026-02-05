@@ -9,13 +9,16 @@
     "lint": "echo \"@artifact/storefront: lint skipped\""
   },
   "dependencies": {
-    "@artifact/core": "^1.0.0",
+    "@artifact/core": "*",
+    "@artifact/ui": "*",
     "@tanstack/react-query": "^5.45.1",
     "@tanstack/react-table": "^8.21.3",
     "clsx": "^2.1.1",
+    "lucide-react": "^0.303.0",
     "next": "14.2.30",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^2.4.0",
     "zustand": "^4.5.2"
   },

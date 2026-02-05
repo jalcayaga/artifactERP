@@ -18,6 +18,7 @@ RUN ls -R apps/backend/dist || echo "No dist found"
 # Runner stage
 FROM node:20-alpine AS runner
 WORKDIR /app
+ENV NODE_ENV=production
 
 # Copy built artifacts and dependencies
 RUN apk add --no-cache openssl
@@ -25,6 +26,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/backend/dist ./dist
 COPY --from=builder /app/apps/backend/package.json ./package.json
 COPY --from=builder /app/apps/backend/prisma ./prisma
+COPY --from=builder /app/packages ./packages
 
 # Generate Prisma Client in runner
 RUN npx prisma generate

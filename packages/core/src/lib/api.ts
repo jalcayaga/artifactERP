@@ -2,9 +2,9 @@
 import axios from 'axios'
 
 const API_BASE_URL =
-  //   process.env.NEXT_PUBLIC_API_URL ||
-  //   process.env.NEXT_PUBLIC_API_BASE_URL ||
-  'http://localhost:3002'
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  'https://api.artifact.cl'
 
 // Function to get the auth token from wherever it's stored (e.g., localStorage)
 const getAuthToken = () => {

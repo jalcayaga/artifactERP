@@ -3,7 +3,7 @@
  */
 
 const PUBLIC_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3002';
+  process.env.NEXT_PUBLIC_API_URL || 'https://api.artifact.cl';
 const INTERNAL_API_URL =
   process.env.API_URL_INTERNAL || process.env.API_URL || PUBLIC_API_URL;
 
@@ -22,7 +22,7 @@ class ApiClient {
   ): Promise<T> {
     const url = `${resolveBaseUrl()}${endpoint}`;
     if (typeof window !== 'undefined') {
-      console.log('Storefront API Request [Build: 16:47]:', options.method, url, 'Source:', process.env.NEXT_PUBLIC_API_URL);
+      console.log('Storefront API Request [Build: FINAL-v2-NO-LOCALHOST]:', options.method, url, 'Source:', process.env.NEXT_PUBLIC_API_URL);
     }
 
     const response = await fetch(url, {
