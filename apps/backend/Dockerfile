@@ -1,6 +1,10 @@
 
 FROM node:20-alpine AS builder
 WORKDIR /app
+
+# Install Python and build tools for native modules (bcrypt)
+RUN apk add --no-cache python3 make g++
+
 # Copy shared files
 COPY package.json package-lock.json turbo.json tsconfig.base.json ./
 # Copy workspace packages
