@@ -11,7 +11,8 @@ import { Button } from '@artifact/ui';
 import { Input } from '@artifact/ui';
 import { Label } from '@artifact/ui';
 import { ArchiveBoxIcon, CalendarIcon } from '@artifact/ui';
-import { Lot, ProductService, formatDate } from '@artifact/core';
+import { Lot, formatDate } from '@artifact/core';
+import { ProductService } from '@artifact/core/client';;
 import { toast } from 'sonner';
 
 interface LotEditModalProps {

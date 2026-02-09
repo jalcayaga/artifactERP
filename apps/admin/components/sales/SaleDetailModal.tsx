@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Sale, OrderItem, formatCurrencyChilean, InvoiceService } from '@artifact/core';
+import { Sale, OrderItem, formatCurrencyChilean } from '@artifact/core';
+import { InvoiceService } from '@artifact/core/client';;
 import {
   XIcon,
   ShoppingCartIcon,

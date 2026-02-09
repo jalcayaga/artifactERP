@@ -1,11 +1,6 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import {
-  ContactPerson,
-  CreateContactPersonDto,
-  UpdateContactPersonDto,
-  ContactPersonService,
-  countries,
-} from '@artifact/core';
+import { ContactPerson, CreateContactPersonDto, UpdateContactPersonDto, countries,  } from '@artifact/core';
+import { ContactPersonService } from '@artifact/core/client';;
 import {
   Card,
   CardContent,

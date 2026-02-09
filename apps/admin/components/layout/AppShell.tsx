@@ -3,7 +3,7 @@
 import { PropsWithChildren, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@artifact/core/client';
+import { useAuth } from '@artifact/core/client';;
 import Sidebar from '@/components/admin/sidebar';
 import AuthStatus from '@/components/auth/AuthStatus';
 import {

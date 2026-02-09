@@ -1,17 +1,9 @@
 'use client';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import {
-  Product,
-  CreateProductDto,
-  UpdateProductDto,
-  UserRole,
-  formatCurrencyChilean,
-} from '@artifact/core';
-import {
-  ProductService,
-  useAuth,
-} from '@artifact/core/client';
+import { Product, CreateProductDto, UpdateProductDto, UserRole, formatCurrencyChilean,  } from '@artifact/core';;
+import {  } from '@artifact/core';
+import { ProductService, useAuth } from '@artifact/core/client';;
 import {
   Card,
   CardContent,

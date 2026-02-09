@@ -71,7 +71,7 @@ export default function LoginPage() {
       <SpaceInvadersBackground />
 
       {/* LEFT SIDE - Marketing (Transparent to show Background) */}
-      <div className="hidden lg:flex flex-col justify-center items-center p-12 relative overflow-hidden z-10 bg-black/40 backdrop-blur-sm">
+      <div className="hidden lg:flex flex-col justify-center items-center p-12 relative overflow-hidden z-10 bg-black/40">
 
         <div className="relative z-10 max-w-lg w-full">
           {/* Logo */}

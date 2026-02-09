@@ -1,18 +1,7 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import {
-  Company,
-  CreateCompanyDto,
-  UpdateCompanyDto,
-  ContactPerson,
-  validateRut,
-  chileanRegions,
-  countries,
-} from '@artifact/core';
-import {
-  CompanyService,
-  ContactPersonService,
-  useAuth,
-} from '@artifact/core/client';
+import { Company, CreateCompanyDto, UpdateCompanyDto, ContactPerson, validateRut, chileanRegions, countries,  } from '@artifact/core';;
+import {  } from '@artifact/core';
+import { CompanyService, ContactPersonService, useAuth } from '@artifact/core/client';;
 import {
   Select,
   SelectContent,

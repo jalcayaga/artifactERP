@@ -32,3 +32,11 @@ ehthumbs.db
 # Environment files
 .env
 .env.*
+archive/
+*.log
+*.txt
+node_modules/
+.turbo/
+.next/
+dist/
+build/

@@ -11,7 +11,8 @@ import {
 } from '@artifact/ui';
 import { Button } from '@artifact/ui';
 import { AlertTriangleIcon } from '@artifact/ui';
-import { Company, SupplierService } from '@artifact/core';
+import { Company } from '@artifact/core';
+import { SupplierService } from '@artifact/core/client';;
 import {
   Select,
   SelectContent,

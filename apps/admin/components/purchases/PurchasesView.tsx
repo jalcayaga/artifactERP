@@ -1,12 +1,8 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  useCompany,
-  PurchaseService,
-  Purchase,
-  formatCurrencyChilean,
-} from '@artifact/core';
+import { Purchase, formatCurrencyChilean,  } from '@artifact/core';
+import { useCompany, PurchaseService } from '@artifact/core/client';;
 import {
   Card,
   CardContent,

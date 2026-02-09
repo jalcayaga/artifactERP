@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Company, CreateCompanyDto, UpdateCompanyDto, CompanyFilterOptions } from '@artifact/core';
-import { CompanyService } from '@artifact/core/client';
+import { Company, CreateCompanyDto, UpdateCompanyDto, CompanyFilterOptions } from '@artifact/core';;
+import { CompanyService } from '@artifact/core/client';;
 import { DataTable } from '@artifact/ui'; // Será migrado
 import { getColumns } from './CompanyColumns'; // En la misma carpeta
 import { Input } from '@artifact/ui'; // Será migrado

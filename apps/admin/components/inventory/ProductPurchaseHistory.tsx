@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Purchase, api, formatDate, formatCurrencyChilean } from '@artifact/core';
+import { Purchase, api, formatDate, formatCurrencyChilean } from '@artifact/core';;
 import { ShoppingCartIcon, TagIcon, CalendarIcon } from '@artifact/ui';
 
 interface ProductPurchaseHistoryProps {

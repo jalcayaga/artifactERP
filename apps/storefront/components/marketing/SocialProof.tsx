@@ -10,7 +10,7 @@ const SocialProof = () => {
                         <div className="proof-number">+200%</div>
                         <h4>Aumento en Reservas</h4>
                         <blockquote className="testimonial-quote">
-                            "Pasamos de agendar todo por teléfono a tener la agenda online siempre llena. ¡Nos ahorraron horas de gestión!"
+                            &ldquo;Pasamos de agendar todo por teléfono a tener la agenda online siempre llena. ¡Nos ahorraron horas de gestión!&rdquo;
                         </blockquote>
                         <cite className="testimonial-author">
                             <strong>Peluquería Mary</strong>
@@ -21,7 +21,7 @@ const SocialProof = () => {
                         <div className="proof-number">1 semana</div>
                         <h4>Para Estar Online</h4>
                         <blockquote className="testimonial-quote">
-                            "En 7 días ya teníamos logo, página web y redes sociales funcionando. Ahora nuestros clientes compran directo por la web."
+                            &ldquo;En 7 días ya teníamos logo, página web y redes sociales funcionando. Ahora nuestros clientes compran directo por la web.&rdquo;
                         </blockquote>
                         <cite className="testimonial-author">
                             <strong>Ferretería Los Aromos</strong>
@@ -32,7 +32,7 @@ const SocialProof = () => {
                         <div className="proof-number">500%</div>
                         <h4>Más Visibilidad</h4>
                         <blockquote className="testimonial-quote">
-                            "Nos llevaron de 0 a 15.000 seguidores en redes. Ahora el restaurante se llena todos los días gracias a su trabajo."
+                            &ldquo;Nos llevaron de 0 a 15.000 seguidores en redes. Ahora el restaurante se llena todos los días gracias a su trabajo.&rdquo;
                         </blockquote>
                         <cite className="testimonial-author">
                             <strong>Restaurante El Guatón</strong>

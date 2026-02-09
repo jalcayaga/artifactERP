@@ -1,11 +1,6 @@
 import React, { useState, useEffect, FormEvent, useMemo } from 'react';
-import {
-  Product,
-  UploadService,
-  ProductService,
-  useAuth,
-  formatCurrencyChilean,
-} from '@artifact/core';
+import { Product, formatCurrencyChilean,  } from '@artifact/core';
+import { UploadService, ProductService, useAuth } from '@artifact/core/client';;
 import {
   Card,
   CardContent,

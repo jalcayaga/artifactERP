@@ -1,121 +1,132 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getProducts, type Product } from "@/lib/storefront";
-import { useTenant } from "@/hooks/use-tenant";
-import { ProductCard } from "@/components/product-card";
 import { Button } from "@artifact/ui";
 import Link from "next/link";
+import SpaceInvadersBackground from "@/components/SpaceInvadersBackground";
+import FeaturesSection from "@/components/marketing/FeaturesSection";
+import HowItWorksSection from "@/components/marketing/HowItWorksSection";
+import PricingSection from "@/components/marketing/PricingSection";
+import SocialProofSection from "@/components/marketing/SocialProofSection";
+import { ArrowRight, Play } from "lucide-react";
 
 export default function StorefrontPage() {
-    const { tenant } = useTenant();
-    const [products, setProducts] = useState<Product[]>([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-
-    // Datos dinámicos del cliente (Fallback a valores por defecto si no hay tenant)
-    const storeName = tenant?.tenant?.name || "Tu Tienda";
-    const heroTitle = `Bienvenido a ${storeName}`;
-    const heroSubtitle = "Explora nuestra colección exclusiva de productos y servicios digitales.";
-
-    useEffect(() => {
-        if (tenant?.tenant?.slug) {
-            setIsLoading(true);
-            setError(null);
-            getProducts({ tenantSlug: tenant.tenant.slug })
-                .then((res) => {
-                    setProducts(res?.data ?? []);
-                })
-                .catch(() => {
-                    setError("No pudimos cargar los productos.");
-                    setProducts([]);
-                })
-                .finally(() => setIsLoading(false));
-        }
-    }, [tenant]);
-
     return (
         <div className="min-h-screen bg-black text-white relative overflow-hidden">
+            {/* Background */}
+            <SpaceInvadersBackground />
 
-            {/* Background Ambience (Estilo Pro) */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-[-20%] left-[20%] w-[600px] h-[600px] bg-brand/10 rounded-full blur-[120px] opacity-40 animate-pulse-slow"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-[100px] opacity-30"></div>
-            </div>
-
+            {/* HERO SECTION */}
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
-                {/* HERO SECTION ("La Imagen Pro" para tus clientes) */}
                 <div className="py-20 md:py-32 flex flex-col items-center text-center space-y-8">
-
+                    {/* Badge */}
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
                         <span className="relative flex h-2 w-2">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
                             <span className="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
                         </span>
                         <span className="text-xs font-bold tracking-widest uppercase text-neutral-300">
-                            Tienda Oficial
+                            Plataforma E-commerce Chilena
                         </span>
                     </div>
 
+                    {/* Main Heading */}
                     <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white max-w-5xl">
-                        {heroTitle}
+                        Vende online con{" "}
+                        <span className="text-brand">Artifact ERP</span>
                     </h1>
 
-                    <p className="text-xl text-neutral-400 max-w-2xl mx-auto leading-relaxed">
-                        {heroSubtitle}
+                    {/* Subtitle */}
+                    <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl mx-auto leading-relaxed">
+                        E-commerce + Admin + Facturación SII.
+                        <br />
+                        La plataforma completa para tu negocio en Chile.
                     </p>
 
+                    {/* CTAs */}
                     <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                        <Link href="/products">
-                            <Button size="lg" className="bg-brand text-black hover:bg-brand/90 font-bold px-10 h-14 text-lg rounded-full shadow-[0_0_20px_rgba(0,224,116,0.3)] transition-all hover:scale-105">
-                                Ver Productos
+                        <Link href="#pricing">
+                            <Button
+                                size="lg"
+                                className="bg-brand text-black hover:bg-brand/90 font-bold px-10 h-14 text-lg rounded-full shadow-[0_0_20px_rgba(0,224,116,0.3)] transition-all hover:scale-105 flex items-center gap-2"
+                            >
+                                Ver Planes
+                                <ArrowRight className="w-5 h-5" />
+                            </Button>
+                        </Link>
+                        <Link href="/contacto">
+                            <Button
+                                size="lg"
+                                variant="ghost"
+                                className="border-2 border-white/20 text-white hover:bg-white/10 font-semibold px-10 h-14 text-lg rounded-full transition-all hover:scale-105 flex items-center gap-2"
+                            >
+                                <Play className="w-5 h-5" />
+                                Solicitar Demo
                             </Button>
                         </Link>
                     </div>
-                </div>
 
-                {/* Separator */}
-                <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-16"></div>
-
-                {/* CATALOG SECTION */}
-                <div className="space-y-10 pb-20">
-                    <div className="flex items-end justify-between">
-                        <div>
-                            <h2 className="text-3xl font-bold text-white mb-2">Destacados</h2>
-                            <p className="text-neutral-500">Lo mejor de nuestra selección para ti.</p>
+                    {/* Trust indicators */}
+                    <div className="flex flex-wrap justify-center gap-6 pt-8 text-sm text-neutral-500">
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-brand"></div>
+                            <span>Facturación SII incluida</span>
                         </div>
-                        <Link href="/products" className="hidden sm:block text-brand hover:text-brand/80 font-medium transition-colors">
-                            Ver todo el catálogo →
-                        </Link>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-brand"></div>
+                            <span>Configuración en minutos</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-brand"></div>
+                            <span>Soporte en español</span>
+                        </div>
                     </div>
+                </div>
+            </div>
 
-                    {isLoading && (
-                        <div className="flex justify-center py-20">
-                            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand"></div>
-                        </div>
-                    )}
+            {/* Separator */}
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-16 relative z-10"></div>
 
-                    {!isLoading && !error && products.length === 0 && (
-                        <div className="py-24 text-center border border-dashed border-white/10 rounded-3xl bg-white/5">
-                            <h3 className="text-xl font-medium text-white mb-2">Catálogo en preparación</h3>
-                            <p className="text-neutral-400">Pronto agregaremos productos increíbles.</p>
-                        </div>
-                    )}
+            {/* MARKETING SECTIONS */}
+            <FeaturesSection />
 
-                    {!isLoading && products.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                            {products.map((product, index) => (
-                                <div key={product.id} className="group relative animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                                    <ProductCard product={product} />
-                                </div>
-                            ))}
-                        </div>
-                    )}
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-16 relative z-10"></div>
 
-                    <div className="sm:hidden text-center pt-8">
-                        <Link href="/products" className="text-brand font-medium">
-                            Ver todo el catálogo →
+            <HowItWorksSection />
+
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-16 relative z-10"></div>
+
+            <PricingSection />
+
+            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-16 relative z-10"></div>
+
+            <SocialProofSection />
+
+            {/* Final CTA Section */}
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-20">
+                <div className="max-w-4xl mx-auto text-center p-12 rounded-3xl bg-gradient-to-br from-brand/10 via-brand/5 to-transparent border border-brand/20">
+                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                        ¿Listo para digitalizar tu negocio?
+                    </h2>
+                    <p className="text-xl text-neutral-400 mb-8">
+                        Únete a más de 100 negocios chilenos que ya venden online con Artifact ERP.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                        <Link href="#pricing">
+                            <Button
+                                size="lg"
+                                className="bg-brand text-black hover:bg-brand/90 font-bold px-10 h-14 text-lg rounded-full shadow-[0_0_20px_rgba(0,224,116,0.3)] transition-all hover:scale-105"
+                            >
+                                Ver Planes y Precios
+                            </Button>
+                        </Link>
+                        <Link href="/contacto">
+                            <Button
+                                size="lg"
+                                variant="ghost"
+                                className="border-2 border-white/20 text-white hover:bg-white/20 font-semibold px-10 h-14 text-lg rounded-full transition-all hover:scale-105"
+                            >
+                                Hablar con Ventas
+                            </Button>
                         </Link>
                     </div>
                 </div>

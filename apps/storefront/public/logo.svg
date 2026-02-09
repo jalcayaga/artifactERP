@@ -1,18 +1,53 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    <linearGradient id="logoSquareGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e074" />
+      <stop offset="100%" stop-color="#00b85c" />
     </linearGradient>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
-  <circle cx="256" cy="256" r="240" fill="#0f172a" stroke="url(#grad1)" stroke-width="20" />
-  <path d="M256 120 L380 340 L132 340 Z" fill="none" stroke="url(#grad1)" stroke-width="24" stroke-linejoin="round" filter="url(#glow)"/>
-  <circle cx="256" cy="230" r="30" fill="#22d3ee" filter="url(#glow)"/>
+  
+  <!-- Background -->
+  <rect width="400" height="400" fill="#000000"/>
+  
+  <!-- Layered A icon -->
+  <g transform="translate(200, 100)">
+    <!-- Layer 1 -->
+    <path d="M0 0 L100 240 L75 240 L0 50 L-75 240 L-100 240 Z" 
+          fill="url(#logoSquareGradient)" 
+          opacity="0.25"/>
+    
+    <!-- Layer 2 -->
+    <path d="M0 25 L85 240 L65 240 L0 75 L-65 240 L-85 240 Z" 
+          fill="url(#logoSquareGradient)" 
+          opacity="0.5"/>
+    
+    <!-- Layer 3 -->
+    <path d="M0 50 L70 240 L55 240 L0 100 L-55 240 L-70 240 Z" 
+          fill="url(#logoSquareGradient)"/>
+    
+    <!-- Horizontal bar -->
+    <rect x="-45" y="150" width="90" height="12" fill="#00e074" rx="6"/>
+  </g>
+  
+  <!-- Text: ARTIFACT -->
+  <text x="200" y="310" 
+        font-family="system-ui, -apple-system, sans-serif" 
+        font-size="36" 
+        font-weight="800" 
+        fill="white" 
+        text-anchor="middle"
+        letter-spacing="-1">ARTIFACT</text>
+  
+  <!-- Badge: ERP -->
+  <g transform="translate(200, 340)">
+    <rect x="-40" y="0" width="80" height="30" rx="15" fill="#00e074" fill-opacity="0.15"/>
+    <rect x="-40" y="0" width="80" height="30" rx="15" stroke="#00e074" stroke-width="2" fill="none"/>
+    <text x="0" y="21" 
+          font-family="system-ui, -apple-system, sans-serif" 
+          font-size="16" 
+          font-weight="800" 
+          fill="#00e074" 
+          text-anchor="middle"
+          letter-spacing="1">ERP</text>
+  </g>
 </svg>

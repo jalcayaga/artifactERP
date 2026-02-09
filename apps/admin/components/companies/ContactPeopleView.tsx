@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth, ContactPerson, UserRole, ContactPersonService } from '@artifact/core';
+import { ContactPerson, UserRole } from '@artifact/core';
+import { useAuth, ContactPersonService } from '@artifact/core/client';;
 import { Card, CardContent, CardHeader, CardTitle } from '@artifact/ui';
 import {
   PencilIcon,

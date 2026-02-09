@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@artifact/core/client';
+import { supabase } from '@artifact/core/client';;
 import { Loader2 } from 'lucide-react';
 
 export default function AuthReceivePage() {

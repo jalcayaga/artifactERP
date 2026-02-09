@@ -12,16 +12,8 @@ import {
   TrashIcon,
   SearchIcon,
 } from '@artifact/ui';
-import {
-  Product,
-  Company,
-  CreatePurchaseDto,
-  formatCurrencyChilean,
-  ProductService,
-  PurchaseService,
-  CompanyService,
-  useAuth,
-} from '@artifact/core';
+import { Product, Company, CreatePurchaseDto, formatCurrencyChilean,  } from '@artifact/core';
+import { ProductService, PurchaseService, CompanyService, useAuth } from '@artifact/core/client';;
 import { Input } from '@artifact/ui';
 import { Button } from '@artifact/ui';
 import { Label } from '@artifact/ui';

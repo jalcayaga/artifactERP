@@ -1,4 +1,4 @@
-import { fetchWithAuth } from '@artifact/core';
+import { fetchWithAuth } from '@artifact/core/client';;
 
 interface Role {
   id: string;

@@ -2,8 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
-import { formatCurrencyChilean } from '@artifact/core';
-import { useTheme } from '@artifact/core/client';
+import { formatCurrencyChilean } from '@artifact/core';;
+import { useTheme } from '@artifact/core/client';;
 
 const SalesChart: React.FC = () => {
   const chartRef = useRef<HTMLCanvasElement>(null);

@@ -23,8 +23,12 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Artifact Storefront',
-  description: 'Tu ecommerce con ERP y facturación electrónica para el SII',
+  title: 'Artifact ERP - E-commerce + Admin + Facturación SII',
+  description: 'La plataforma completa para vender online en Chile. E-commerce profesional, panel admin y facturación electrónica SII integrada.',
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/logo.svg',
+  },
 };
 
 export default async function RootLayout({

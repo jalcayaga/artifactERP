@@ -1,16 +1,9 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  Sale,
-  OrderStatus,
-  formatCurrencyChilean,
-} from '@artifact/core';
-import {
-  useCompany,
-  SaleService,
-  InvoiceService,
-} from '@artifact/core/client';
+import { Sale, OrderStatus, formatCurrencyChilean,  } from '@artifact/core';;
+import {  } from '@artifact/core';
+import { useCompany, SaleService, InvoiceService } from '@artifact/core/client';;
 import {
   Card,
   CardContent,

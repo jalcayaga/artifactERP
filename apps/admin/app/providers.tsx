@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { AuthProvider, CompanyProvider, ThemeProvider, SupabaseAuthProvider } from "@artifact/core/client";
+import { AuthProvider, CompanyProvider, ThemeProvider, SupabaseAuthProvider } from '@artifact/core/client';;
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/query";
 

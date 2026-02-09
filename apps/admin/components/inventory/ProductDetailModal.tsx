@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Product,
-  Lot,
-  formatCurrencyChilean,
-  api,
-} from '@artifact/core';
+import { Product, Lot, formatCurrencyChilean, api,  } from '@artifact/core';;
 import {
   XIcon,
   CubeIcon,
@@ -18,7 +13,7 @@ import {
   PencilIcon,
   DocumentTextIcon,
 } from '@artifact/ui';
-import { formatDate } from '@artifact/core'; // Assuming formatDate is in utils
+import { formatDate } from '@artifact/core';; // Assuming formatDate is in utils
 import LotEditModal from './LotEditModal'; // Será migrado
 import ProductPurchaseHistory from './ProductPurchaseHistory'; // Será migrado
 

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Company } from '@artifact/core';
+import { Company } from '@artifact/core';;
 import { XIcon, BriefcaseIcon } from '@artifact/ui';
 import ContactPeopleView from './ContactPeopleView'; // Asumimos que estará en la misma carpeta
 

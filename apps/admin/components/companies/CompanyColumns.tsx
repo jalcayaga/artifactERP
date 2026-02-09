@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@artifact/ui'; // Será migrado
-import { Company } from '@artifact/core';
+import { Company } from '@artifact/core';;
 
 // Esta función se llamará desde CompanyView para pasar los manejadores de eventos
 export const getColumns = (

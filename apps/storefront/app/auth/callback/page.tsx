@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabaseClient'; // Will import from core eventually, but let's stick to core exports if possible? No, we need direct client access sometimes. 
 // Wait, we exported supabase from core/client. 
 import { supabase as supabaseClient } from '@artifact/core/client';
 

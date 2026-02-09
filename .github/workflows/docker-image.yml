@@ -20,7 +20,7 @@ jobs:
 
     strategy:
       matrix:
-        service: [backend, admin, storefront, marketing]
+        service: [backend, admin, storefront]
 
     steps:
       - name: Checkout repository
@@ -58,3 +58,28 @@ jobs:
             NEXT_PUBLIC_CHATWOOT_BASE_URL=${{ secrets.NEXT_PUBLIC_CHATWOOT_BASE_URL }}
             NEXT_PUBLIC_N8N_WEBHOOK_URL=${{ secrets.NEXT_PUBLIC_N8N_WEBHOOK_URL }}
 
+      # Trigger Portainer webhooks to auto-deploy
+      - name: Trigger Portainer Webhook (Backend)
+        if: matrix.service == 'backend' && secrets.PORTAINER_WEBHOOK_BACKEND != ''
+        run: |
+          curl -X POST ${{ secrets.PORTAINER_WEBHOOK_BACKEND }} || echo "Webhook failed or not configured"
+
+      - name: Trigger Portainer Webhook (Admin)
+        if: matrix.service == 'admin' && secrets.PORTAINER_WEBHOOK_ADMIN != ''
+        run: |
+          curl -X POST ${{ secrets.PORTAINER_WEBHOOK_ADMIN }} || echo "Webhook failed or not configured"
+
+      - name: Trigger Portainer Webhook (Storefront)
+        if: matrix.service == 'storefront' && secrets.PORTAINER_WEBHOOK_STOREFRONT != ''
+        run: |
+          curl -X POST ${{ secrets.PORTAINER_WEBHOOK_STOREFRONT }} || echo "Webhook failed or not configured"
+
+      - name: Deployment Summary
+        run: |
+          echo "✅ ${{ matrix.service }} built and pushed successfully"
+          echo "📦 Image: ${{ steps.meta.outputs.tags }}"
+          if [ "${{ secrets.PORTAINER_WEBHOOK_BACKEND }}" != "" ] || [ "${{ secrets.PORTAINER_WEBHOOK_ADMIN }}" != "" ] || [ "${{ secrets.PORTAINER_WEBHOOK_STOREFRONT }}" != "" ]; then
+            echo "🔄 Portainer webhook triggered"
+          else
+            echo "⚠️  No Portainer webhook configured - manual deployment required"
+          fi

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useAuth } from '@artifact/core';
+import { useAuth } from '@artifact/core/client';;
 
 interface WelcomeCardProps {
     stats: {

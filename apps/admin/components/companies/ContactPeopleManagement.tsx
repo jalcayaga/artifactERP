@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ContactPerson, ContactPersonService } from '@artifact/core';
+import { ContactPerson } from '@artifact/core';
+import { ContactPersonService } from '@artifact/core/client';;
 import { Button } from '@artifact/ui';
 import { toast } from 'sonner';
 import {

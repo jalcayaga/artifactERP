@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useAuth } from '@artifact/core/client';
+import { useAuth } from '@artifact/core/client';;
 import { useRouter, usePathname } from 'next/navigation';
 
 // A simple loading spinner component

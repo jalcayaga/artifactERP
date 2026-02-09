@@ -45,7 +45,7 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const storeName = tenant?.name ?? "Artifact Storefront";
+  const storeName = tenant?.tenant?.name ?? "Artifact Storefront";
   const logoUrl = tenant?.branding?.logoUrl ?? defaultTheme.logoUrl;
 
   return (
@@ -60,10 +60,10 @@ export function Header() {
           <Link href="/" className="flex items-center gap-3 group">
             <Image
               src="/logo-navbar.svg"
-              alt="Artifact Logo"
-              width={140}
-              height={32}
-              className="h-8 w-auto"
+              alt="Artifact ERP"
+              width={180}
+              height={40}
+              className="h-9 w-auto transition-transform group-hover:scale-105"
             />
           </Link>
 

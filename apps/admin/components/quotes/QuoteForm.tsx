@@ -22,16 +22,8 @@ import {
   FormMessage,
 } from '@artifact/ui'; // Será migrado
 import { TrashIcon, PlusIcon } from '@artifact/ui';
-import {
-  Company,
-  Product,
-  Quote,
-  QuoteStatus,
-  CompanyService,
-  ProductService,
-  formatCurrencyChilean,
-  parseChileanCurrency,
-} from '@artifact/core';
+import { Company, Product, Quote, QuoteStatus, formatCurrencyChilean, parseChileanCurrency,  } from '@artifact/core';
+import { CompanyService, ProductService } from '@artifact/core/client';;
 import { toast } from 'sonner';
 
 const formSchema = z.object({

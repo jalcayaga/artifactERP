@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAuth } from '@artifact/core/client';
+import { useAuth } from '@artifact/core/client';;
 import Link from 'next/link';
 import {
   User,

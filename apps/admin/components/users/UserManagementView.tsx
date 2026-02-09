@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect, useCallback } from 'react';
-import { User, UserRole, CreateUserDto, AuthenticatedUser } from '@artifact/core';
-import { useAuth, UserService } from '@artifact/core/client';
+import { User, UserRole, CreateUserDto, AuthenticatedUser } from '@artifact/core';;
+import { useAuth, UserService } from '@artifact/core/client';;
 import { Card, CardContent, CardHeader, CardTitle } from '@artifact/ui';
 import { Button } from '@artifact/ui';
 import { Input } from '@artifact/ui';

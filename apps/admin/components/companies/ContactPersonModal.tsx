@@ -7,7 +7,7 @@ import {
   DialogDescription,
 } from '@artifact/ui'; // Será migrado
 import { ContactPersonForm } from './ContactPersonForm'; // En la misma carpeta
-import { ContactPerson } from '@artifact/core';
+import { ContactPerson } from '@artifact/core';;
 
 interface ContactPersonModalProps {
   companyId: string;

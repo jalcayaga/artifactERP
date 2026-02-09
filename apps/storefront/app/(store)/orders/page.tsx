@@ -50,17 +50,14 @@ export default function MyOrdersPage() {
     const getStatusIcon = (status: OrderStatus) => {
         switch (status) {
             case OrderStatus.PENDING_PAYMENT:
-            case OrderStatus.PENDING:
                 return <Clock className="w-5 h-5 text-yellow-500" />;
             case OrderStatus.PROCESSING:
-            case OrderStatus.CONFIRMED:
                 return <Package className="w-5 h-5 text-blue-500" />;
             case OrderStatus.SHIPPED:
                 return <Truck className="w-5 h-5 text-purple-500" />;
             case OrderStatus.DELIVERED:
                 return <CheckCircle className="w-5 h-5 text-green-500" />;
             case OrderStatus.CANCELLED:
-            case OrderStatus.REJECTED:
                 return <XCircle className="w-5 h-5 text-red-500" />;
             default:
                 return <AlertCircle className="w-5 h-5 text-gray-400" />;
@@ -70,13 +67,9 @@ export default function MyOrdersPage() {
     const getStatusLabel = (status: OrderStatus) => {
         const statusLabels: Record<string, string> = {
             [OrderStatus.PENDING_PAYMENT]: 'Pendiente de Pago',
-            [OrderStatus.PENDING]: 'Pendiente',
+
             [OrderStatus.PROCESSING]: 'En Proceso',
-            [OrderStatus.CONFIRMED]: 'Confirmado',
-            [OrderStatus.SHIPPED]: 'Enviado',
-            [OrderStatus.DELIVERED]: 'Entregado',
             [OrderStatus.CANCELLED]: 'Cancelado',
-            [OrderStatus.REJECTED]: 'Rechazado',
         };
         return statusLabels[status] || status;
     };

@@ -1,12 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import {
-    Invoice,
-    PaymentService,
-    formatCurrencyChilean,
-    PaymentMethod
-} from '@artifact/core';
+import { Invoice, formatCurrencyChilean, PaymentMethod } from '@artifact/core';
+import { PaymentService } from '@artifact/core/client';;
 import {
     Button,
     Input,
