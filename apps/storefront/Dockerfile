@@ -1,6 +1,8 @@
 
+
 FROM node:20-alpine AS builder
 WORKDIR /app
+# Updated: 2026-02-09 - Fixed core package exports
 COPY package.json package-lock.json turbo.json tsconfig.base.json ./
 COPY packages/ packages/
 COPY apps/storefront/ apps/storefront/
