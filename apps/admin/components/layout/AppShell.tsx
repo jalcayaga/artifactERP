@@ -1,131 +1,148 @@
 'use client';
 
-import { PropsWithChildren, useState } from 'react';
-import Link from 'next/link';
+import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { useAuth } from '@artifact/core/client';;
-import Sidebar from '@/components/admin/sidebar';
-import AuthStatus from '@/components/auth/AuthStatus';
+import Link from 'next/link';
+import { Sidebar } from '../admin/sidebar';
+import AuthGuard from '../auth/AuthGuard';
+import AuthStatus from '../auth/AuthStatus';
+import ThemeSwitcher from '../theme/ThemeSwitcher';
 import {
-  Search,
-  Bell,
-  Menu,
-  X,
-  Command,
-  Sparkles
-} from 'lucide-react';
+  Navbar,
+  Typography,
+  IconButton,
+  Breadcrumbs,
+  Input,
+  Badge,
+} from "@material-tailwind/react";
+import {
+  UserCircleIcon,
+  Cog6ToothIcon,
+  BellIcon,
+  Bars3Icon,
+  HomeIcon,
+  Squares2X2Icon,
+  MagnifyingGlassIcon,
+  GlobeAltIcon,
+  SunIcon,
+  ChatBubbleOvalLeftEllipsisIcon,
+} from "@heroicons/react/24/outline";
 
-const AdminShell: React.FC<PropsWithChildren> = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+interface AppShellProps {
+  children: React.ReactNode;
+}
+
+export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchFocused, setSearchFocused] = useState(false);
 
-  const showShell = isAuthenticated && pathname !== '/login';
+  // Show shell on all pages except login.
+  // AuthGuard handles protection and loading states inside the shell.
+  const showShell = pathname !== '/login';
 
   if (!showShell) {
     return <>{children}</>;
   }
 
-  return (
-    <div className="min-h-screen flex bg-[rgb(var(--bg-primary))] text-[rgb(var(--text-primary))] transition-colors duration-300">
-      {/* Sidebar */}
-      <Sidebar />
+  // Split pathname for breadcrumbs (simple approach)
+  const pathSegments = pathname.split('/').filter(Boolean);
 
-      {/* Mobile Sidebar Overlay */}
-      {mobileMenuOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-      )}
+  return (
+    <div className="min-h-screen flex bg-[#0f172a] text-white font-sans selection:bg-blue-500 selection:text-white">
+      {/* Sidebar */}
+      <Sidebar mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-80 transition-all duration-300">
         {/* Top Header/Navbar */}
-        <header className="sticky top-0 z-30 bg-[rgba(var(--bg-primary),0.8)] backdrop-blur-xl border-b border-[rgba(var(--border-color),0.1)]">
-          <div className="flex items-center justify-between px-4 lg:px-8 h-16">
+        <Navbar
+          className="sticky top-0 z-40 w-full rounded-none bg-[#0f172a] border-b border-blue-gray-100/5 px-4 py-2.5 transition-all shadow-none"
+          fullWidth
+          blurred={false}
+        >
+          <div className="flex items-center justify-between text-white">
             {/* Left: Mobile Menu + Breadcrumb */}
-            <div className="flex items-center gap-4">
-              {/* Mobile Menu Button */}
-              <button
+            {/* Left: Icons (Menu, Grid, Search) to match reference */}
+            <div className="flex items-center gap-2 md:gap-4">
+              <IconButton
+                variant="text"
+                color="white"
+                className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-lg hover:bg-[rgba(var(--bg-secondary),0.5)] transition-colors"
               >
-                {mobileMenuOpen ? (
-                  <X className="w-5 h-5" />
-                ) : (
-                  <Menu className="w-5 h-5" />
-                )}
-              </button>
+                <Bars3Icon className="h-5 w-5 stroke-2" />
+              </IconButton>
 
-              {/* Mobile Logo */}
-              <Link href="/" className="md:hidden flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[rgb(var(--brand-color))] to-[rgba(var(--brand-color),0.6)] flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-black" />
-                </div>
-                <span className="font-bold text-lg">Artifact</span>
+              <Link href="/dashboard">
+                <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
+                  <Squares2X2Icon className="h-5 w-5" />
+                </IconButton>
               </Link>
 
-              {/* Search Bar (Desktop) */}
-              <div className={`hidden lg:flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-200 ${searchFocused
-                ? 'bg-[rgba(var(--bg-secondary),0.8)] ring-1 ring-[rgba(var(--brand-color),0.3)]'
-                : 'bg-[rgba(var(--bg-secondary),0.4)]'
-                }`}>
-                <Search className="w-4 h-4 text-[rgb(var(--text-secondary))]" />
-                <input
-                  type="text"
-                  placeholder="Buscar..."
-                  className="bg-transparent border-none outline-none text-sm w-48 placeholder:text-[rgb(var(--text-secondary))]"
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
-                />
-                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-[rgba(var(--bg-secondary),0.8)] text-[rgb(var(--text-secondary))]">
-                  <Command className="w-3 h-3" />
-                  <span className="text-xs">K</span>
-                </div>
+              <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
+                <MagnifyingGlassIcon className="h-5 w-5" />
+              </IconButton>
+            </div>
+
+            {/* Right: Search + Actions + User */}
+            {/* Right: Actions + User */}
+            <div className="flex items-center gap-2">
+
+              {/* Theme Switcher Unified */}
+              <div className="flex items-center px-2 py-1 rounded-xl bg-white/5 border border-blue-gray-100/5">
+                <ThemeSwitcher />
+              </div>
+
+              <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
+                {/* SVG for UK Flag to match reference */}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 60 30"
+                  className="h-5 w-5 rounded-sm object-cover"
+                >
+                  <clipPath id="s">
+                    <path d="M0,0 v30 h60 v-30 z" />
+                  </clipPath>
+                  <clipPath id="t">
+                    <path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" />
+                  </clipPath>
+                  <g clipPath="url(#s)">
+                    <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+                    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" />
+                    <path d="M0,0 L60,30 M60,0 L0,30" clipPath="url(#t)" stroke="#C8102E" strokeWidth="4" />
+                    <path d="M30,0 v30 M0,15 h60" stroke="#fff" strokeWidth="10" />
+                    <path d="M30,0 v30 M0,15 h60" stroke="#C8102E" strokeWidth="6" />
+                  </g>
+                </svg>
+              </IconButton>
+
+              <Badge content="3" withBorder className="border-[#1e293b] bg-blue-500 min-w-[18px] min-h-[18px] !p-0 grid place-items-center">
+                <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
+                  <ChatBubbleOvalLeftEllipsisIcon className="h-5 w-5" />
+                </IconButton>
+              </Badge>
+
+              <Badge content="5" withBorder className="border-[#1e293b] bg-red-500 min-w-[18px] min-h-[18px] !p-0 grid place-items-center">
+                <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
+                  <BellIcon className="h-5 w-5" />
+                </IconButton>
+              </Badge>
+
+              {/* User Auth Status */}
+              <div className="ml-1">
+                <AuthStatus />
               </div>
             </div>
-
-            {/* Right: Actions + User */}
-            <div className="flex items-center gap-2 lg:gap-4">
-              {/* Notifications */}
-              <button className="relative p-2 rounded-xl hover:bg-[rgba(var(--bg-secondary),0.5)] transition-colors group">
-                <Bell className="w-5 h-5 text-[rgb(var(--text-secondary))] group-hover:text-[rgb(var(--text-primary))] transition-colors" />
-                {/* Notification dot */}
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[rgb(var(--brand-color))] rounded-full animate-pulse" />
-              </button>
-
-              {/* Divider */}
-              <div className="hidden lg:block w-px h-6 bg-[rgba(var(--border-color),0.2)]" />
-
-              {/* User Menu */}
-              <AuthStatus />
-            </div>
           </div>
-        </header>
+        </Navbar>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto">
-          <div className="container mx-auto p-4 lg:p-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-            {children}
-          </div>
+        <main className="flex-1 p-4 lg:p-6 mt-2">
+          <AuthGuard>{children}</AuthGuard>
         </main>
-
-        {/* Footer */}
-        <footer className="border-t border-[rgba(var(--border-color),0.1)] px-4 lg:px-8 py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-sm text-[rgb(var(--text-secondary))]">
-            <p>© {new Date().getFullYear()} Artifact ERP</p>
-            <div className="flex items-center gap-4">
-              <Link href="#" className="hover:text-[rgb(var(--brand-color))] transition-colors">Ayuda</Link>
-              <Link href="#" className="hover:text-[rgb(var(--brand-color))] transition-colors">Docs</Link>
-              <span className="text-[rgba(var(--text-secondary),0.5)]">v2.0.0</span>
-            </div>
-          </div>
-        </footer>
       </div>
     </div>
   );
 };
 
-export default AdminShell;
+export default AppShell;

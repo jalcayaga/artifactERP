@@ -4,7 +4,6 @@ import { Providers } from "./providers";
 import AuthGuard from "@/components/auth/AuthGuard";
 import AdminShell from "@/components/layout/AppShell";
 import { ThemeProvider } from "@/components/theme/ThemeContext";
-import ThemeSwitcher from "@/components/theme/ThemeSwitcher";
 
 export const metadata: Metadata = {
   title: "Artifact Admin",
@@ -21,10 +20,11 @@ export default function RootLayout({
       <body>
         <Providers>
           <ThemeProvider>
-            <AuthGuard>
-              <AdminShell>{children}</AdminShell>
-              <ThemeSwitcher />
-            </AuthGuard>
+            <AdminShell>
+              <AuthGuard>
+                {children}
+              </AuthGuard>
+            </AdminShell>
           </ThemeProvider>
         </Providers>
       </body>

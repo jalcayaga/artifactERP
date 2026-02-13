@@ -1,16 +1,22 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Company, CreateCompanyDto, UpdateCompanyDto, CompanyFilterOptions } from '@artifact/core';;
-import { CompanyService } from '@artifact/core/client';;
-import { DataTable } from '@artifact/ui'; // Será migrado
-import { getColumns } from './CompanyColumns'; // En la misma carpeta
-import { Input } from '@artifact/ui'; // Será migrado
-import { Button } from '@artifact/ui'; // Será migrado
-import CompanyDetailModal from './CompanyDetailModal'; // En la misma carpeta
-import CompanyForm from './CompanyForm'; // En la misma carpeta
-import ConfirmationModal from '@/components/common/ConfirmationModal'; // Será migrado a common
-import { PlusIcon, TrashIcon } from '@artifact/ui';
+import { Company, CompanyFilterOptions } from '@artifact/core';
+import { CompanyService } from '@artifact/core/client';
+import { DataTable } from '@artifact/ui';
+import { getColumns } from './CompanyColumns';
+import CompanyDetailModal from './CompanyDetailModal';
+import CompanyForm from './CompanyForm';
+import ConfirmationModal from '@/components/common/ConfirmationModal';
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Typography,
+  Button,
+  ButtonGroup
+} from "@material-tailwind/react";
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline';
 
 interface CompanyViewProps {
   show?: 'clients' | 'suppliers';
@@ -94,14 +100,9 @@ export default function CompanyView({ show }: CompanyViewProps) {
   };
 
   const handleSaveCompany = async (savedCompany: Company) => {
-    try {
-      // The CompanyForm already handles the creation/update logic and returns the saved Company
-      setShowForm(false);
-      setEditingCompany(null);
-      fetchCompanies(); // Refresh data
-    } catch (err) {
-      setError('Error al guardar la empresa.');
-    }
+    setShowForm(false);
+    setEditingCompany(null);
+    fetchCompanies();
   };
 
   const handleCloseForm = () => {
@@ -120,44 +121,79 @@ export default function CompanyView({ show }: CompanyViewProps) {
 
   const columns = useMemo(() => getColumns(handleEdit, handleDeleteRequest, handleView), []);
 
-  if (loading) return <div>Cargando...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-  const title = show === 'clients' ? 'Clientes' : show === 'suppliers' ? 'Proveedores' : 'Clientes y Proveedores';
+  if (error) {
+    return (
+      <div className="p-4 text-center text-red-500">
+        <Typography color="red">{error}</Typography>
+      </div>
+    );
+  }
+
+  const title = "Clientes / Proveedores";
 
   return (
-    <div className="container mx-auto py-10">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">{title}</h1>
-        <Button onClick={handleAddNewCompany}>
-          <PlusIcon className="w-4 h-4 mr-2" /> Nuevo Cliente/Proveedor
-        </Button>
-      </div>
-
-      {!show && (
-        <div className="flex space-x-2 mb-4">
-          <Button
-            variant={currentFilterType === 'all' ? 'default' : 'outline'}
-            onClick={() => setCurrentFilterType('all')}
-          >
-            Todas
-          </Button>
-          <Button
-            variant={currentFilterType === 'clients' ? 'default' : 'outline'}
-            onClick={() => setCurrentFilterType('clients')}
-          >
-            Clientes
-          </Button>
-          <Button
-            variant={currentFilterType === 'suppliers' ? 'default' : 'outline'}
-            onClick={() => setCurrentFilterType('suppliers')}
-          >
-            Proveedores
-          </Button>
-        </div>
-      )}
-
-      <DataTable columns={columns} data={companies} />
+    <div className="mt-4 mb-8 flex flex-col gap-6">
+      <DataTable
+        title={title}
+        description="Administra tus relaciones comerciales en un solo lugar"
+        columns={columns}
+        data={companies}
+        renderActions={
+          <div className="flex flex-col sm:flex-row gap-4 items-center w-full justify-between">
+            {!show && (
+              <ButtonGroup
+                variant="text"
+                color="blue-gray"
+                size="sm"
+                placeholder=""
+                onPointerEnterCapture={() => { }}
+                onPointerLeaveCapture={() => { }}
+              >
+                <Button
+                  className={currentFilterType === 'all' ? "bg-white/5 text-blue-500" : "text-blue-gray-200"}
+                  onClick={() => setCurrentFilterType('all')}
+                  placeholder=""
+                  onPointerEnterCapture={() => { }}
+                  onPointerLeaveCapture={() => { }}
+                >Todas</Button>
+                <Button
+                  className={currentFilterType === 'clients' ? "bg-white/5 text-blue-500" : "text-blue-gray-200"}
+                  onClick={() => setCurrentFilterType('clients')}
+                  placeholder=""
+                  onPointerEnterCapture={() => { }}
+                  onPointerLeaveCapture={() => { }}
+                >Clientes</Button>
+                <Button
+                  className={currentFilterType === 'suppliers' ? "bg-white/5 text-blue-500" : "text-blue-gray-200"}
+                  onClick={() => setCurrentFilterType('suppliers')}
+                  placeholder=""
+                  onPointerEnterCapture={() => { }}
+                  onPointerLeaveCapture={() => { }}
+                >Proveedores</Button>
+              </ButtonGroup>
+            )}
+            <Button
+              className="flex items-center gap-3 bg-blue-500"
+              size="sm"
+              onClick={handleAddNewCompany}
+              placeholder=""
+              onPointerEnterCapture={() => { }}
+              onPointerLeaveCapture={() => { }}
+            >
+              <PlusIcon className="h-4 w-4 text-white" />
+              <span className="text-sm font-bold text-white uppercase tracking-wider">Nuevo</span>
+            </Button>
+          </div>
+        }
+      />
 
       {viewingCompany && (
         <CompanyDetailModal
@@ -181,15 +217,15 @@ export default function CompanyView({ show }: CompanyViewProps) {
           onConfirm={handleConfirmDelete}
           title="Confirmar Eliminación"
           message={(
-            <>
+            <span className="text-gray-400">
               ¿Estás seguro de que quieres eliminar la empresa{" "}
-              <strong>{companyToDelete.name}</strong>? Esta acción no se puede
+              <strong className="text-white">{companyToDelete.name}</strong>? Esta acción no se puede
               deshacer.
-            </>
+            </span>
           )}
           confirmText="Eliminar"
-          confirmButtonClass="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-          icon={<TrashIcon className="w-5 h-5 mr-2" />}
+          confirmButtonClass="bg-red-500 hover:bg-red-600"
+          icon={<TrashIcon className="w-5 h-5 mr-2 text-red-500" />}
         />
       )}
     </div>

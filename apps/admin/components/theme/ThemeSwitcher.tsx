@@ -4,44 +4,66 @@
 import React from 'react';
 import { useTheme } from './ThemeContext';
 import { Moon, Sun, Eye } from 'lucide-react';
+import { IconButton, Tooltip } from "@material-tailwind/react";
 
 export default function ThemeSwitcher() {
     const { theme, setTheme } = useTheme();
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex gap-2 p-2 rounded-full glass shadow-2xl">
-            <button
-                onClick={() => setTheme('dark')}
-                className={`p-2 rounded-full transition-all ${theme === 'dark'
-                        ? 'bg-[rgb(var(--brand-color))] text-black shadow-[0_0_10px_rgb(var(--brand-color))]'
-                        : 'text-[rgb(var(--text-secondary))] hover:text-[rgb(var(--brand-color))]'
-                    }`}
-                title="Dark Mode (Cyberpunk)"
-            >
-                <Moon className="w-5 h-5" />
-            </button>
+        <div className="flex items-center gap-1">
+            <Tooltip content="Modo Oscuro (Deep Blue)">
+                <IconButton
+                    variant="text"
+                    color="white"
+                    size="sm"
+                    onClick={() => setTheme('dark')}
+                    className={`grid place-items-center transition-all ${theme === 'dark'
+                        ? 'text-blue-500 bg-white/5'
+                        : 'text-blue-gray-200 hover:text-white hover:bg-white/5'
+                        }`}
+                    placeholder=""
+                    onPointerEnterCapture={() => { }}
+                    onPointerLeaveCapture={() => { }}
+                >
+                    <Moon className="w-4 h-4" />
+                </IconButton>
+            </Tooltip>
 
-            <button
-                onClick={() => setTheme('light')}
-                className={`p-2 rounded-full transition-all ${theme === 'light'
-                        ? 'bg-yellow-400 text-black shadow-lg'
-                        : 'text-[rgb(var(--text-secondary))] hover:text-yellow-400'
-                    }`}
-                title="Light Mode (Classic)"
-            >
-                <Sun className="w-5 h-5" />
-            </button>
+            <Tooltip content="Modo Claro (Clásico)">
+                <IconButton
+                    variant="text"
+                    color="white"
+                    size="sm"
+                    onClick={() => setTheme('light')}
+                    className={`grid place-items-center transition-all ${theme === 'light'
+                        ? 'text-yellow-500 bg-white/5'
+                        : 'text-blue-gray-200 hover:text-white hover:bg-white/5'
+                        }`}
+                    placeholder=""
+                    onPointerEnterCapture={() => { }}
+                    onPointerLeaveCapture={() => { }}
+                >
+                    <Sun className="w-4 h-4" />
+                </IconButton>
+            </Tooltip>
 
-            <button
-                onClick={() => setTheme('contrast')}
-                className={`p-2 rounded-full transition-all ${theme === 'contrast'
-                        ? 'bg-white text-black font-bold border-2 border-black'
-                        : 'text-[rgb(var(--text-secondary))] hover:text-white'
-                    }`}
-                title="High Contrast"
-            >
-                <Eye className="w-5 h-5" />
-            </button>
+            <Tooltip content="Alto Contraste">
+                <IconButton
+                    variant="text"
+                    color="white"
+                    size="sm"
+                    onClick={() => setTheme('contrast')}
+                    className={`grid place-items-center transition-all ${theme === 'contrast'
+                        ? 'text-white bg-white/10'
+                        : 'text-blue-gray-200 hover:text-white hover:bg-white/5'
+                        }`}
+                    placeholder=""
+                    onPointerEnterCapture={() => { }}
+                    onPointerLeaveCapture={() => { }}
+                >
+                    <Eye className="w-4 h-4" />
+                </IconButton>
+            </Tooltip>
         </div>
     );
 }

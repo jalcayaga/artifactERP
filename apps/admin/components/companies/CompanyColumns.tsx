@@ -1,15 +1,8 @@
-import { Button } from '@artifact/ui'; // Será migrado
-import { ArrowUpDown, MoreHorizontal } from 'lucide-react';
+import { Button } from '@artifact/ui';
+import { ArrowUpDown, Eye, Pencil, Trash2 } from 'lucide-react';
 import { Column, Row } from '@tanstack/react-table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@artifact/ui'; // Será migrado
-import { Company } from '@artifact/core';;
+import { Company } from '@artifact/core';
+import { IconButton, Tooltip } from "@material-tailwind/react";
 
 // Esta función se llamará desde CompanyView para pasar los manejadores de eventos
 export const getColumns = (
@@ -25,6 +18,7 @@ export const getColumns = (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="hover:bg-transparent text-blue-gray-200 font-bold"
         >
           Nombre
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -42,32 +36,70 @@ export const getColumns = (
     {
       accessorKey: 'isClient',
       header: 'Cliente',
-      cell: ({ row }: { row: Row<Company> }) => (row.original.isClient ? 'Sí' : 'No'),
+      cell: ({ row }: { row: Row<Company> }) => (
+        <span className={row.original.isClient ? "text-green-400 font-bold" : "text-blue-gray-400 opacity-50"}>
+          {row.original.isClient ? 'Sí' : 'No'}
+        </span>
+      ),
     },
     {
       accessorKey: 'isSupplier',
       header: 'Proveedor',
-      cell: ({ row }: { row: Row<Company> }) => (row.original.isSupplier ? 'Sí' : 'No'),
+      cell: ({ row }: { row: Row<Company> }) => (
+        <span className={row.original.isSupplier ? "text-blue-400 font-bold" : "text-blue-gray-400 opacity-50"}>
+          {row.original.isSupplier ? 'Sí' : 'No'}
+        </span>
+      ),
     },
     {
       id: 'actions',
       cell: ({ row }: { row: Row<Company> }) => {
         const company = row.original;
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Acciones</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => handleView(company)}>Ver</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleEdit(company)}>Editar</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDelete(company)}>Eliminar</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <Tooltip content="Ver detalles">
+              <IconButton
+                variant="text"
+                color="blue-gray"
+                size="sm"
+                onClick={() => handleView(company)}
+                className="hover:bg-blue-500/10"
+                placeholder=""
+                onPointerEnterCapture={() => { }}
+                onPointerLeaveCapture={() => { }}
+              >
+                <Eye className="h-4 w-4 text-blue-gray-200" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip content="Editar">
+              <IconButton
+                variant="text"
+                color="blue-gray"
+                size="sm"
+                onClick={() => handleEdit(company)}
+                className="hover:bg-blue-500/10"
+                placeholder=""
+                onPointerEnterCapture={() => { }}
+                onPointerLeaveCapture={() => { }}
+              >
+                <Pencil className="h-4 w-4 text-blue-500" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip content="Eliminar">
+              <IconButton
+                variant="text"
+                color="blue-gray"
+                size="sm"
+                onClick={() => handleDelete(company)}
+                className="hover:bg-red-500/10"
+                placeholder=""
+                onPointerEnterCapture={() => { }}
+                onPointerLeaveCapture={() => { }}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </IconButton>
+            </Tooltip>
+          </div>
         );
       },
     },
