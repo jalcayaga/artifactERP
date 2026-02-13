@@ -46,12 +46,14 @@ export class SalesService {
       }
 
       // 2. Create Order
+      const { posShiftId, ...cleanOrderData } = orderData;
       const newOrder = await tx.order.create({
         data: {
           tenant: { connect: { id: tenantId } },
-          ...orderData,
+          ...cleanOrderData,
           company: { connect: { id: companyId } },
           user: { connect: { id: userId } },
+          ...(posShiftId && { posShift: { connect: { id: posShiftId } } }),
           orderItems: {
             create: orderItemsData,
           },

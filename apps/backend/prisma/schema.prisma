@@ -71,6 +71,7 @@ enum OrderStatus {
   PROCESSING
   SHIPPED
   DELIVERED
+  COMPLETED
   CANCELLED
   REFUNDED
 }
@@ -121,6 +122,12 @@ enum BillingInterval {
   YEARLY
 }
 
+enum IndicatorType {
+  UF
+  USD
+  UTM
+}
+
 // --------------------
 // Multi-tenant core
 // --------------------
@@ -150,6 +157,13 @@ model Tenant {
 
   subscriptions Subscription[]
   contactPeople ContactPerson[]
+  categories    Category[]
+  warehouses    Warehouse[]
+  purchaseOrders PurchaseOrder[]
+  receptions     Reception[]
+  priceLists     PriceList[]
+  cashRegisters  CashRegister[]
+  posShifts      PosShift[]
 
   @@map("tenants")
 }
@@ -184,11 +198,13 @@ model User {
   password         String
   firstName        String?
   lastName         String?
-    roles            Role[]   @relation("UserToRole")
+  role             UserRole @default(CLIENT)
+  roles            Role[]   @relation("UserToRole")
   isActive         Boolean  @default(true)
   profilePictureUrl String?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
+  posShifts        PosShift[]
 
   tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   orders    Order[]
@@ -216,7 +232,7 @@ model Company {
   email       String?
   isClient    Boolean  @default(false)
   isSupplier  Boolean  @default(false)
-  createdAt   DateTime @default(now())
+  createdAt   DateTime @now()
   updatedAt   DateTime @updatedAt
 
   tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -226,6 +242,9 @@ model Company {
   invoices      Invoice[]
   orders        Order[]
   purchases     Purchase[]
+  purchaseOrders PurchaseOrder[]
+
+  branches      Branch[]
 
   subscriptions Subscription[]
 
@@ -267,13 +286,18 @@ model Product {
   name              String
   productType       ProductType @default(PRODUCT)
   sku               String?
+  barcode           String?     @unique
+  brand             String?
   description       String?
   longDescription   String?     @db.Text
   images            String[]    @default([])
   technicalSheetUrl String?
   category          String?
+  categoryId        String?
+  categoryRef       Category?   @relation(fields: [categoryId], references: [id])
   price             Decimal
   unitPrice         Decimal?
+  unit              String?     @default("UN") // e.g. UN, KG, L
   reorderLevel      Int?
   isPublished       Boolean     @default(false)
   createdAt         DateTime    @default(now())
@@ -282,304 +306,20 @@ model Product {
   tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   orderItems    OrderItem[]
   purchaseItems PurchaseItem[]
+  purchaseOrderItems PurchaseOrderItem[]
+  receptionItems     ReceptionItem[]
   lots          Lot[]
   quoteItems    QuoteItem[]
   invoiceItems  InvoiceItem[]
   subscriptions Subscription[]
+  productPrices ProductPrice[]
 
   @@index([tenantId])
   @@index([category])
+  @@index([categoryId])
   @@index([isPublished])
   @@unique([tenantId, sku])
   @@map("products")
 }
 
-model Lot {
-  id              String        @id @default(cuid())
-  tenantId        String
-  productId       String
-  purchaseItemId  String?
-  lotNumber       String
-  initialQuantity Int
-  currentQuantity Int
-  purchasePrice   Decimal       @db.Decimal(10, 2)
-  entryDate       DateTime      @default(now())
-  expirationDate  DateTime?
-  location        String?
-
-  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  product      Product       @relation(fields: [productId], references: [id])
-  purchaseItem PurchaseItem? @relation(fields: [purchaseItemId], references: [id])
-  orderItemLots OrderItemLot[]
-
-  @@index([tenantId])
-  @@index([productId])
-  @@index([entryDate])
-  @@unique([tenantId, lotNumber])
-  @@map("lots")
-}
-
-// --------------------
-// Orders & purchases
-// --------------------
-
-model Order {
-  id               String         @id @default(cuid())
-  tenantId         String
-  userId           String
-  companyId        String
-  status           OrderStatus    @default(PENDING_PAYMENT)
-  paymentStatus    PaymentStatus  @default(PENDING)
-  subTotalAmount   Decimal
-  vatAmount        Decimal
-  vatRatePercent   Float          @default(19.0)
-  discountAmount   Decimal        @default(0)
-  shippingAmount   Decimal        @default(0)
-  grandTotalAmount Decimal
-  currency         String         @default("CLP")
-  shippingAddress  String?        @db.Text
-  billingAddress   String?        @db.Text
-  customerNotes    String?        @db.Text
-  paymentMethod    PaymentMethod?
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-
-  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  user      User      @relation(fields: [userId], references: [id], onDelete: Restrict)
-  company   Company   @relation(fields: [companyId], references: [id], onDelete: Restrict)
-  orderItems OrderItem[]
-  invoice    Invoice?
-
-  @@index([tenantId])
-  @@index([userId])
-  @@index([companyId])
-  @@index([status])
-  @@map("orders")
-}
-
-model Purchase {
-  id             String   @id @default(cuid())
-  tenantId       String
-  companyId      String
-  purchaseDate   DateTime @default(now())
-  status         String   @default("PENDING")
-  subTotalAmount Decimal  @db.Decimal(10, 2)
-  totalVatAmount Decimal  @db.Decimal(10, 2)
-  grandTotal     Decimal  @db.Decimal(10, 2)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  company Company @relation(fields: [companyId], references: [id])
-  items   PurchaseItem[]
-
-  @@index([tenantId])
-  @@index([companyId])
-  @@map("purchases")
-}
-
-model PurchaseItem {
-  id                String  @id @default(cuid())
-  purchaseId        String
-  productId         String
-  quantity          Int
-  unitPrice         Decimal @db.Decimal(10, 2)
-  totalPrice        Decimal @db.Decimal(10, 2)
-  itemVatAmount     Decimal @db.Decimal(10, 2)
-  totalPriceWithVat Decimal @db.Decimal(10, 2)
-
-  purchase Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
-  product  Product  @relation(fields: [productId], references: [id])
-  lots     Lot[]
-
-  @@index([purchaseId])
-  @@index([productId])
-  @@map("purchase_items")
-}
-
-model OrderItem {
-  id                String  @id @default(cuid())
-  orderId           String
-  productId         String
-  quantity          Int
-  unitPrice         Decimal @db.Decimal(10, 2)
-  totalPrice        Decimal @db.Decimal(10, 2)
-  itemVatAmount     Decimal @db.Decimal(10, 2)
-  totalPriceWithVat Decimal @db.Decimal(10, 2)
-
-  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
-  orderItemLots OrderItemLot[]
-
-  @@index([orderId])
-  @@index([productId])
-  @@map("order_items")
-}
-
-model OrderItemLot {
-  id            String @id @default(cuid())
-  orderItemId   String
-  lotId         String
-  quantityTaken Int
-
-  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
-  lot       Lot       @relation(fields: [lotId], references: [id], onDelete: Restrict)
-
-  @@unique([orderItemId, lotId])
-  @@map("order_item_lots")
-}
-
-// --------------------
-// Quotes & invoicing
-// --------------------
-
-model Quote {
-  id             String      @id @default(cuid())
-  tenantId       String
-  companyId      String
-  userId         String
-  status         QuoteStatus @default(DRAFT)
-  quoteDate      DateTime    @default(now())
-  expirationDate DateTime?
-  subTotalAmount Decimal     @db.Decimal(10, 2)
-  vatAmount      Decimal     @db.Decimal(10, 2)
-  grandTotal     Decimal     @db.Decimal(10, 2)
-  notes          String?     @db.Text
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-
-  tenant     Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  company    Company @relation(fields: [companyId], references: [id])
-  user       User    @relation(fields: [userId], references: [id])
-  quoteItems QuoteItem[]
-
-  @@index([tenantId])
-  @@index([companyId])
-  @@index([userId])
-  @@map("quotes")
-}
-
-model QuoteItem {
-  id                String   @id @default(cuid())
-  quoteId           String
-  productId         String
-  quantity          Int
-  unitPrice         Decimal  @db.Decimal(10, 2)
-  totalPrice        Decimal  @db.Decimal(10, 2)
-  itemVatAmount     Decimal  @db.Decimal(10, 2)
-  totalPriceWithVat Decimal  @db.Decimal(10, 2)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  quote   Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
-
-  @@index([quoteId])
-  @@index([productId])
-  @@map("quote_items")
-}
-
-model Invoice {
-  id             String        @id @default(cuid())
-  tenantId       String
-  orderId        String        @unique
-  companyId      String
-  invoiceNumber  String
-  status         InvoiceStatus @default(DRAFT)
-  issueDate      DateTime      @default(now())
-  dueDate        DateTime?
-  subTotalAmount Decimal       @db.Decimal(10, 2)
-  vatAmount      Decimal       @db.Decimal(10, 2)
-  grandTotal     Decimal       @db.Decimal(10, 2)
-  notes          String?       @db.Text
-  dteProvider    String?
-  dteStatus      String?
-  dteFolio       Int?
-  dteXmlUrl      String?
-  dtePdfUrl      String?
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-
-  tenant   Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  order    Order    @relation(fields: [orderId], references: [id])
-  company  Company  @relation(fields: [companyId], references: [id])
-  items    InvoiceItem[]
-  payments Payment[]
-
-  @@index([tenantId])
-  @@index([companyId])
-  @@index([status])
-  @@unique([tenantId, invoiceNumber])
-  @@map("invoices")
-}
-
-model InvoiceItem {
-  id                String   @id @default(cuid())
-  invoiceId         String
-  productId         String
-  quantity          Int
-  unitPrice         Decimal  @db.Decimal(10, 2)
-  totalPrice        Decimal  @db.Decimal(10, 2)
-  itemVatAmount     Decimal  @db.Decimal(10, 2)
-  totalPriceWithVat Decimal  @db.Decimal(10, 2)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id])
-
-  @@index([invoiceId])
-  @@index([productId])
-  @@map("invoice_items")
-}
-
-model Payment {
-  id          String        @id @default(cuid())
-  tenantId    String
-  invoiceId   String
-  amount      Decimal       @db.Decimal(10, 2)
-  paymentDate DateTime      @default(now())
-  paymentMethod PaymentMethod
-  notes       String?       @db.Text
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  invoice Invoice @relation(fields: [invoiceId], references: [id])
-
-  @@index([invoiceId])
-  @@map("payments")
-}
-
-// --------------------
-// Subscriptions
-// --------------------
-
-model Subscription {
-  id                String             @id @default(cuid())
-  tenantId          String
-  companyId         String
-  productId         String
-  status            SubscriptionStatus @default(ACTIVE)
-  interval          BillingInterval    @default(MONTHLY)
-  currentPeriodStart DateTime
-  currentPeriodEnd  DateTime
-  nextBillingDate   DateTime
-  price             Decimal            @db.Decimal(10, 2)
-  paymentMethod     PaymentMethod?
-  cancelAtPeriodEnd Boolean            @default(false)
-  canceledAt        DateTime?
-  trialEnd          DateTime?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-
-  tenant  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
-  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
-
-  @@index([tenantId])
-  @@index([companyId])
-  @@index([status])
-  @@index([nextBillingDate])
-  @@map("subscriptions")
-}
+// ... rest of the file ...
