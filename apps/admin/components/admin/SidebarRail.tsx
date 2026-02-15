@@ -8,6 +8,8 @@ import {
     Truck,
     ShieldCheck,
     Settings,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import { IconButton, Tooltip, Avatar } from "@material-tailwind/react";
 import Image from 'next/image';
@@ -17,9 +19,16 @@ export type SidebarCategory = 'overview' | 'commerce' | 'inventory' | 'logistics
 interface SidebarRailProps {
     activeCategory: SidebarCategory;
     setActiveCategory: (category: SidebarCategory) => void;
+    sidebarCollapsed: boolean;
+    setSidebarCollapsed: (collapsed: boolean) => void;
 }
 
-export const SidebarRail: React.FC<SidebarRailProps> = ({ activeCategory, setActiveCategory }) => {
+export const SidebarRail: React.FC<SidebarRailProps> = ({
+    activeCategory,
+    setActiveCategory,
+    sidebarCollapsed,
+    setSidebarCollapsed
+}) => {
     const categories = [
         { id: 'overview' as const, icon: LayoutGrid, label: 'Dashboard' },
         { id: 'commerce' as const, icon: Banknote, label: 'Commerce' },
@@ -75,8 +84,20 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({ activeCategory, setAct
                 })}
             </div>
 
-            {/* Footer / User - 1:1 MaterialM */}
-            <div className="pb-6 w-full flex flex-col items-center gap-6">
+            {/* Footer / User - 1:1 MaterialM with Toggle */}
+            <div className="pb-6 w-full flex flex-col items-center gap-6 mt-auto">
+                <IconButton
+                    variant="text"
+                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                    className="w-[48px] h-[48px] rounded-full text-[#7b8893] hover:bg-[rgba(0,161,255,0.12)] hover:text-[#00a1ff] transition-all duration-300 hidden lg:flex items-center justify-center shadow-lg border border-[#ffffff08]"
+                >
+                    {sidebarCollapsed ? (
+                        <ChevronRight className="h-[22px] w-[22px]" strokeWidth={2} />
+                    ) : (
+                        <ChevronLeft className="h-[22px] w-[22px]" strokeWidth={2} />
+                    )}
+                </IconButton>
+
                 <IconButton variant="text" className="w-[48px] h-[48px] rounded-full text-[#7b8893] hover:bg-[rgba(0,161,255,0.12)] hover:text-[#00a1ff] transition-all duration-300">
                     <Settings className="h-[22px] w-[22px]" strokeWidth={1.5} />
                 </IconButton>

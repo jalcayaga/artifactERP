@@ -35,6 +35,7 @@ interface AppShellProps {
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [showHeader, setShowHeader] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
 
@@ -66,11 +67,17 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex bg-[#0f172a] text-white font-sans selection:bg-[#00a1ff] selection:text-white">
-      {/* Sidebar */}
-      <Sidebar mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
+      {/* Sidebar - Controlled by collapse state */}
+      <Sidebar
+        mobileOpen={mobileMenuOpen}
+        setMobileOpen={setMobileMenuOpen}
+        sidebarCollapsed={sidebarCollapsed}
+        setSidebarCollapsed={setSidebarCollapsed}
+      />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-[320px] transition-all duration-300">
+      {/* Main Content Area - Dynamic spacing based on sidebar state */}
+      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out ${sidebarCollapsed ? "lg:ml-[80px]" : "lg:ml-[320px]"
+        }`}>
         {/* Top Header/Navbar */}
         <Navbar
           {...({} as any)}
