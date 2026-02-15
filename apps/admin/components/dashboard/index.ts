@@ -1,16 +1,12 @@
-export { default as HeroMetricCard } from './HeroMetricCard';
-export { default as KPICard } from './KPICard';
-export { default as WelcomeCard } from './WelcomeCard'; // New export
-export { default as Sparkline } from './Sparkline';
-export { default as ActivityFeed } from './ActivityFeed';
-export type { Activity } from './ActivityFeed';
+export { default as WelcomeCard } from './WelcomeCard';
+export { default as WelcomeBanner } from './WelcomeBanner';
+export { default as StatsGroup } from './StatsGroup';
 export { default as SalesChart } from './SalesChart';
-
-// Skeletons
-export {
-    Skeleton,
-    HeroMetricSkeleton,
-    KPICardSkeleton,
-    ActivityFeedSkeleton,
-    ChartSkeleton,
-} from './Skeletons';
+export { default as ActivityFeed } from './ActivityFeed';
+export { default as KPICard } from './KPICard';
+export { default as DashboardSkeleton } from './DashboardSkeleton';
+export { default as WelcomeKPICard } from './WelcomeKPICard';
+export { default as RevenueChart } from './RevenueChart';
+export { default as FunnelChart } from './FunnelChart';
+export { default as ProductsTable } from './ProductsTable';
+export { default as TransactionsList } from './TransactionsList';

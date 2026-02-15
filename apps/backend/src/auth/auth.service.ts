@@ -8,7 +8,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService
-  ) {}
+  ) { }
 
   async validateUser(
     tenantId: string,
@@ -25,59 +25,37 @@ export class AuthService {
   }
 
   async login(tenantId: string, loginDto: { email: string; password: string }) {
-    try {
-      console.log(
-        '--- [AUTH DEBUG] Attempting to validate user:',
-        loginDto.email
-      )
-      const user = await this.validateUser(
-        tenantId,
-        loginDto.email,
-        loginDto.password
-      )
-      if (!user) {
-        console.log(
-          '--- [AUTH DEBUG] User validation failed for:',
-          loginDto.email
-        )
-        throw new UnauthorizedException('Invalid credentials')
-      }
-      console.log('--- [AUTH DEBUG] User validated successfully:', user.email)
+    const user = await this.validateUser(
+      tenantId,
+      loginDto.email,
+      loginDto.password
+    )
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials')
+    }
 
-      const payload = {
-        email: user.email,
-        sub: user.id,
-        roles: user.roles.map((role) => role.name),
-        tenantId,
-      }
-      console.log('--- [AUTH DEBUG] Creating JWT payload:', payload)
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      roles: user.roles.map((role) => role.name),
+      tenantId,
+    }
 
-      const accessToken = this.jwtService.sign(payload)
-      console.log('--- [AUTH DEBUG] JWT signed successfully.')
+    const accessToken = this.jwtService.sign(payload)
 
-      const userResponse = {
-        id: user.id,
-        email: user.email,
-        roles: user.roles.map((role) => role.name),
-        firstName: user.firstName,
-        lastName: user.lastName,
-        companies: user.companies,
-        tenantId: tenantId,
-      }
+    const userResponse = {
+      id: user.id,
+      email: user.email,
+      roles: user.roles.map((role) => role.name),
+      firstName: user.firstName,
+      lastName: user.lastName,
+      companies: user.companies,
+      tenantId: tenantId,
+    }
 
-      console.log(
-        '--- [AUTH DEBUG] Login successful, returning token and user.'
-      )
-      return {
-        access_token: accessToken,
-        user: userResponse,
-      }
-    } catch (error) {
-      console.error(
-        '--- [AUTH DEBUG] CRITICAL ERROR IN LOGIN METHOD ---',
-        error
-      )
-      throw error // Re-throw the error to ensure NestJS handles it
+    return {
+      access_token: accessToken,
+      user: userResponse,
     }
   }
 

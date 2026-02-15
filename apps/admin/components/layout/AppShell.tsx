@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Sidebar } from '../admin/sidebar';
@@ -35,6 +35,23 @@ interface AppShellProps {
 export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showHeader, setShowHeader] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setShowHeader(false); // Scrolling down
+      } else {
+        setShowHeader(true); // Scrolling up
+      }
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Show shell on all pages except login.
   // AuthGuard handles protection and loading states inside the shell.
@@ -48,15 +65,17 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const pathSegments = pathname.split('/').filter(Boolean);
 
   return (
-    <div className="min-h-screen flex bg-[#0f172a] text-white font-sans selection:bg-blue-500 selection:text-white">
+    <div className="min-h-screen flex bg-[#0f172a] text-white font-sans selection:bg-[#00a1ff] selection:text-white">
       {/* Sidebar */}
       <Sidebar mobileOpen={mobileMenuOpen} setMobileOpen={setMobileMenuOpen} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-80 transition-all duration-300">
+      <div className="flex-1 flex flex-col min-h-screen lg:ml-[320px] transition-all duration-300">
         {/* Top Header/Navbar */}
         <Navbar
-          className="sticky top-0 z-40 w-full rounded-none bg-[#0f172a] border-b border-blue-gray-100/5 px-4 py-2.5 transition-all shadow-none"
+          {...({} as any)}
+          className={`sticky top-0 z-40 w-full rounded-none bg-transparent px-4 py-2.5 transition-all duration-300 shadow-none ${showHeader ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+            }`}
           fullWidth
           blurred={false}
         >
@@ -73,7 +92,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 <Bars3Icon className="h-5 w-5 stroke-2" />
               </IconButton>
 
-              <Link href="/dashboard">
+              <Link href="/">
                 <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
                   <Squares2X2Icon className="h-5 w-5" />
                 </IconButton>
@@ -137,8 +156,8 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         </Navbar>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 lg:p-6 mt-2">
-          <AuthGuard>{children}</AuthGuard>
+        <main className="flex-1 p-4 lg:p-6 mt-2 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          {children}
         </main>
       </div>
     </div>

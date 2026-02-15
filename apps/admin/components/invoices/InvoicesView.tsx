@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from 'react';
-import { Invoice, InvoiceStatus, formatCurrencyChilean,  } from '@artifact/core';;
+import { Invoice, InvoiceStatus, formatCurrencyChilean, } from '@artifact/core';;
 import { InvoiceService, PaymentService, useCompany } from '@artifact/core/client';;
 import {
     Card,
@@ -90,19 +90,47 @@ const InvoicesView: React.FC = () => {
             cell: ({ row }) => {
                 const status = row.original.status;
                 const config = {
-                    [InvoiceStatus.PAID]: { color: 'text-green-600 bg-green-50', icon: CheckCircle2, label: 'Pagada' },
-                    [InvoiceStatus.PARTIALLY_PAID]: { color: 'text-blue-600 bg-blue-50', icon: Clock, label: 'Parcial' },
-                    [InvoiceStatus.SENT]: { color: 'text-yellow-600 bg-yellow-50', icon: FileText, label: 'Enviada' },
-                    [InvoiceStatus.OVERDUE]: { color: 'text-red-600 bg-red-50', icon: AlertCircle, label: 'Vencida' },
-                    [InvoiceStatus.DRAFT]: { color: 'text-gray-600 bg-gray-50', icon: Clock, label: 'Borrador' },
-                    [InvoiceStatus.VOID]: { color: 'text-gray-400 bg-gray-100', icon: AlertCircle, label: 'Anulada' },
-                }[status] || { color: 'text-gray-600 bg-gray-50', icon: Clock, label: status };
+                    [InvoiceStatus.PAID]: {
+                        color: 'text-green-600 bg-green-50 dark:text-green-400 dark:bg-green-900/30 border-green-200 dark:border-green-900',
+                        icon: CheckCircle2,
+                        label: 'Pagada'
+                    },
+                    [InvoiceStatus.PARTIALLY_PAID]: {
+                        color: 'text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-900/30 border-blue-200 dark:border-blue-900',
+                        icon: Clock,
+                        label: 'Parcial'
+                    },
+                    [InvoiceStatus.SENT]: {
+                        color: 'text-yellow-600 bg-yellow-50 dark:text-yellow-400 dark:bg-yellow-900/30 border-yellow-200 dark:border-yellow-900',
+                        icon: FileText,
+                        label: 'Enviada'
+                    },
+                    [InvoiceStatus.OVERDUE]: {
+                        color: 'text-red-600 bg-red-50 dark:text-red-400 dark:bg-red-900/30 border-red-200 dark:border-red-900',
+                        icon: AlertCircle,
+                        label: 'Vencida'
+                    },
+                    [InvoiceStatus.DRAFT]: {
+                        color: 'text-slate-600 bg-slate-50 dark:text-slate-400 dark:bg-slate-800 border-slate-200 dark:border-slate-700',
+                        icon: Clock,
+                        label: 'Borrador'
+                    },
+                    [InvoiceStatus.VOID]: {
+                        color: 'text-gray-400 bg-gray-100 dark:text-gray-500 dark:bg-gray-800/50 border-gray-200 dark:border-gray-800',
+                        icon: AlertCircle,
+                        label: 'Anulada'
+                    },
+                }[status] || {
+                    color: 'text-gray-600 bg-gray-50 dark:text-gray-400 dark:bg-gray-800',
+                    icon: Clock,
+                    label: status
+                };
 
                 return (
-                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+                    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${config.color}`} >
                         <config.icon className="h-3 w-3" />
                         {config.label}
-                    </div>
+                    </div >
                 );
             },
         },
@@ -144,18 +172,19 @@ const InvoicesView: React.FC = () => {
         <div className="space-y-6">
             <div className="flex justify-between items-center">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Facturación</h1>
-                    <p className="text-muted-foreground">Administra tus facturas, cobranzas y factoring.</p>
+                    <h1 className="text-2xl font-bold tracking-tight text-white">Facturación</h1>
+                    <p className="text-slate-400">Administra tus facturas, cobranzas y factoring.</p>
                 </div>
             </div>
 
-            <Card>
+            <Card className="border-slate-800 bg-[#1e293b]">
                 <CardContent className="p-0">
                     <DataTable
                         columns={columns}
                         data={invoices}
                         filterColumn="invoiceNumber"
                         filterPlaceholder="Buscar factura..."
+                        className="border-slate-700"
                     />
                 </CardContent>
             </Card>

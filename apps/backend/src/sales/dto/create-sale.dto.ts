@@ -110,4 +110,8 @@ export class CreateSaleDto {
   @ValidateNested({ each: true })
   @Type(() => SaleItemDto)
   items: SaleItemDto[]
+
+  @IsOptional()
+  @IsString()
+  posShiftId?: string
 }

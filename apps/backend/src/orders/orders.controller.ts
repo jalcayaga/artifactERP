@@ -15,12 +15,13 @@ import { OrdersService } from './orders.service'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard'
 import { TenantId } from '../common/decorators/tenant.decorator'
 
 @UseGuards(JwtAuthGuard)
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly ordersService: OrdersService) { }
 
   @Post()
   create(

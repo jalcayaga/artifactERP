@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  # Backend (Path-based routing for SSO)
   backend:
     image: ghcr.io/jalcayaga/artifacterp-backend:latest
     deploy:
@@ -16,29 +17,31 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.artifact-backend.rule=Host(`api.artifact.cl`)"
-        - "traefik.http.routers.artifact-backend.entrypoints=websecure"
-        - "traefik.http.routers.artifact-backend.tls.certresolver=myresolver"
-        - "traefik.http.services.artifact-backend.loadbalancer.server.port=3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=MangoNet"
+      - "traefik.http.routers.artifact-backend.rule=Host(`artifact.cl`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.artifact-backend.entrypoints=websecure"
+      - "traefik.http.routers.artifact-backend.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.artifact-backend.priority=10"
+      - "traefik.http.middlewares.artifact-backend-stripprefix.stripprefix.prefixes=/api"
+      - "traefik.http.routers.artifact-backend.middlewares=artifact-backend-stripprefix"
+      - "traefik.http.services.artifact-backend.loadbalancer.server.port=3000"
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - DIRECT_URL=${DIRECT_URL}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRATION=${JWT_EXPIRATION}
-      - STOREFRONT_URL=${STOREFRONT_URL}
-      - ADMIN_URL=${ADMIN_URL}
+      - STOREFRONT_URL=https://artifact.cl
+      - ADMIN_URL=https://artifact.cl/admin
       - PORT=3000
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
     networks:
       - MangoNet
-    healthcheck:
-      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
+  # Admin (Path-based routing for SSO)
   admin:
     image: ghcr.io/jalcayaga/artifacterp-admin:latest
     deploy:
@@ -47,30 +50,26 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 256M
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.artifact-admin.rule=Host(`app.artifact.cl`)"
-        - "traefik.http.routers.artifact-admin.entrypoints=websecure"
-        - "traefik.http.routers.artifact-admin.tls.certresolver=myresolver"
-        - "traefik.http.services.artifact-admin.loadbalancer.server.port=3000"
+    #  resources: ... (defaults)
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=MangoNet"
+      - "traefik.http.routers.artifact-admin.rule=Host(`artifact.cl`) && PathPrefix(`/admin`)"
+      - "traefik.http.routers.artifact-admin.entrypoints=websecure"
+      - "traefik.http.routers.artifact-admin.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.artifact-admin.priority=10"
+      - "traefik.http.middlewares.artifact-admin-stripprefix.stripprefix.prefixes=/admin"
+      - "traefik.http.routers.artifact-admin.middlewares=artifact-admin-stripprefix"
+      - "traefik.http.services.artifact-admin.loadbalancer.server.port=3000"
     environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_API_URL=https://artifact.cl/api
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
     networks:
       - MangoNet
-    healthcheck:
-      test: [ "CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:3000 || exit 1" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    # Healthcheck removed to avoid wget issues
 
+    # Storefront (RESTORED - Healthcheck removed)
   storefront:
     image: ghcr.io/jalcayaga/artifacterp-storefront:latest
     deploy:
@@ -86,24 +85,24 @@ services:
         reservations:
           cpus: '0.25'
           memory: 256M
-      labels:
-        - "traefik.enable=true"
-        - "traefik.http.routers.artifact-storefront.rule=Host(`artifact.cl`) || Host(`www.artifact.cl`)"
-        - "traefik.http.routers.artifact-storefront.entrypoints=websecure"
-        - "traefik.http.routers.artifact-storefront.tls.certresolver=myresolver"
-        - "traefik.http.services.artifact-storefront.loadbalancer.server.port=3000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=MangoNet"
+      - "traefik.http.routers.artifact-storefront.rule=Host(`artifact.cl`) || Host(`www.artifact.cl`)"
+      - "traefik.http.routers.artifact-storefront.entrypoints=websecure"
+      - "traefik.http.routers.artifact-storefront.tls.certresolver=letsencryptresolver"
+      - "traefik.http.routers.artifact-storefront.priority=1"
+      - "traefik.http.services.artifact-storefront.loadbalancer.server.port=3000"
     environment:
-      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+      - NEXT_PUBLIC_API_URL=https://artifact.cl/api
+      - NEXT_PUBLIC_ADMIN_URL=https://artifact.cl/admin
       - NEXT_PUBLIC_TENANT_ID_HEADER=x-tenant-slug
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
       - API_URL=http://backend:3000
     networks:
       - MangoNet
-    healthcheck:
-      test: [ "CMD-SHELL", "wget --quiet --tries=1 --spider http://localhost:3000 || exit 1" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
+    # Healthcheck removed to avoid wget issues
 
 networks:
   MangoNet:

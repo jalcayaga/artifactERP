@@ -4,26 +4,28 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingCart, Menu } from "lucide-react";
+import { ClientIcon } from "./client-icon";
 import { Button } from "@artifact/ui";
 
+import { useSupabaseAuth } from "@artifact/core/client";
 import { useTenant } from "@/hooks/use-tenant";
 import { useCart } from "@/hooks/use-cart";
-import { useAuth } from "@/hooks/use-auth";
+// import { useAuth } from "@/hooks/use-auth";
 import { defaultTheme } from "@/lib/theme";
 import CartDrawer from "./store/CartDrawer";
+
+
 
 const NAV_LINKS = [
   { label: "Inicio", href: "/" },
   { label: "Tienda", href: "/products" },
-  { label: "Nosotros", href: "/about" },
-  { label: "Términos", href: "/terms" },
-  { label: "Privacidad", href: "/privacy" },
+  { label: "Info", href: "/info" },
 ];
 
 export function Header() {
   const { tenant } = useTenant();
   const { items } = useCart();
-  const { user } = useAuth();
+  const { user } = useSupabaseAuth();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -87,7 +89,8 @@ export function Header() {
               className="relative h-11 w-11 rounded-full border border-white/10 bg-white/5 shadow-sm text-neutral-300 hover:border-brand/40 hover:text-brand hover:bg-brand/10"
               aria-label="Abrir carrito"
             >
-              <ShoppingCart className="h-5 w-5" />
+              <ClientIcon icon={ShoppingCart} className="h-5 w-5" />
+
               <span className={`absolute -top-1 -right-1 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-brand text-xs font-semibold text-black transition-transform ${mounted && cartCount > 0 ? 'scale-100' : 'scale-0'}`}>
                 {mounted ? cartCount : 0}
               </span>
@@ -113,7 +116,7 @@ export function Header() {
               className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/5 text-neutral-300 transition hover:text-brand focus:outline-none focus:ring-2 focus:ring-brand/40 md:hidden"
               aria-label="Abrir menú"
             >
-              <Menu className="h-5 w-5" />
+              <ClientIcon icon={Menu} className="h-5 w-5" />
             </button>
           </div>
         </nav >

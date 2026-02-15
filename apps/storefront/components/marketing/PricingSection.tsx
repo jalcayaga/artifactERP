@@ -1,5 +1,6 @@
 import React from 'react';
 import { Check, Sparkles } from 'lucide-react';
+import { ClientIcon } from '../client-icon';
 import { Button } from '@artifact/ui';
 import Link from 'next/link';
 
@@ -77,13 +78,13 @@ export default function PricingSection() {
                         <div
                             key={index}
                             className={`relative p-8 rounded-3xl border-2 transition-all duration-300 ${plan.popular
-                                ? 'border-brand bg-brand/5 scale-105'
-                                : 'border-white/10 bg-white/5 hover:border-brand/30'
+                                ? 'border-brand bg-brand/5 scale-105 shadow-[0_0_40px_rgba(0,224,116,0.2)]'
+                                : 'border-white/10 bg-white/5 hover:border-brand/30 hover:shadow-[0_0_30px_rgba(0,224,116,0.1)]'
                                 }`}
                         >
                             {plan.popular && (
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-brand text-black text-sm font-bold flex items-center gap-1">
-                                    <Sparkles className="w-4 h-4" />
+                                    <ClientIcon icon={Sparkles} className="w-4 h-4" />
                                     Más Popular
                                 </div>
                             )}
@@ -100,7 +101,7 @@ export default function PricingSection() {
                             <ul className="space-y-3 mb-8">
                                 {plan.features.map((feature, i) => (
                                     <li key={i} className="flex items-start gap-3">
-                                        <Check className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
+                                        <ClientIcon icon={Check} className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
                                         <span className="text-neutral-300">{feature}</span>
                                     </li>
                                 ))}

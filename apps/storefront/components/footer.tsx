@@ -8,21 +8,21 @@ const footerSections = [
       { label: 'Funciones', href: '/#features' },
       { label: 'Precios', href: '/#planes' },
       { label: 'Integraciones', href: '/#features' },
-      { label: 'Seguridad', href: '/privacy' }
+      { label: 'Seguridad', href: '/info#privacy' }
     ]
   },
   {
     title: 'Compañía',
     links: [
-      { label: 'Nosotros', href: '/about' },
+      { label: 'Nosotros', href: '/info#about' },
       { label: 'Contacto', href: '/#contacto' }
     ]
   },
   {
     title: 'Legal',
     links: [
-      { label: 'Privacidad', href: '/privacy' },
-      { label: 'Términos', href: '/terms' }
+      { label: 'Privacidad', href: '/info#privacy' },
+      { label: 'Términos', href: '/info#terms' }
     ]
   }
 ];
@@ -124,10 +124,10 @@ export function Footer() {
           </p>
 
           <div className="flex items-center gap-6">
-            <Link href="/privacy" className="transition-colors hover:text-white">
+            <Link href="/info#privacy" className="transition-colors hover:text-white">
               Privacidad
             </Link>
-            <Link href="/terms" className="transition-colors hover:text-white">
+            <Link href="/info#terms" className="transition-colors hover:text-white">
               Términos
             </Link>
           </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShoppingCart, BarChart3, FileText, Store, Package, TrendingUp } from 'lucide-react';
+import { ClientIcon } from '../client-icon';
 
 const features = [
     {
@@ -53,10 +54,10 @@ export default function FeaturesSection() {
                         return (
                             <div
                                 key={index}
-                                className="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand/30 transition-all duration-300 hover:bg-white/10"
+                                className="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand/30 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(0,224,116,0.15)] transition-all duration-300"
                             >
-                                <div className="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                    <Icon className="w-6 h-6 text-brand" />
+                                <div className="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-brand/20 transition-all duration-300">
+                                    <ClientIcon icon={Icon} className="w-6 h-6 text-brand" />
                                 </div>
                                 <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
                                 <p className="text-neutral-400 leading-relaxed">{feature.description}</p>

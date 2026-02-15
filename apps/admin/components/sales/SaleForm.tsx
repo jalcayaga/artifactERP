@@ -1,28 +1,45 @@
 'use client';
 
 import React, { useState, FormEvent, useMemo, useCallback, useEffect } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@artifact/ui';
+import {
+  Card,
+  CardBody,
+  CardFooter,
+  CardHeader,
+  Typography,
+  Button,
+  Input,
+  Select,
+  Option,
+  Textarea,
+  IconButton,
+} from '@material-tailwind/react';
 import {
   ShoppingCartIcon,
   PlusIcon,
   TrashIcon,
-  SearchIcon,
-} from '@artifact/ui';
-import { Sale, OrderItem, Product, LotInfo, CreateSaleDto, CreateSaleItemDto, UpdateSaleDto, Company, OrderStatus, PaymentStatus, formatCurrencyChilean,  } from '@artifact/core';;
-import {  } from '@artifact/core';
-import { ProductService, SaleService, CompanyService, PurchaseService, useAuth } from '@artifact/core/client';;
-import { Input } from '@artifact/ui';
-import { Button } from '@artifact/ui';
-import { Label } from '@artifact/ui';
+} from '@heroicons/react/24/outline';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@artifact/ui';
+  Sale,
+  Product,
+  LotInfo,
+  CreateSaleDto,
+  CreateSaleItemDto,
+  UpdateSaleDto,
+  Company,
+  OrderStatus,
+  PaymentStatus,
+  formatCurrencyChilean,
+} from '@artifact/core';
+import {
+  ProductService,
+  SaleService,
+  CompanyService,
+  PurchaseService,
+  useAuth,
+} from '@artifact/core/client';
 import { toast } from 'sonner';
-import CreatePurchaseOrderModal from './CreatePurchaseOrderModal'; // Será migrado
+import CreatePurchaseOrderModal from './CreatePurchaseOrderModal';
 
 interface SaleFormProps {
   saleData?: Sale | null;
@@ -32,7 +49,10 @@ interface SaleFormProps {
 
 const FIXED_VAT_RATE_PERCENT = 19;
 
-type SaleFormItem = CreateSaleItemDto & { productName?: string };
+type SaleFormItem = CreateSaleItemDto & {
+  productName?: string;
+  lots?: { lotId: string; quantity: number }[];
+};
 
 const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
   const { token, currentUser } = useAuth();
@@ -87,6 +107,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
           itemVatAmount: Number(item.itemVatAmount ?? 0),
           totalPriceWithVat: Number(item.totalPriceWithVat ?? 0),
           productName: item.product?.name ?? item.productId,
+          lots: item.orderItemLots?.map(oil => ({ lotId: oil.lotId, quantity: oil.quantityTaken })),
         })) ?? [];
       setItems(existingItems);
     } else {
@@ -200,6 +221,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
       itemVatAmount: itemVatAmount,
       totalPriceWithVat: totalPriceWithVat,
       productName: selectedProductToAdd.name,
+      lots: selectedLotId ? [{ lotId: selectedLotId, quantity }] : undefined,
     };
 
     setItems((prevItems) => [...prevItems, newItem]);
@@ -210,7 +232,13 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
     setUnitPriceToAdd('');
     setSelectedLotId(null);
     setItemErrors({});
-  }, [selectedProductToAdd, quantityToAdd, unitPriceToAdd, selectedLotId, validateItemForm]);
+  }, [
+    selectedProductToAdd,
+    quantityToAdd,
+    unitPriceToAdd,
+    selectedLotId,
+    validateItemForm,
+  ]);
 
   const handleRemoveItem = useCallback((index: number) => {
     setItems((prevItems) => prevItems.filter((_, i) => i !== index));
@@ -244,6 +272,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
         totalPrice: item.totalPrice,
         itemVatAmount: item.itemVatAmount,
         totalPriceWithVat: item.totalPriceWithVat,
+        lots: item.lots,
       }));
 
       const basePayload = {
@@ -290,7 +319,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
     } catch (error: any) {
       console.error('Error guardando la venta:', error);
       const apiError = error as Error & {
-        response?: { data?: any }
+        response?: { data?: any };
       };
       const errorData = apiError.response?.data;
       if (errorData?.errorCode === 'OUT_OF_STOCK') {
@@ -335,325 +364,216 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
     }
   };
 
-  const inputBaseClass =
-    'mt-1 block w-full px-3 py-2 border rounded-md shadow-sm text-sm transition-colors duration-150 bg-background border-border placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-foreground';
-  const errorTextClass = 'mt-1 text-xs text-destructive';
-
   return (
     <>
-      <Card className='max-w-4xl mx-auto border'>
-        <CardHeader>
-          <CardTitle className='text-xl'>
-            {isEditing
-              ? `Editar Venta: ${saleData?.id.substring(0, 8)}...`
-              : 'Crear Nueva Venta'}
-          </CardTitle>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className='space-y-6 pt-6'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-              <div>
-                <Label htmlFor='client-select'>
-                  Cliente <span className='text-red-500'>*</span>
-                </Label>
-                <Select
-                  onValueChange={setSelectedCompanyId}
-                  value={selectedCompanyId}
-                >
-                  <SelectTrigger id='client-select'>
-                    <SelectValue placeholder='Selecciona un cliente' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {companies.map((company) => (
-                      <SelectItem key={company.id} value={company.id}>
-                        {company.name}{' '}
-                        {company.email ? `(${company.email})` : ''}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.selectedCompanyId && (
-                  <p id='client-error' className={errorTextClass}>
-                    {errors.selectedCompanyId}
-                  </p>
-                )}
-              </div>
-              <div>
-                <Label htmlFor='sale-date'>
-                  Fecha de Venta <span className='text-red-500'>*</span>
-                </Label>
-                <Input
-                  type='date'
-                  id='sale-date'
-                  value={saleDate}
-                  onChange={(e) => setSaleDate(e.target.value)}
-                  aria-describedby='saleDate-error'
-                />
-                {errors.saleDate && (
-                  <p id='saleDate-error' className={errorTextClass}>
-                    {errors.saleDate}
-                  </p>
-                )}
-              </div>
+      <form onSubmit={handleSubmit} className="w-full max-w-5xl mx-auto flex flex-col gap-6 p-4">
+        <Card className="bg-[#1e293b] text-white">
+          <CardHeader floated={false} shadow={false} className="rounded-none bg-transparent">
+            <Typography variant="h5" color="white">
+              {isEditing
+                ? `Editar Venta: ${saleData?.id.substring(0, 8)}...`
+                : 'Crear Nueva Venta'}
+            </Typography>
+          </CardHeader>
+          <CardBody className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Typography variant="small" className="mb-2 font-medium text-blue-gray-300">
+                Cliente *
+              </Typography>
+              <Select
+                label="Seleccionar Cliente"
+                className="text-white bg-[#0f172a]"
+                error={!!errors.selectedCompanyId}
+                value={selectedCompanyId}
+                onChange={(val) => setSelectedCompanyId(val || '')}
+              >
+                {companies.map((company) => (
+                  <Option key={company.id} value={company.id}>
+                    {company.name} {company.email ? `(${company.email})` : ''}
+                  </Option>
+                ))}
+              </Select>
             </div>
+            <div>
+              <Typography variant="small" className="mb-2 font-medium text-blue-gray-300">
+                Fecha de Venta *
+              </Typography>
+              <Input
+                type="date"
+                className="text-white bg-[#0f172a]"
+                value={saleDate}
+                onChange={(e) => setSaleDate(e.target.value)}
+                error={!!errors.saleDate}
+                crossOrigin={undefined}
+              />
+            </div>
+          </CardBody>
+        </Card>
 
-            <div className='space-y-4 p-4 rounded-md bg-card'>
-              <h3 className='text-md font-semibold text-foreground'>
-                Artículos de la Venta (IVA {FIXED_VAT_RATE_PERCENT}%)
-              </h3>
-
-              {/* Product Search and Selection */}
-              <div className='grid grid-cols-1 sm:grid-cols-12 gap-4 items-end'>
-                <div className='sm:col-span-5 relative'>
-                  <Label
-                    htmlFor='product-search'
-                    className='block text-xs font-medium text-muted-foreground'
-                  >
-                    Buscar Producto
-                  </Label>
-                  <Input
-                    id='product-search'
-                    type='text'
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder='Escribe para buscar productos...'
-                    className='pr-10'
-                  />
-                  <SearchIcon className='absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground' />
-                  {searchResults.length > 0 && (
-                    <div className='absolute z-10 w-full bg-popover border border-border rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto'>
-                      {searchResults.map((product) => (
-                        <div
-                          key={product.id}
-                          className='px-3 py-2 hover:bg-accent cursor-pointer text-sm'
-                          onClick={() => handleProductSelect(product)}
-                        >
-                          {product.name} {product.sku ? `(${product.sku})` : ''}{' '}
-                          - {formatCurrencyChilean(product.price)}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                  {itemErrors.product && (
-                    <p className={errorTextClass}>{itemErrors.product}</p>
-                  )}
-                </div>
-
-                {selectedProductToAdd && (
-                  <div className='sm:col-span-7 grid grid-cols-1 sm:grid-cols-5 gap-4'>
-                    <div className='sm:col-span-2'>
-                      <Label
-                        htmlFor='item-quantity'
-                        className='block text-xs font-medium text-muted-foreground'
+        {/* Items Card */}
+        <Card className="bg-[#1e293b] text-white overflow-visible">
+          <div className="p-4 bg-[#0f172a] border-b border-white/5">
+            <Typography variant="h6" color="white">Artículos de la Venta (IVA {FIXED_VAT_RATE_PERCENT}%)</Typography>
+          </div>
+          <CardBody className="p-4 space-y-4">
+            {/* Product Search Row */}
+            <div className="flex flex-col md:flex-row gap-4 items-end">
+              <div className="w-full relative">
+                <Typography variant="small" className="mb-1 font-medium text-blue-gray-300">Buscar Producto</Typography>
+                <Input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Escriba para buscar..."
+                  className="text-white bg-[#0f172a]"
+                  error={!!itemErrors.product}
+                  crossOrigin={undefined}
+                />
+                {searchResults.length > 0 && (
+                  <div className="absolute z-50 w-full bg-[#1e293b] border border-blue-gray-700 rounded-md shadow-lg mt-1 max-h-60 overflow-y-auto">
+                    {searchResults.map((product) => (
+                      <div
+                        key={product.id}
+                        className="px-3 py-2 hover:bg-[#0f172a] cursor-pointer text-sm text-white border-b border-blue-gray-800 last:border-0"
+                        onClick={() => handleProductSelect(product)}
                       >
-                        Cant.
-                      </Label>
-                      <Input
-                        type='number'
-                        id='item-quantity'
-                        value={quantityToAdd}
-                        onChange={(e) => setQuantityToAdd(e.target.value)}
-                        placeholder='0'
-                      />
-                      {itemErrors.quantity && (
-                        <p className={errorTextClass}>{itemErrors.quantity}</p>
-                      )}
-                    </div>
-                    <div className='sm:col-span-3'>
-                      <Label
-                        htmlFor='item-price'
-                        className='block text-xs font-medium text-muted-foreground'
-                      >
-                        P. Unit. Venta (sin IVA)
-                      </Label>
-                      <Input
-                        type='number'
-                        id='item-price'
-                        value={unitPriceToAdd}
-                        onChange={(e) => setUnitPriceToAdd(e.target.value)}
-                        placeholder='0.00'
-                        step='0.01'
-                      />
-                      {itemErrors.price && (
-                        <p className={errorTextClass}>{itemErrors.price}</p>
-                      )}
-                    </div>
-
-                    {selectedProductToAdd.productType === 'PRODUCT' &&
-                      selectedProductLots.length > 0 && (
-                        <div className='sm:col-span-5'>
-                          <Label
-                            htmlFor='lot-select'
-                            className='block text-xs font-medium text-muted-foreground'
-                          >
-                            Seleccionar Lote (Precio Compra)
-                          </Label>
-                          <Select
-                            onValueChange={setSelectedLotId}
-                            value={selectedLotId || ''}
-                          >
-                            <SelectTrigger id='lot-select'>
-                              <SelectValue placeholder='Selecciona un lote' />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {selectedProductLots.map((lot) => (
-                                <SelectItem key={lot.id} value={lot.id}>
-                                  Lote: {lot.lotNumber} - Cant:{' '}
-                                  {lot.currentQuantity} - Compra:{' '}
-                                  {formatCurrencyChilean(lot.purchasePrice)}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          {itemErrors.lot && (
-                            <p className={errorTextClass}>{itemErrors.lot}</p>
-                          )}
-                        </div>
-                      )}
-
-                    <div className='sm:col-span-5'>
-                      <Button
-                        type='button'
-                        onClick={handleAddItem}
-                        className='w-full'
-                      >
-                        <PlusIcon className='w-4 h-4 mr-2' /> Añadir Artículo
-                      </Button>
-                    </div>
+                        {product.name} {product.sku ? `(${product.sku})` : ''} - {formatCurrencyChilean(product.price)}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
+            </div>
 
-              {items.length > 0 ? (
-                <div className='mt-4 -mx-4 sm:mx-0 overflow-x-auto'>
-                  <table className='min-w-full divide-y divide-border'>
-                    <thead className='bg-muted/50'>
-                      <tr>
-                        <th className='px-3 py-2 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wider'>
-                          Producto / Servicio
-                        </th>
-                        <th className='px-3 py-2 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider'>
-                          Cant.
-                        </th>
-                        <th className='px-3 py-2 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider'>
-                          P.Unit (s/IVA)
-                        </th>
-                        <th className='px-3 py-2 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider'>
-                          Subtotal (s/IVA)
-                        </th>
-                        <th className='px-3 py-2 text-right text-xs font-semibold text-muted-foreground uppercase tracking-wider hidden sm:table-cell'>
-                          IVA Item
-                        </th>
-                        <th className='px-3 py-2 text-center text-xs font-semibold text-muted-foreground uppercase tracking-wider'></th>
-                      </tr>
-                    </thead>
-                    <tbody className='divide-y divide-border'>
-                      {items.map((item, index) => (
-                        <tr key={index}>
-                          <td className='px-3 py-2 whitespace-nowrap text-sm text-foreground'>
-                            {item.productName || item.productId}
-                          </td>
-                          <td className='px-3 py-2 whitespace-nowrap text-sm text-muted-foreground text-right'>
-                            {item.quantity}
-                          </td>
-                          <td className='px-3 py-2 whitespace-nowrap text-sm text-muted-foreground text-right'>
-                            {formatCurrencyChilean(item.unitPrice)}
-                          </td>
-                          <td className='px-3 py-2 whitespace-nowrap text-sm text-foreground font-medium text-right'>
-                            {formatCurrencyChilean(item.totalPrice)}
-                          </td>
-                          <td className='px-3 py-2 whitespace-nowrap text-sm text-muted-foreground text-right hidden sm:table-cell'>
-                            {formatCurrencyChilean(item.itemVatAmount)}
-                          </td>
-                          <td className='px-3 py-2 whitespace-nowrap text-center'>
-                            <button
-                              type='button'
-                              onClick={() => handleRemoveItem(index)}
-                              title='Eliminar Artículo'
-                              className='text-destructive hover:text-destructive/80 p-1 rounded-md hover:bg-destructive/10 transition-colors'
-                            >
-                              <TrashIcon className='w-4 h-4' />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            {selectedProductToAdd && (
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-end bg-[#0f172a] p-4 rounded-lg border border-white/10">
+                <div className="sm:col-span-2">
+                  <Typography variant="small" className="mb-1 font-medium text-blue-gray-300">Cantidad</Typography>
+                  <Input
+                    type="number"
+                    value={quantityToAdd}
+                    onChange={(e) => setQuantityToAdd(e.target.value)}
+                    className="text-white"
+                    error={!!itemErrors.quantity}
+                    crossOrigin={undefined}
+                  />
                 </div>
-              ) : (
-                <p className='text-sm text-center text-muted-foreground italic py-3'>
-                  Aún no se han añadido artículos a la venta.
-                </p>
-              )}
-              {errors.items && (
-                <p className={errorTextClass + ' text-center'}>
-                  {errors.items}
-                </p>
-              )}
+                <div className="sm:col-span-3">
+                  <Typography variant="small" className="mb-1 font-medium text-blue-gray-300">Precio Unit. (s/IVA)</Typography>
+                  <Input
+                    type="number"
+                    value={unitPriceToAdd}
+                    onChange={(e) => setUnitPriceToAdd(e.target.value)}
+                    className="text-white"
+                    error={!!itemErrors.price}
+                    crossOrigin={undefined}
+                  />
+                </div>
+                {selectedProductToAdd.productType === 'PRODUCT' && selectedProductLots.length > 0 && (
+                  <div className="sm:col-span-4">
+                    <Typography variant="small" className="mb-1 font-medium text-blue-gray-300">Lote (Opcional)</Typography>
+                    <Select
+                      className="text-white"
+                      value={selectedLotId || ''}
+                      onChange={(val) => setSelectedLotId(val || null)}
+                      error={!!itemErrors.lot}
+                      label="Seleccionar Lote"
+                    >
+                      {selectedProductLots.map((lot) => (
+                        <Option key={lot.id} value={lot.id}>
+                          {lot.lotNumber} (Disp: {lot.currentQuantity})
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
+                )}
+                <div className="sm:col-span-3">
+                  <Button fullWidth onClick={handleAddItem} color="blue" className="flex items-center justify-center gap-2">
+                    <PlusIcon className="w-4 h-4" /> Agregar
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Items Table */}
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-max table-auto text-left">
+                <thead>
+                  <tr>
+                    <th className="border-b border-blue-gray-100/10 bg-[#0f172a] p-4 text-xs font-semibold uppercase text-blue-gray-200">Producto</th>
+                    <th className="border-b border-blue-gray-100/10 bg-[#0f172a] p-4 text-xs font-semibold uppercase text-blue-gray-200 text-right">Cant.</th>
+                    <th className="border-b border-blue-gray-100/10 bg-[#0f172a] p-4 text-xs font-semibold uppercase text-blue-gray-200 text-right">P.Unit</th>
+                    <th className="border-b border-blue-gray-100/10 bg-[#0f172a] p-4 text-xs font-semibold uppercase text-blue-gray-200 text-right">Subtotal</th>
+                    <th className="border-b border-blue-gray-100/10 bg-[#0f172a] p-4 text-xs font-semibold uppercase text-blue-gray-200 w-10"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.length === 0 ? (
+                    <tr><td colSpan={5} className="p-4 text-center text-blue-gray-400">Sin artículos</td></tr>
+                  ) : (
+                    items.map((item, index) => (
+                      <tr key={index} className="hover:bg-white/5">
+                        <td className="p-4 border-b border-blue-gray-100/5">
+                          <Typography variant="small" color="white" className="font-normal">{item.productName}</Typography>
+                          {item.lots && item.lots.length > 0 && <Typography variant="small" className="text-[10px] text-blue-gray-400">Lote ID: {item.lots[0].lotId.substring(0, 8)}...</Typography>}
+                        </td>
+                        <td className="p-4 border-b border-blue-gray-100/5 text-right"><Typography variant="small" color="blue-gray" className="font-normal">{item.quantity}</Typography></td>
+                        <td className="p-4 border-b border-blue-gray-100/5 text-right"><Typography variant="small" color="blue-gray" className="font-normal">{formatCurrencyChilean(item.unitPrice)}</Typography></td>
+                        <td className="p-4 border-b border-blue-gray-100/5 text-right"><Typography variant="small" color="white" className="font-medium">{formatCurrencyChilean(item.totalPrice)}</Typography></td>
+                        <td className="p-4 border-b border-blue-gray-100/5 text-center">
+                          <IconButton variant="text" color="red" size="sm" onClick={() => handleRemoveItem(index)}>
+                            <TrashIcon className="w-4 h-4" />
+                          </IconButton>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
 
-            <div className='mt-6 pt-4 border-t border-border space-y-2'>
-              <div className='flex justify-end items-center'>
-                <span className='text-md font-medium text-muted-foreground'>
-                  Subtotal (sin IVA):
-                </span>
-                <span className='ml-4 text-md font-semibold text-foreground w-32 text-right'>
-                  {formatCurrencyChilean(subTotal)}
-                </span>
-              </div>
-              <div className='flex justify-end items-center'>
-                <span className='text-md font-medium text-muted-foreground'>
-                  IVA ({FIXED_VAT_RATE_PERCENT}%):
-                </span>
-                <span className='ml-4 text-md font-semibold text-foreground w-32 text-right'>
-                  {formatCurrencyChilean(totalVatAmount)}
-                </span>
-              </div>
-              <div className='flex justify-end items-center mt-1 pt-1 border-t border-border/50'>
-                <span className='text-lg font-bold text-foreground'>
-                  Total Venta:
-                </span>
-                <span className='ml-4 text-2xl font-bold text-primary w-32 text-right'>
-                  {formatCurrencyChilean(grandTotal)}
-                </span>
-              </div>
-            </div>
+            {errors.items && <Typography variant="small" color="red" className="text-center">{errors.items}</Typography>}
 
-            <div>
-              <Label htmlFor='sale-observations'>Observaciones</Label>
-              <textarea
-                id='sale-observations'
+          </CardBody>
+        </Card>
+
+        {/* Footer with Totals */}
+        <Card className="bg-[#1e293b] text-white">
+          <CardBody className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="w-full md:w-1/2">
+              <Textarea
+                label="Observaciones"
+                className="text-white"
+                rows={3}
                 value={observations}
                 onChange={(e) => setObservations(e.target.value)}
-                rows={3}
-                className={inputBaseClass}
-                placeholder='Añadir notas adicionales sobre la venta...'
-              ></textarea>
+              />
             </div>
-          </CardContent>
-          <CardFooter className='flex flex-col sm:flex-row justify-end items-center gap-3 pt-6'>
-            <Button
-              type='button'
-              variant='outline'
-              onClick={onCancel}
-              className='w-full sm:w-auto order-2 sm:order-1'
-            >
-              Cancelar
-            </Button>
-            <Button
-              type='submit'
-              className='w-full sm:w-auto order-1 sm:order-2'
-              disabled={isSubmitting}
-            >
-              {isSubmitting
-                ? 'Guardando...'
-                : isEditing
-                  ? 'Actualizar Venta'
-                  : 'Guardar Venta'}
+            <div className="w-full md:w-1/3 flex flex-col gap-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-blue-gray-300">Subtotal Neto:</span>
+                <span className="font-medium text-white">{formatCurrencyChilean(subTotal)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-blue-gray-300">IVA (19%):</span>
+                <span className="font-medium text-white">{formatCurrencyChilean(totalVatAmount)}</span>
+              </div>
+              <div className="border-t border-white/10 my-1"></div>
+              <div className="flex justify-between text-lg font-bold">
+                <span className="text-blue-400">Total:</span>
+                <span className="text-white">{formatCurrencyChilean(grandTotal)}</span>
+              </div>
+            </div>
+          </CardBody>
+          <CardFooter className="pt-0 border-t border-white/5 flex justify-end gap-3">
+            <Button variant="outlined" color="white" onClick={onCancel}>Cancelar</Button>
+            <Button variant="gradient" color="blue" type="submit" loading={isSubmitting}>
+              {isEditing ? 'Actualizar Venta' : 'Guardar Venta'}
             </Button>
           </CardFooter>
-        </form>
-      </Card>
+        </Card>
+
+      </form>
       <CreatePurchaseOrderModal
         isOpen={showPurchaseModal}
         onClose={() => setShowPurchaseModal(false)}

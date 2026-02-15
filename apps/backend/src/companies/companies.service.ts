@@ -10,7 +10,7 @@ import { Company, Prisma } from '@prisma/client'
 
 @Injectable()
 export class CompaniesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(
     tenantId: string,
@@ -27,15 +27,15 @@ export class CompaniesService {
           userId: userId, // Add the userId here
           contactPeople: contactPerson
             ? {
-                create: {
-                  tenantId,
-                  firstName: contactPerson.firstName,
-                  lastName: contactPerson.lastName,
-                  email: contactPerson.email,
-                  phone: contactPerson.phone,
-                  role: contactPerson.role || 'Principal',
-                },
-              }
+              create: {
+                tenantId,
+                firstName: contactPerson.firstName,
+                lastName: contactPerson.lastName,
+                email: contactPerson.email,
+                phone: contactPerson.phone,
+                role: contactPerson.role || 'Principal',
+              },
+            }
             : undefined,
         },
       })
@@ -56,6 +56,7 @@ export class CompaniesService {
   async findAll(
     tenantId: string,
     userId: string,
+    userRoles: string[],
     filters: {
       isClient?: boolean
       isSupplier?: boolean
@@ -74,14 +75,16 @@ export class CompaniesService {
       tenantId,
     }
 
+    const isAdmin = userRoles.includes('SUPERADMIN') || userRoles.includes('ADMIN')
+
     if (filters.companyOwnership === 'mine') {
       where.userId = userId
     } else if (filters.companyOwnership === 'others') {
       where.userId = { not: userId }
-    } else if (filters.companyOwnership === 'all') {
-      // No userId filter applied, return all companies
+    } else if (filters.companyOwnership === 'all' || isAdmin) {
+      // No userId filter applied for admins or explicit 'all'
     } else {
-      // Default behavior: only show companies owned by the user
+      // Default behavior for regular users: only show companies owned by them
       where.userId = userId
     }
 
@@ -99,6 +102,7 @@ export class CompaniesService {
       where,
       skip: (page - 1) * limit,
       take: limit,
+      orderBy: { name: 'asc' }, // Better for POS
     })
 
     const pages = Math.ceil(total / limit)
@@ -115,12 +119,16 @@ export class CompaniesService {
   async findOne(
     tenantId: string,
     id: string,
-    userId: string
+    userId: string,
+    userRoles: string[]
   ): Promise<Company | null> {
     const company = await this.prisma.company.findFirst({
       where: { id, tenantId },
     })
-    if (!company || company.userId !== userId) {
+
+    const isAdmin = userRoles.includes('SUPERADMIN') || userRoles.includes('ADMIN')
+
+    if (!company || (!isAdmin && company.userId !== userId)) {
       throw new NotFoundException(
         `Company with ID ${id} not found or you don't have access.`
       )
@@ -132,14 +140,42 @@ export class CompaniesService {
     tenantId: string,
     id: string,
     userId: string,
+    userRoles: string[],
     updateCompanyDto: UpdateCompanyDto
   ): Promise<Company> {
-    await this.findOne(tenantId, id, userId) // Ensure user has access
+    await this.findOne(tenantId, id, userId, userRoles) // Ensure user has access
     return this.prisma.company.update({ where: { id }, data: updateCompanyDto })
   }
 
-  async remove(tenantId: string, id: string, userId: string): Promise<Company> {
-    await this.findOne(tenantId, id, userId) // Ensure user has access
+  async remove(
+    tenantId: string,
+    id: string,
+    userId: string,
+    userRoles: string[]
+  ): Promise<Company> {
+    await this.findOne(tenantId, id, userId, userRoles) // Ensure user has access
     return this.prisma.company.delete({ where: { id } })
+  }
+
+  async addBranch(companyId: string, data: { name: string; address?: string; city?: string; communeId?: string; phone?: string; code?: string }) {
+    return this.prisma.branch.create({
+      data: {
+        ...data,
+        companyId,
+      },
+    })
+  }
+
+  async getBranches(companyId: string) {
+    return this.prisma.branch.findMany({
+      where: { companyId },
+      include: { commune: true },
+    })
+  }
+
+  async removeBranch(branchId: string) {
+    return this.prisma.branch.delete({
+      where: { id: branchId },
+    })
   }
 }

@@ -35,7 +35,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await loginWithPassword(email, password);
-      router.push('/');
+      router.push('/account');
     } catch (err: any) {
       setError(err.message || 'Error al iniciar sesión');
     } finally {

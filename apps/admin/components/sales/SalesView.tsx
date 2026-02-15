@@ -1,20 +1,20 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Sale, OrderStatus, formatCurrencyChilean,  } from '@artifact/core';;
-import {  } from '@artifact/core';
-import { useCompany, SaleService, InvoiceService } from '@artifact/core/client';;
+import { Sale, OrderStatus, formatCurrencyChilean, cn } from '@artifact/core';
+import { useCompany, SaleService, InvoiceService } from '@artifact/core/client';
+import { useRouter } from 'next/navigation';
+import { PlusIcon, EyeIcon, PencilIcon, TrashIcon, ShoppingCartIcon, DocumentTextIcon, MoreVertical, PlusCircle } from 'lucide-react';
 import {
   Card,
   CardContent,
   Button,
   DataTable,
-  PlusIcon,
-  ShoppingCartIcon,
-  EyeIcon,
-  PencilIcon,
-  TrashIcon,
-  DocumentTextIcon,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator
 } from '@artifact/ui';
 import { ColumnDef } from '@tanstack/react-table';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -173,8 +173,8 @@ const SalesView: React.FC = () => {
           const sale = row.original;
           return (
             <div>
-              <div className='font-medium text-foreground'>{sale.company?.name ?? 'Sin empresa'}</div>
-              <div className='text-xs text-muted-foreground sm:hidden'>
+              <div className='font-semibold text-slate-200 text-[14px]'>{sale.company?.name ?? 'Sin empresa'}</div>
+              <div className='text-xs text-slate-400 sm:hidden'>
                 {new Date(sale.createdAt).toLocaleDateString()} · Total:{' '}
                 {formatCurrencyChilean(sale.grandTotalAmount)}
               </div>
@@ -213,7 +213,7 @@ const SalesView: React.FC = () => {
         id: 'total',
         header: 'Total',
         cell: ({ row }) => (
-          <span className='font-semibold text-primary'>
+          <span className='font-bold text-[#5d87ff]'>
             {formatCurrencyChilean(row.original.grandTotalAmount)}
           </span>
         ),
@@ -224,47 +224,44 @@ const SalesView: React.FC = () => {
         cell: ({ row }) => {
           const sale = row.original;
           return (
-            <div className='flex items-center justify-center space-x-1 sm:space-x-2'>
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={() => handleViewSale(sale)}
-                title='Ver Detalles de Venta'
-                aria-label={`Ver detalles de venta ${sale.id.substring(0, 8)}`}
-              >
-                <EyeIcon className='w-5 h-5' />
-              </Button>
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={() => handleEditSale(sale)}
-                title='Editar Venta'
-                aria-label={`Editar venta ${sale.id.substring(0, 8)}`}
-              >
-                <PencilIcon className='w-5 h-5' />
-              </Button>
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={() => handleDeleteSaleRequest(sale)}
-                title='Eliminar Venta'
-                aria-label={`Eliminar venta ${sale.id.substring(0, 8)}`}
-              >
-                <TrashIcon className='w-5 h-5' />
-              </Button>
-              {(sale.status === OrderStatus.DELIVERED ||
-                sale.status === OrderStatus.SHIPPED) &&
-                !sale.invoice && (
+            <div className='flex justify-center'>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
                   <Button
                     variant='ghost'
-                    size='sm'
-                    onClick={() => handleGenerateInvoice(sale.id)}
-                    title='Generar Factura'
-                    aria-label={`Generar factura para la venta ${sale.id.substring(0, 8)}`}
+                    size='icon'
+                    className="w-10 h-10 rounded-full text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all"
                   >
-                    <DocumentTextIcon className='w-5 h-5' />
+                    <MoreVertical className="w-5 h-5" />
                   </Button>
-                )}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-[180px] bg-[#1a2537] border-white/[0.08] shadow-2xl">
+                  <DropdownMenuItem onClick={() => handleViewSale(sale)} className="gap-2 cursor-pointer py-2.5">
+                    <EyeIcon className="w-4 h-4 text-[#5d87ff]" />
+                    <span className="font-medium">Ver Detalles</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleEditSale(sale)} className="gap-2 cursor-pointer py-2.5">
+                    <PencilIcon className="w-4 h-4 text-orange-400" />
+                    <span className="font-medium">Editar Venta</span>
+                  </DropdownMenuItem>
+
+                  {(sale.status === OrderStatus.DELIVERED || sale.status === OrderStatus.SHIPPED) && !sale.invoice && (
+                    <DropdownMenuItem onClick={() => handleGenerateInvoice(sale.id)} className="gap-2 cursor-pointer py-2.5">
+                      <DocumentTextIcon className="w-4 h-4 text-emerald-400" />
+                      <span className="font-medium">Generar Factura</span>
+                    </DropdownMenuItem>
+                  )}
+
+                  <DropdownMenuSeparator className="bg-white/[0.05]" />
+                  <DropdownMenuItem
+                    onClick={() => handleDeleteSaleRequest(sale)}
+                    className="gap-2 cursor-pointer py-2.5 text-red-400 focus:text-red-400 focus:bg-red-400/10"
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                    <span className="font-medium">Eliminar</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           );
         },
@@ -313,15 +310,21 @@ const SalesView: React.FC = () => {
   return (
     <>
       <div className='space-y-6 lg:space-y-8'>
-        <div className='flex justify-between items-center'>
-          <h1 className='text-2xl font-bold'>Gestión de Ventas</h1>
-          <Button className='w-full sm:w-auto' onClick={handleCreateNewSale}>
-            <PlusIcon className='w-5 h-5 mr-2' />
-            <span>Crear Nueva Venta</span>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 mt-8 px-1">
+          <div>
+            <h1 className="text-[32px] font-bold text-white tracking-tight">Ventas</h1>
+            <p className="text-slate-400 text-[15px] font-normal">Gestiona y monitorea todas las transacciones comerciales.</p>
+          </div>
+          <Button
+            className="bg-[#5d87ff] hover:bg-[#4f73d9] text-white px-6 py-6 rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2 h-12"
+            onClick={() => router.push('/sales/new')}
+          >
+            <PlusCircle className="w-5 h-5" />
+            Nueva Venta
           </Button>
         </div>
 
-        <Card className='overflow-hidden'>
+        <Card className='overflow-hidden border-white/[0.05] bg-transparent shadow-none'>
           <CardContent className='p-0'>
             <DataTable<Sale>
               columns={columns}

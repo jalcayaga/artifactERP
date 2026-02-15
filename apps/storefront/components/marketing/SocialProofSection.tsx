@@ -1,5 +1,6 @@
 import React from 'react';
 import { Star, Quote } from 'lucide-react';
+import { ClientIcon } from '../client-icon';
 
 const testimonials = [
     {
@@ -48,17 +49,14 @@ export default function SocialProofSection() {
                     {testimonials.map((testimonial, index) => (
                         <div
                             key={index}
-                            className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand/30 transition-all duration-300 flex flex-col"
+                            className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand/30 hover:shadow-[0_0_30px_rgba(0,224,116,0.15)] transition-all duration-300 flex flex-col"
                         >
                             {/* Rating */}
                             <div className="flex gap-1 mb-4">
                                 {[...Array(testimonial.rating)].map((_, i) => (
-                                    <Star key={i} className="w-5 h-5 fill-brand text-brand" />
+                                    <ClientIcon key={i} icon={Star} className="w-5 h-5 fill-brand text-brand" />
                                 ))}
                             </div>
-
-                            {/* Quote */}
-                            <Quote className="w-8 h-8 text-brand/30 mb-3" />
 
                             {/* Testimonial text */}
                             <p className="text-neutral-300 leading-relaxed mb-6 flex-grow">

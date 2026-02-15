@@ -4,10 +4,18 @@ import { useQuery } from "@tanstack/react-query";
 import { getUsers } from "@/lib/admin";
 import { User } from "@/lib/types";
 import Table from "@/components/admin/Table";
-import { Button } from "@artifact/ui";
-import { Input } from "@artifact/ui";
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Typography,
+  Button,
+  Input,
+  IconButton
+} from "@material-tailwind/react";
 import Can from "@/components/admin/Can";
 import { useState } from "react";
+import { MagnifyingGlassIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 export default function UsersPage() {
   const [page, setPage] = useState(1);
@@ -20,15 +28,15 @@ export default function UsersPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-4 text-center">
-        <p>Cargando usuarios...</p>
+      <div className="flex justify-center items-center h-full">
+        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="container mx-auto p-4 text-center text-red-500">
+      <div className="p-4 text-center text-red-500">
         <p>Error al cargar usuarios: {error?.message}</p>
       </div>
     );
@@ -56,63 +64,98 @@ export default function UsersPage() {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Gestión de Usuarios</h1>
-
-      <div className="mb-4 flex justify-between items-center">
-        <Input
-          type="text"
-          placeholder="Buscar usuarios..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-1/3"
-        />
-        <Button>Añadir Usuario</Button>
-      </div>
-
-      {users.length === 0 ? (
-        <div className="text-center">
-          <p>No se encontraron usuarios.</p>
-        </div>
-      ) : (
-        <Table
-          data={users}
-          columns={columns}
-          renderRowActions={(user) => (
-            <div className="flex gap-2">
-              <Can need={["users:update"]}>
-                <Button onClick={() => handleEdit(user)} className="bg-blue-500 hover:bg-blue-600 text-white">
-                  Editar
-                </Button>
-              </Can>
-              <Can need={["users:update"]}>
-                <Button onClick={() => handleDeactivate(user)} className="bg-red-500 hover:bg-red-600 text-white">
-                  Desactivar
-                </Button>
-              </Can>
+    <div className="mt-4 mb-8 flex flex-col gap-12">
+      <Card className="h-full w-full bg-[#1e293b] shadow-none">
+        <CardHeader floated={false} shadow={false} className="rounded-none bg-transparent px-6 pt-6 pb-2">
+          <div className="mb-8 flex items-center justify-between gap-8">
+            <div>
+              <Typography variant="h5" color="white" className="font-bold">
+                Gestión de Usuarios
+              </Typography>
+              <Typography color="gray" className="mt-1 font-normal text-blue-gray-200">
+                Ver información de todos los usuarios
+              </Typography>
             </div>
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+              <Button className="flex items-center gap-3 bg-blue-500" size="sm">
+                <span className="text-sm">Añadir Usuario</span>
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
+            <div className="w-full md:w-72">
+              <Input
+                label="Buscar"
+                icon={<MagnifyingGlassIcon className="h-5 w-5" />}
+                color="white"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="!border-t-blue-gray-200 focus:!border-t-white"
+                labelProps={{
+                  className: "before:content-none after:content-none",
+                }}
+                containerProps={{
+                  className: "min-w-[200px]",
+                }}
+                crossOrigin={undefined}
+              />
+            </div>
+          </div>
+        </CardHeader>
+        <CardBody className="overflow-hidden px-0">
+          {users.length === 0 ? (
+            <div className="text-center p-8">
+              <Typography color="white">No se encontraron usuarios.</Typography>
+            </div>
+          ) : (
+            <Table
+              data={users}
+              columns={columns}
+              renderRowActions={(user) => (
+                <div className="flex gap-2">
+                  <Can need={["users:update"]}>
+                    <IconButton variant="text" color="blue" onClick={() => handleEdit(user)}>
+                      <PencilIcon className="h-4 w-4" />
+                    </IconButton>
+                  </Can>
+                  <Can need={["users:update"]}>
+                    <IconButton variant="text" color="red" onClick={() => handleDeactivate(user)}>
+                      <TrashIcon className="h-4 w-4" />
+                    </IconButton>
+                  </Can>
+                </div>
+              )}
+            />
           )}
-        />
-      )}
-
-      {/* Pagination */}
-      <div className="flex justify-center mt-8 space-x-2">
-        <button
-          onClick={() => setPage((prev) => Math.max(1, prev - 1))}
-          disabled={page === 1}
-          className="px-4 py-2 border rounded-md disabled:opacity-50"
-        >
-          Anterior
-        </button>
-        <span className="px-4 py-2">Página {page} de {totalPages}</span>
-        <button
-          onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
-          disabled={page === totalPages}
-          className="px-4 py-2 border rounded-md disabled:opacity-50"
-        >
-          Siguiente
-        </button>
-      </div>
+        </CardBody>
+        <div className="flex items-center justify-center border-t border-blue-gray-100/5 p-4">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="text"
+              size="sm"
+              className="flex items-center gap-2 text-white"
+              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              disabled={page === 1}
+            >
+              Anterior
+            </Button>
+            <div className="flex items-center gap-2">
+              <Typography color="white" className="font-normal">
+                Página <strong className="text-blue-500">{page}</strong> de <strong className="text-blue-500">{totalPages}</strong>
+              </Typography>
+            </div>
+            <Button
+              variant="text"
+              size="sm"
+              className="flex items-center gap-2 text-white"
+              onClick={() => setPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={page === totalPages}
+            >
+              Siguiente
+            </Button>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }

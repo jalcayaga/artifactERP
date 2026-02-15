@@ -13,12 +13,13 @@ import { ContactPeopleService } from './contact-people.service'
 import { CreateContactPersonDto } from './dto/create-contact-person.dto'
 import { UpdateContactPersonDto } from './dto/update-contact-person.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard'
 import { TenantId } from '../common/decorators/tenant.decorator'
 
 @UseGuards(JwtAuthGuard)
 @Controller('companies/:companyId/contact-people')
 export class ContactPeopleController {
-  constructor(private readonly contactPeopleService: ContactPeopleService) {}
+  constructor(private readonly contactPeopleService: ContactPeopleService) { }
 
   @Post()
   create(

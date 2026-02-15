@@ -31,16 +31,24 @@ class ApiClient {
     };
 
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('wolfflow_token');
+      // Priority: wolfflow_token, then artifact_token
+      const token = localStorage.getItem('wolfflow_token') || localStorage.getItem('artifact_token');
       if (token) {
         (headers as any).Authorization = `Bearer ${token}`;
       }
 
       const hostname = window.location.hostname;
       const parts = hostname.split('.');
-      if (parts.length > 1 && parts[0] !== 'www') {
-        (headers as any)['x-tenant-slug'] = parts[0];
+
+      // Default tenant to 'artifact' if on localhost or no subdomain
+      let tenant = 'artifact';
+      if (parts.length > 1 && parts[0] !== 'www' && parts[0] !== 'localhost') {
+        tenant = parts[0];
       }
+
+      (headers as any)['x-tenant-slug'] = tenant;
+
+      console.log(`[API] Header x-tenant-slug set to: ${tenant} (Hostname: ${hostname})`);
     }
 
     const response = await fetch(url, {

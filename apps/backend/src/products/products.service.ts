@@ -30,6 +30,8 @@ export class ProductsService {
         name: data.name,
         productType: data.productType,
         sku: data.sku,
+        barcode: data.barcode,
+        brand: data.brand,
         description: data.description,
         longDescription: data.longDescription,
         images: data.images ?? [],
@@ -206,6 +208,15 @@ export class ProductsService {
       }
     }
 
+    if (data.barcode) {
+      const existingByBarcode = await this.prisma.product.findUnique({
+        where: { barcode: data.barcode }
+      })
+      if (existingByBarcode && existingByBarcode.id !== id) {
+        throw new ConflictException('Product with this Barcode already exists.')
+      }
+    }
+
     return this.prisma.product.update({ where: { id }, data: updateData })
   }
 
@@ -301,17 +312,22 @@ export class ProductsService {
       throw new ForbiddenException(`Product ${productId} does not belong to the current tenant.`)
     }
 
-    // FIFO: Get lots with stock, ordered by entryDate (oldest first)
+    // FIFO: Get lots with available stock (currentQuantity - committedQuantity), ordered by entryDate (oldest first)
     const lots = await prisma.lot.findMany({
       where: {
         tenantId,
         productId,
-        currentQuantity: { gt: 0 },
       },
       orderBy: { entryDate: 'asc' },
     })
 
-    const totalAvailable = lots.reduce((sum, lot) => sum + lot.currentQuantity, 0)
+    // Filter and map to include calculated available stock
+    const lotsWithAvailable = lots.map(lot => ({
+      ...lot,
+      available: Number(lot.currentQuantity) - Number(lot.committedQuantity)
+    })).filter(lot => lot.available > 0)
+
+    const totalAvailable = lotsWithAvailable.reduce((sum, lot) => sum + lot.available, 0)
 
     if (totalAvailable < quantity) {
       const { OutOfStockException } = await import(
@@ -323,22 +339,67 @@ export class ProductsService {
     let remaining = quantity
     const allocations: { lotId: string; quantity: number }[] = []
 
-    for (const lot of lots) {
+    for (const lot of lotsWithAvailable) {
       if (remaining <= 0) break
 
-      const taken = Math.min(lot.currentQuantity, remaining)
+      const taken = Math.min(lot.available, remaining)
       allocations.push({ lotId: lot.id, quantity: taken })
       remaining -= taken
     }
 
-    // Apply updates
+    // Apply updates (increment committedQuantity instead of decrementing physical stock)
     for (const alloc of allocations) {
       await prisma.lot.update({
         where: { id: alloc.lotId },
-        data: { currentQuantity: { decrement: alloc.quantity } },
+        data: { committedQuantity: { increment: alloc.quantity } },
       })
     }
 
     return allocations
+  }
+
+  async getAvailableStock(tenantId: string, productId: string): Promise<number> {
+    const lots = await this.prisma.lot.findMany({
+      where: { tenantId, productId },
+    })
+
+    return lots.reduce((sum, lot) => {
+      return sum + (Number(lot.currentQuantity) - Number(lot.committedQuantity))
+    }, 0)
+  }
+
+  async fulfillReservation(
+    tenantId: string,
+    allocations: { lotId: string; quantity: number }[],
+    tx?: Prisma.TransactionClient
+  ): Promise<void> {
+    const prisma = tx || this.prisma
+
+    for (const alloc of allocations) {
+      await prisma.lot.update({
+        where: { id: alloc.lotId },
+        data: {
+          currentQuantity: { decrement: alloc.quantity },
+          committedQuantity: { decrement: alloc.quantity },
+        },
+      })
+    }
+  }
+
+  async releaseReservation(
+    tenantId: string,
+    allocations: { lotId: string; quantity: number }[],
+    tx?: Prisma.TransactionClient
+  ): Promise<void> {
+    const prisma = tx || this.prisma
+
+    for (const alloc of allocations) {
+      await prisma.lot.update({
+        where: { id: alloc.lotId },
+        data: {
+          committedQuantity: { decrement: alloc.quantity },
+        },
+      })
+    }
   }
 }

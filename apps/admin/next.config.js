@@ -1,20 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  output: 'standalone',
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-      {
-        protocol: 'http',
-        hostname: '**',
-      },
-    ],
-  },
   transpilePackages: ['@artifact/ui', '@artifact/core'],
+  images: {
+    domains: ['igscuchfztqvzwtehqag.supabase.co', 'artifact.cl', 'lh3.googleusercontent.com'],
+  },
 };
 
 module.exports = nextConfig;

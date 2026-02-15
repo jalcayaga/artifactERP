@@ -24,7 +24,6 @@ import {
   TableRow,
 } from './table';
 import { SearchIcon, ChevronLeftIcon, ChevronRightIcon } from './icons';
-
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[];
   data: TData[];
@@ -37,6 +36,7 @@ interface DataTableProps<TData> {
   emptyState?: React.ReactNode;
   className?: string;
   cardClassName?: string;
+  isLoading?: boolean;
 }
 
 export function DataTable<TData>({
@@ -51,6 +51,7 @@ export function DataTable<TData>({
   emptyState,
   className,
   cardClassName,
+  isLoading = false,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -80,12 +81,12 @@ export function DataTable<TData>({
             {(title || description) && (
               <div>
                 {title && (
-                  <h2 className="text-xl font-bold text-white tracking-tight">
+                  <h2 className="text-2xl font-bold text-white tracking-tight">
                     {title}
                   </h2>
                 )}
                 {description && (
-                  <p className="text-sm text-blue-gray-200 mt-1 font-normal opacity-70">
+                  <p className="text-sm text-slate-400 mt-1 font-normal">
                     {description}
                   </p>
                 )}
@@ -101,12 +102,12 @@ export function DataTable<TData>({
           {(filter || renderActions) && (
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-2">
               <div className="relative w-full sm:max-w-sm">
-                <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-gray-400 opacity-50" />
+                <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                 <Input
                   placeholder={filterPlaceholder}
                   value={(filter?.getFilterValue() as string) ?? ''}
                   onChange={(event) => filter?.setFilterValue(event.target.value)}
-                  className="pl-10 bg-white/5 border-blue-gray-100/10 focus:border-blue-500/50 text-white placeholder:text-blue-gray-400 h-10 transition-all rounded-xl"
+                  className="pl-10 bg-[#1e293b]/30 border-white/[0.08] focus:border-[#5d87ff]/50 text-white placeholder:text-slate-500 h-11 transition-all rounded-xl"
                 />
               </div>
             </div>
@@ -114,18 +115,23 @@ export function DataTable<TData>({
         </div>
       )}
 
-      <div className={cn(
-        "rounded-2xl border border-blue-gray-100/5 bg-[#1e293b]/50 backdrop-blur-sm overflow-hidden",
-        cardClassName
-      )}>
+      <div
+        className={cn(
+          "rounded-[16px] bg-[#1a2537] border border-white/[0.05] overflow-hidden",
+          cardClassName
+        )}
+        style={{
+          boxShadow: "rgba(145, 158, 171, 0.3) 0px 0px 2px 0px, rgba(145, 158, 171, 0.02) 0px 12px 24px -4px"
+        }}
+      >
         <Table>
-          <TableHeader className="bg-white/[0.02]">
+          <TableHeader className="bg-white/[0.01]">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-blue-gray-100/5 hover:bg-transparent">
+              <TableRow key={headerGroup.id} className="border-white/[0.05] hover:bg-transparent">
                 {headerGroup.headers.map((header) => (
                   <TableHead
                     key={header.id}
-                    className="text-blue-gray-200 font-bold text-xs uppercase tracking-wider py-4 opacity-70"
+                    className="text-slate-400 font-bold text-[12px] uppercase tracking-wider py-4"
                   >
                     {header.isPlaceholder
                       ? null
@@ -139,15 +145,25 @@ export function DataTable<TData>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <TableRow key={i} className="border-blue-gray-100/5">
+                  {columns.map((_, j) => (
+                    <TableCell key={j} className="py-4">
+                      <div className="h-5 bg-white/5 rounded-lg animate-pulse" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className="border-blue-gray-100/5 hover:bg-white/[0.03] transition-colors group"
+                  className="border-white/[0.05] hover:bg-white/[0.02] transition-colors group"
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-4 text-white font-medium">
+                    <TableCell key={cell.id} className="py-4 text-slate-200 font-medium text-[14px]">
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}

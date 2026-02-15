@@ -35,34 +35,31 @@ const Drawer: React.FC<DrawerProps> = ({
   const drawer = (
     <>
       <div
-        className={`fixed inset-0 z-50 bg-slate-900/50 transition-opacity duration-300 ${
-          isOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-50 bg-slate-900/50 transition-opacity duration-300 ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
         onClick={onClose}
         aria-hidden="true"
       />
       <aside
-        className={`fixed top-0 z-[60] h-full w-full max-w-sm bg-white shadow-xl transition-transform duration-300 ease-in-out ${
-          side === "right" ? "right-0" : "left-0"
-        } ${
-          isOpen
+        className={`fixed top-0 z-[60] h-full w-full max-w-sm shadow-xl transition-transform duration-300 ease-in-out ${side === "right" ? "right-0" : "left-0"
+          } ${isOpen
             ? "translate-x-0"
             : side === "right"
-            ? "translate-x-full"
-            : "-translate-x-full"
-        }`}
+              ? "translate-x-full"
+              : "-translate-x-full"
+          }`}
         role="dialog"
         aria-modal="true"
       >
-        <div className="relative flex h-full flex-col overflow-y-auto p-6">
+        <div className="relative flex h-full flex-col overflow-y-auto">
           <button
             onClick={onClose}
-            className="absolute right-4 top-4 rounded-full bg-slate-100 p-2 text-slate-500 transition hover:text-slate-700"
+            className="absolute right-4 top-4 z-10 rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20"
             aria-label="Cerrar"
           >
             <span className="block h-5 w-5">×</span>
           </button>
-          <div className="mt-6">{children}</div>
+          {children}
         </div>
       </aside>
     </>

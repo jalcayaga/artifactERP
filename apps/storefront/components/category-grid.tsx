@@ -2,6 +2,7 @@
 "use client";
 
 import { ArrowUpRight } from "lucide-react";
+import { ClientIcon } from "./client-icon";
 import { Card, CardContent, CardTitle, Button } from "@artifact/ui";
 import Link from "next/link";
 
@@ -56,7 +57,7 @@ export function CategoryGrid() {
         {categories.map((category) => (
           <Card
             key={category.name}
-            className={`relative h-full overflow-hidden border-none bg-gradient-to-br ${category.accent} shadow-lg shadow-slate-200/50 transition hover:-translate-y-1 hover:shadow-xl`}
+            className={`relative h-full overflow-hidden border-none bg-gradient-to-br ${category.accent} shadow-lg shadow-slate-200/50 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-[0_0_30px_rgba(0,224,116,0.1)]`}
           >
             <CardContent className="flex h-full flex-col gap-5 p-7">
               <div className="space-y-3">
@@ -73,7 +74,7 @@ export function CategoryGrid() {
                   className="inline-flex items-center gap-2 px-0 text-sm font-semibold text-brand hover:text-brand/80"
                 >
                   Ver más
-                  <ArrowUpRight className="h-4 w-4" />
+                  <ClientIcon icon={ArrowUpRight} className="h-4 w-4" />
                 </Button>
               </Link>
             </CardContent>

@@ -24,7 +24,17 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   @MaxLength(100)
+  @MaxLength(100)
   sku?: string
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  barcode?: string
+
+  @IsOptional()
+  @IsString()
+  brand?: string
 
   @IsOptional()
   @IsString()

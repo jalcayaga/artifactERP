@@ -15,12 +15,13 @@ import { PurchasesService } from './purchases.service'
 import { CreatePurchaseDto } from './dto/create-purchase.dto'
 import { UpdatePurchaseDto } from './dto/update-purchase.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard'
 import { TenantId } from '../common/decorators/tenant.decorator'
 
 @UseGuards(JwtAuthGuard)
 @Controller('purchases')
 export class PurchasesController {
-  constructor(private readonly purchasesService: PurchasesService) {}
+  constructor(private readonly purchasesService: PurchasesService) { }
 
   @Post()
   create(

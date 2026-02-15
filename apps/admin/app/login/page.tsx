@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSupabaseAuth } from '@artifact/core/client';; // Use the new Supabase hook
-import { Button, Input, Card, CardHeader, CardTitle, CardContent, CardFooter } from '@artifact/ui';
+import { useSupabaseAuth } from '@artifact/core/client';
+import { Button, Input, Card, CardHeader, CardTitle, CardContent } from '@artifact/ui';
 import SpaceInvadersBackground from '@/components/SpaceInvadersBackground';
-import { Mail, Loader2 } from 'lucide-react';
+import { Mail, Loader2, Lock, Eye, EyeOff } from 'lucide-react';
 
 const GoogleIcon = () => (
   <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -16,11 +16,24 @@ const GoogleIcon = () => (
   </svg>
 );
 
+const MicrosoftIcon = () => (
+  <svg className="w-5 h-5 mr-2" viewBox="0 0 23 23">
+    <path fill="#f3f3f3" d="M0 0h23v23H0z" />
+    <path fill="#f35325" d="M1 1h10v10H1z" />
+    <path fill="#81bc06" d="M12 1h10v10H12z" />
+    <path fill="#05a6f0" d="M1 12h10v10H1z" />
+    <path fill="#ffba08" d="M12 12h10v10H12z" />
+  </svg>
+);
+
 export default function LoginPage() {
   const router = useRouter();
-  const { loginWithGoogle, loginWithEmail, isLoading, user } = useSupabaseAuth();
+  const { loginWithGoogle, loginWithMicrosoft, loginWithPassword, isLoading, user } = useSupabaseAuth();
   const [email, setEmail] = useState('');
-  const [sendingLink, setSendingLink] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loggingIn, setLoggingIn] = useState(false);
 
   useEffect(() => {
     if (!isLoading && user) {
@@ -32,11 +45,23 @@ export default function LoginPage() {
     await loginWithGoogle();
   };
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleMicrosoftLogin = async () => {
+    await loginWithMicrosoft();
+  };
+
+  const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSendingLink(true);
-    await loginWithEmail(email);
-    setSendingLink(false);
+    setError('');
+    setLoggingIn(true);
+
+    try {
+      await loginWithPassword(email, password);
+      router.push('/');
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión');
+    } finally {
+      setLoggingIn(false);
+    }
   };
 
   if (isLoading) {
@@ -73,15 +98,28 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent className="space-y-6">
 
-            <Button
-              variant="outline"
-              className="w-full h-12 text-base font-medium border-white/10 hover:bg-white/5 hover:text-white bg-transparent text-slate-200"
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-            >
-              <GoogleIcon />
-              Ingresar con Google
-            </Button>
+            {/* OAuth Buttons */}
+            <div className="space-y-3">
+              <Button
+                variant="outline"
+                className="w-full h-12 text-base font-medium border-white/10 hover:bg-white/5 hover:text-white bg-transparent text-slate-200"
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
+              >
+                <GoogleIcon />
+                Ingresar con Google
+              </Button>
+
+              <Button
+                variant="outline"
+                className="w-full h-12 text-base font-medium border-white/10 hover:bg-white/5 hover:text-white bg-transparent text-slate-200"
+                onClick={handleMicrosoftLogin}
+                disabled={isLoading}
+              >
+                <MicrosoftIcon />
+                Ingresar con Microsoft
+              </Button>
+            </div>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -92,32 +130,72 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <form onSubmit={handleEmailLogin} className="space-y-4">
+            {/* Email/Password Form */}
+            <form onSubmit={handlePasswordLogin} className="space-y-4">
               <div className="space-y-2">
-                <Input
-                  type="email"
-                  placeholder="admin@empresa.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="bg-black/20 border-white/10 text-white placeholder:text-slate-600 focus:border-cyan-500/50 h-11"
-                />
+                <label className="text-sm text-slate-300">Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    type="email"
+                    name="email"
+                    autoComplete="username email"
+                    placeholder="admin@empresa.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-brand/50"
+                    required
+                  />
+                </div>
               </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-slate-300">Contraseña</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-brand/50"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-300"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <p className="text-sm text-red-400">{error}</p>
+                </div>
+              )}
+
               <Button
                 type="submit"
-                className="w-full h-11 bg-cyan-500 text-black hover:bg-cyan-400 font-semibold"
-                disabled={sendingLink || isLoading}
+                className="w-full h-12 bg-brand hover:bg-brand/90 text-black font-semibold"
+                disabled={loggingIn}
               >
-                {sendingLink ? 'Enviando...' : 'Enviar enlace de acceso'}
-                <Mail className="w-4 h-4 ml-2" />
+                {loggingIn ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Ingresando...
+                  </>
+                ) : (
+                  'Ingresar'
+                )}
               </Button>
             </form>
+
           </CardContent>
-          <CardFooter className="flex justify-center border-t border-white/5 pt-6">
-            <p className="text-xs text-slate-500 text-center max-w-xs">
-              Acceso restringido a personal autorizado.
-            </p>
-          </CardFooter>
         </Card>
       </div>
     </div>

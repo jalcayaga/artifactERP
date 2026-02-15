@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { Product, CreateProductDto, UpdateProductDto, UserRole, formatCurrencyChilean,  } from '@artifact/core';;
-import {  } from '@artifact/core';
+import { Product, CreateProductDto, UpdateProductDto, UserRole, formatCurrencyChilean, cn } from '@artifact/core';;
+import { } from '@artifact/core';
 import { ProductService, useAuth } from '@artifact/core/client';;
 import {
   Card,
@@ -13,13 +13,19 @@ import {
 } from '@artifact/ui';
 import { ColumnDef } from '@tanstack/react-table';
 import {
+  PlusIcon,
+  ArchiveBoxIcon,
   EyeIcon,
   PencilIcon,
   TrashIcon,
-  ArchiveBoxIcon,
-  PlusIcon,
-  CubeIcon,
-} from '@artifact/ui';
+} from '@heroicons/react/24/outline';
+import { CubeIcon } from '@heroicons/react/24/solid';
+import {
+  Typography,
+  Button,
+  Chip,
+  IconButton,
+} from "@material-tailwind/react";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import ProductForm from './ProductForm';
@@ -250,35 +256,64 @@ const InventoryView: React.FC = () => {
       {
         accessorKey: 'productType',
         header: 'Tipo',
-        cell: ({ row }) =>
-          row.original.productType === 'PRODUCT' ? 'Producto' : 'Servicio',
+        cell: ({ row }) => {
+          const type = row.original.productType;
+          return (
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "w-2 h-2 rounded-full",
+                type === 'PRODUCT' ? "bg-blue-500" : "bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]"
+              )} />
+              <span className={cn(
+                "text-xs font-semibold uppercase tracking-wider",
+                type === 'PRODUCT' ? "text-blue-400" : "text-purple-400"
+              )}>
+                {type === 'PRODUCT' ? 'Producto' : 'Servicio'}
+              </span>
+            </div>
+          );
+        }
       },
       {
         accessorKey: 'price',
         header: 'Precio Venta',
-        cell: ({ row }) => formatCurrencyChilean(Number(row.original.price)),
+        cell: ({ row }) => (
+          <span className="text-white font-bold tracking-tight">
+            {formatCurrencyChilean(Number(row.original.price))}
+          </span>
+        ),
       },
       {
         accessorKey: 'totalStock',
         header: 'Stock',
         enableSorting: false,
-        cell: ({ row }) =>
-          row.original.productType === 'PRODUCT'
-            ? row.original.totalStock ?? '—'
-            : 'N/A',
+        cell: ({ row }) => {
+          if (row.original.productType !== 'PRODUCT') return <span className="text-blue-gray-400/50 italic opacity-50">N/A</span>;
+          const stock = row.original.totalStock ?? 0;
+          return (
+            <div className="flex items-center gap-2">
+              <span className={cn(
+                "font-bold",
+                stock <= (row.original.reorderLevel || 0) ? "text-red-400" : "text-emerald-400"
+              )}>
+                {stock}
+              </span>
+              <span className="text-[10px] text-blue-gray-400 uppercase opacity-60">unids</span>
+            </div>
+          );
+        }
       },
       {
         accessorKey: 'isPublished',
         header: 'Estado',
         cell: ({ row }) => (
-          <span
-            className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${row.original.isPublished
-              ? 'bg-emerald-100 text-emerald-700'
-              : 'bg-muted text-muted-foreground'
-              }`}
-          >
-            {row.original.isPublished ? 'Publicado' : 'Oculto'}
-          </span>
+          <Chip
+            variant="ghost"
+            color={row.original.isPublished ? "green" : "blue-gray"}
+            size="sm"
+            value={row.original.isPublished ? "Activo" : "Inactivo"}
+            className="rounded-full capitalize font-bold"
+          />
         ),
       },
       {
@@ -287,31 +322,46 @@ const InventoryView: React.FC = () => {
         cell: ({ row }) => {
           const product = row.original;
           return (
-            <div className='flex items-center justify-center space-x-1 sm:space-x-2'>
-              <button
+            <div className='flex items-center justify-end gap-1'>
+              <IconButton
+                variant="text"
+                color="blue"
+                size="sm"
                 onClick={() => handleViewProduct(product)}
-                title='Ver Detalles'
-                className='text-primary hover:text-primary/80 dark:hover:text-primary/70 transition-colors p-1 rounded-md hover:bg-primary/10'
-                aria-label={`Ver detalles de ${product.name}`}
+                placeholder=""
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+                onResize={undefined}
+                onResizeCapture={undefined}
               >
                 <EyeIcon className='w-5 h-5' />
-              </button>
-              <button
+              </IconButton>
+              <IconButton
+                variant="text"
+                color="blue"
+                size="sm"
                 onClick={() => handleEditProduct(product)}
-                title='Editar Producto'
-                className='text-primary hover:text-primary/80 dark:hover:text-primary/70 transition-colors p-1 rounded-md hover:bg-primary/10'
-                aria-label={`Editar producto ${product.name}`}
+                placeholder=""
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+                onResize={undefined}
+                onResizeCapture={undefined}
               >
                 <PencilIcon className='w-5 h-5' />
-              </button>
-              <button
+              </IconButton>
+              <IconButton
+                variant="text"
+                color="red"
+                size="sm"
                 onClick={() => handleDeleteProductRequest(product)}
-                title='Eliminar Producto'
-                className='text-destructive hover:text-destructive/80 dark:hover:text-destructive/70 transition-colors p-1 rounded-md hover:bg-destructive/10'
-                aria-label={`Eliminar producto ${product.name}`}
+                placeholder=""
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+                onResize={undefined}
+                onResizeCapture={undefined}
               >
                 <TrashIcon className='w-5 h-5' />
-              </button>
+              </IconButton>
             </div>
           );
         },
@@ -328,16 +378,18 @@ const InventoryView: React.FC = () => {
     );
   }
 
-  if (productsQuery.isLoading) {
-    return <div className='text-center py-8'>Cargando productos...</div>;
-  }
-
   if (productsQuery.isError) {
     const message =
       productsQuery.error instanceof Error
         ? productsQuery.error.message
         : 'Error al cargar los productos.';
-    return <div className='text-center py-8 text-destructive'>{message}</div>;
+    return (
+      <div className='p-8 text-center'>
+        <Typography color="red" className="font-bold" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+          {message}
+        </Typography>
+      </div>
+    );
   }
 
   if (showProductForm) {
@@ -352,82 +404,103 @@ const InventoryView: React.FC = () => {
 
   return (
     <>
-      <div className='space-y-6 lg:space-y-8'>
-        <div className='flex justify-between items-center'>
-          <h1 className='text-2xl font-bold'>Inventario</h1>
-          <button
-            className='w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center space-x-2'
-            onClick={handleAddNewProduct}
-            aria-label='Añadir Nuevo Producto o Servicio'
-          >
-            <PlusIcon className='w-5 h-5' />
-            <span>Nuevo Producto/Servicio</span>
-          </button>
-        </div>
-
-        <Card className='overflow-hidden border'>
-          <CardContent className='p-0'>
-            <DataTable<InventoryProduct>
-              columns={columns}
-              data={products}
-              filterColumn='name'
-              filterPlaceholder='Buscar por nombre...'
-              hidePagination
-              emptyState={
-                <div className='text-center py-12 px-4'>
-                  <ArchiveBoxIcon className='mx-auto h-16 w-16 text-muted-foreground opacity-40' />
-                  <h3 className='mt-3 text-xl font-semibold text-foreground'>
-                    No hay productos o servicios registrados
-                  </h3>
-                  <p className='mt-1.5 text-sm text-muted-foreground'>
-                    Empieza añadiendo tu primer producto o servicio para gestionar tu
-                    inventario y catálogo.
-                  </p>
-                  <div className='mt-6'>
-                    <button
-                      type='button'
-                      onClick={handleAddNewProduct}
-                      className='w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground font-medium py-2.5 px-5 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 flex items-center justify-center space-x-2 mx-auto'
-                    >
-                      <PlusIcon className='w-5 h-5' />
-                      <span>Añadir Primer Producto/Servicio</span>
-                    </button>
-                  </div>
-                </div>
-              }
-            />
-          </CardContent>
-        </Card>
+      <div className='mt-4 mb-8 flex flex-col gap-6'>
+        <DataTable<InventoryProduct>
+          title="Catálogo de Productos y Servicios"
+          description="Gestiona tu inventario y servicios desde una vista única y profesional."
+          columns={columns}
+          data={products}
+          isLoading={productsQuery.isLoading}
+          filterColumn='name'
+          filterPlaceholder='Buscar por nombre, SKU...'
+          hidePagination
+          renderActions={
+            <Button
+              className="flex items-center gap-3 bg-blue-500"
+              size="sm"
+              onClick={handleAddNewProduct}
+              placeholder=""
+              onPointerEnterCapture={undefined}
+              onPointerLeaveCapture={undefined}
+              onResize={undefined}
+              onResizeCapture={undefined}
+            >
+              <PlusIcon className="h-4 w-4 text-white" />
+              <span className="text-sm font-bold text-white uppercase tracking-wider">Nuevo Item</span>
+            </Button>
+          }
+          emptyState={
+            <div className='text-center py-12 px-4'>
+              <ArchiveBoxIcon className='mx-auto h-16 w-16 text-blue-gray-400 opacity-40' />
+              <Typography variant="h5" color="white" className="mt-4 font-bold" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                No hay productos o servicios registrados
+              </Typography>
+              <Typography className="text-blue-gray-200 mt-2 opacity-70" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                Empieza añadiendo tu primer producto o servicio para gestionar tu catálogo.
+              </Typography>
+              <Button
+                variant="gradient"
+                color="blue"
+                onClick={handleAddNewProduct}
+                className="mt-6 flex items-center gap-2 mx-auto"
+                placeholder=""
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+                onResize={undefined}
+                onResizeCapture={undefined}
+              >
+                <PlusIcon className="h-5 w-5" />
+                <span>Registrar Primer Item</span>
+              </Button>
+            </div>
+          }
+        />
 
         {products.length > 0 && totalPages > 1 && (
-          <div className='flex justify-between items-center mt-4'>
+          <div className='flex justify-between items-center px-4'>
             <div>
-              <p className='text-sm text-muted-foreground'>
-                Página {currentPage} de {totalPages} (Total: {totalProducts} productos)
+              <p className='text-sm text-blue-gray-200 opacity-60'>
+                Página <span className="text-white font-bold">{currentPage}</span> de <span className="text-white font-bold">{totalPages}</span> (Total: {totalProducts} productos)
               </p>
             </div>
             <div className='flex items-center space-x-2'>
-              <button
-                className='px-4 py-2 border rounded-md text-sm font-medium bg-background hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed'
+              <Button
+                variant="outlined"
+                size="sm"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage <= 1}
+                className="bg-white/5 border-blue-gray-100/10 text-white disabled:opacity-30 rounded-lg"
+                placeholder=""
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+                onResize={undefined}
+                onResizeCapture={undefined}
               >
                 Anterior
-              </button>
-              <button
-                className='px-4 py-2 border rounded-md text-sm font-medium bg-background hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed'
+              </Button>
+              <Button
+                variant="outlined"
+                size="sm"
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage >= totalPages}
+                className="bg-white/5 border-blue-gray-100/10 text-white disabled:opacity-30 rounded-lg"
+                placeholder=""
+                onPointerEnterCapture={undefined}
+                onPointerLeaveCapture={undefined}
+                onResize={undefined}
+                onResizeCapture={undefined}
               >
                 Siguiente
-              </button>
+              </Button>
             </div>
           </div>
         )}
       </div>
+
       {viewingProduct && (
         <ProductDetailModal product={viewingProduct} onClose={handleCloseDetailModal} />
       )}
+
       {showDeleteConfirmModal && productToDelete && (
         <ConfirmationModal
           isOpen={showDeleteConfirmModal}

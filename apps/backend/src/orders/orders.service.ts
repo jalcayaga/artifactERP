@@ -10,7 +10,7 @@ import { UpdateOrderDto } from './dto/update-order.dto'
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(
     tenantId: string,
@@ -21,39 +21,69 @@ export class OrdersService {
     await this.ensureUserBelongsToTenant(tenantId, authenticatedUserId)
     await this.ensureCompanyBelongsToTenant(tenantId, createOrderDto.companyId)
 
-    return this.prisma.order.create({
-      data: {
-        tenant: { connect: { id: tenantId } },
-        user: { connect: { id: authenticatedUserId } },
-        company: { connect: { id: createOrderDto.companyId } },
-        status: createOrderDto.status,
-        paymentStatus: createOrderDto.paymentStatus,
-        subTotalAmount: new Prisma.Decimal(createOrderDto.subTotalAmount),
-        vatAmount: new Prisma.Decimal(createOrderDto.vatAmount),
-        grandTotalAmount: new Prisma.Decimal(createOrderDto.grandTotalAmount),
-        vatRatePercent: createOrderDto.vatRatePercent,
-        discountAmount: createOrderDto.discountAmount
-          ? new Prisma.Decimal(createOrderDto.discountAmount)
-          : undefined,
-        shippingAmount: createOrderDto.shippingAmount
-          ? new Prisma.Decimal(createOrderDto.shippingAmount)
-          : undefined,
-        currency: createOrderDto.currency,
-        shippingAddress: createOrderDto.shippingAddress,
-        billingAddress: createOrderDto.billingAddress,
-        customerNotes: createOrderDto.customerNotes,
-        paymentMethod: createOrderDto.paymentMethod,
-        orderItems: {
-          create: createOrderDto.items.map((item) => ({
-            quantity: item.quantity,
-            unitPrice: new Prisma.Decimal(item.unitPrice),
-            totalPrice: new Prisma.Decimal(item.totalPrice),
-            itemVatAmount: new Prisma.Decimal(item.itemVatAmount),
-            totalPriceWithVat: new Prisma.Decimal(item.totalPriceWithVat),
-            product: { connect: { id: item.productId } },
-          })),
+    // Transaction to create order and update lots
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Create Order and OrderItems (and OrderItemLots via nested write)
+      const order = await tx.order.create({
+        data: {
+          tenant: { connect: { id: tenantId } },
+          user: { connect: { id: authenticatedUserId } },
+          company: { connect: { id: createOrderDto.companyId } },
+          source: createOrderDto.source,
+          status: createOrderDto.status,
+          paymentStatus: createOrderDto.paymentStatus,
+          subTotalAmount: new Prisma.Decimal(createOrderDto.subTotalAmount),
+          vatAmount: new Prisma.Decimal(createOrderDto.vatAmount),
+          grandTotalAmount: new Prisma.Decimal(createOrderDto.grandTotalAmount),
+          vatRatePercent: createOrderDto.vatRatePercent,
+          discountAmount: createOrderDto.discountAmount
+            ? new Prisma.Decimal(createOrderDto.discountAmount)
+            : undefined,
+          shippingAmount: createOrderDto.shippingAmount
+            ? new Prisma.Decimal(createOrderDto.shippingAmount)
+            : undefined,
+          currency: createOrderDto.currency,
+          shippingAddress: createOrderDto.shippingAddress,
+          billingAddress: createOrderDto.billingAddress,
+          customerNotes: createOrderDto.customerNotes,
+          paymentMethod: createOrderDto.paymentMethod,
+          orderItems: {
+            create: createOrderDto.items.map((item) => ({
+              quantity: item.quantity,
+              unitPrice: new Prisma.Decimal(item.unitPrice),
+              totalPrice: new Prisma.Decimal(item.totalPrice),
+              itemVatAmount: new Prisma.Decimal(item.itemVatAmount),
+              totalPriceWithVat: new Prisma.Decimal(item.totalPriceWithVat),
+              product: { connect: { id: item.productId } },
+              orderItemLots:
+                item.lots && item.lots.length > 0
+                  ? {
+                    create: item.lots.map((lot) => ({
+                      lot: { connect: { id: lot.lotId } },
+                      quantityTaken: lot.quantity,
+                    })),
+                  }
+                  : undefined,
+            })),
+          },
         },
-      },
+      })
+
+      // 2. Decrement Lots
+      for (const item of createOrderDto.items) {
+        if (item.lots && item.lots.length > 0) {
+          for (const lotInfo of item.lots) {
+            await tx.lot.update({
+              where: { id: lotInfo.lotId },
+              data: {
+                currentQuantity: { decrement: lotInfo.quantity },
+              },
+            })
+          }
+        }
+      }
+
+      return order
     })
   }
 

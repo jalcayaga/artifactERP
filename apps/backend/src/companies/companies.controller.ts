@@ -18,6 +18,7 @@ import { UpdateCompanyDto } from './dto/update-company.dto'
 import { Roles } from '../common/decorators/roles.decorator'
 import { UserRole } from '@artifact/core'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { SupabaseAuthGuard } from '../auth/guards/supabase-auth.guard'
 import { TenantId } from '../common/decorators/tenant.decorator'
 
 @UseGuards(JwtAuthGuard)
@@ -50,6 +51,7 @@ export class CompaniesController {
     return this.companiesService.findAll(
       tenantId,
       req.user.id,
+      req.user.roles || [], // Pass roles
       filters,
       page || 1,
       limit || 100
@@ -58,7 +60,7 @@ export class CompaniesController {
 
   @Get(':id')
   findOne(@TenantId() tenantId: string, @Param('id') id: string, @Req() req) {
-    return this.companiesService.findOne(tenantId, id, req.user.id)
+    return this.companiesService.findOne(tenantId, id, req.user.id, req.user.roles || [])
   }
 
   @Patch(':id')
@@ -72,12 +74,13 @@ export class CompaniesController {
       tenantId,
       id,
       req.user.id,
+      req.user.roles || [],
       updateCompanyDto
     )
   }
 
   @Delete(':id')
   remove(@TenantId() tenantId: string, @Param('id') id: string, @Req() req) {
-    return this.companiesService.remove(tenantId, id, req.user.id)
+    return this.companiesService.remove(tenantId, id, req.user.id, req.user.roles || [])
   }
 }

@@ -1,6 +1,7 @@
 import { PrismaClient, Action } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { Permission } from '../src/common/types/permissions.types';
+import { seedChileData } from './seeds/chile_data';
 
 const prisma = new PrismaClient();
 
@@ -148,6 +149,133 @@ async function main() {
       },
     });
   }
+
+  // Seed Subscription Products for Artifact
+  if (artifactTenant) {
+    console.log('Seeding subscription products...');
+    const products = [
+      {
+        name: 'Artifact Social AI',
+        sku: 'PLAN_SOCIAL_AI',
+        description: 'Gestión de Redes Sociales con Inteligencia Artificial',
+        price: 250000,
+        salesModel: 'SUBSCRIPTION',
+        isPublished: true,
+        productType: 'SERVICE'
+      },
+      {
+        name: 'Visual Soul',
+        sku: 'PLAN_VISUAL_SOUL',
+        description: 'Diseño de Identidad de Marca y Papelería Digital',
+        price: 180000,
+        salesModel: 'SUBSCRIPTION',
+        isPublished: true,
+        productType: 'SERVICE'
+      }
+    ];
+
+    for (const p of products) {
+      await prisma.product.upsert({
+        where: {
+          tenantId_sku: {
+            tenantId: artifactTenant.id,
+            sku: p.sku
+          }
+        },
+        update: {
+          name: p.name,
+          price: p.price,
+          salesModel: p.salesModel as any,
+          productType: p.productType as any,
+          isPublished: p.isPublished
+        },
+        create: {
+          tenantId: artifactTenant.id,
+          name: p.name,
+          sku: p.sku,
+          description: p.description,
+          price: p.price,
+          salesModel: p.salesModel as any,
+          productType: p.productType as any,
+          isPublished: p.isPublished
+        }
+      });
+    }
+
+    // Artifact Admin User (The CEO of Artifact SpA)
+    const adminRole = await prisma.role.findUnique({ where: { name: 'ADMIN' } });
+    const salt = await bcrypt.genSalt(12);
+    const password = await bcrypt.hash('Artifact!2025', salt);
+
+    const artifactAdmin = await prisma.user.upsert({
+      where: { tenantId_email: { tenantId: artifactTenant.id, email: 'artifact@artifact.cl' } },
+      update: { roles: { connect: { id: adminRole.id } } },
+      create: {
+        tenantId: artifactTenant.id,
+        email: 'artifact@artifact.cl',
+        password,
+        firstName: 'Artifact',
+        lastName: 'CEO',
+        roles: { connect: { id: adminRole.id } },
+        isActive: true
+      }
+    });
+
+    // Grant Infinite Subscription to Artifact Admin
+    const infinitePlan = await prisma.product.findUnique({
+      where: { tenantId_sku: { tenantId: artifactTenant.id, sku: 'PLAN_VISUAL_SOUL' } }
+    });
+
+    if (infinitePlan && artifactAdmin) {
+      // Ensure a Company exists for the Tenant linked to the Admin
+      let mainCompany = await prisma.company.findFirst({
+        where: { tenantId: artifactTenant.id, userId: artifactAdmin.id }
+      });
+
+      if (!mainCompany) {
+        console.log('Creating main company for Artifact SpA...');
+        mainCompany = await prisma.company.create({
+          data: {
+            tenantId: artifactTenant.id,
+            userId: artifactAdmin.id,
+            name: 'Artifact SpA',
+            rut: '76.123.456-7',
+            email: 'artifact@artifact.cl',
+            isClient: false,
+            isSupplier: false
+          }
+        });
+      }
+
+      if (mainCompany) {
+        const existingSub = await prisma.subscription.findFirst({
+          where: { tenantId: artifactTenant.id, status: 'ACTIVE' }
+        });
+
+        if (!existingSub) {
+          console.log('🎁 Granting Infinite Subscription to Artifact SpA...');
+          await prisma.subscription.create({
+            data: {
+              tenantId: artifactTenant.id,
+              companyId: mainCompany.id,
+              productId: infinitePlan.id,
+              status: 'ACTIVE',
+              interval: 'YEARLY',
+              price: 0,
+              currentPeriodStart: new Date(),
+              currentPeriodEnd: new Date('2099-12-31'), // Infinite
+              nextBillingDate: new Date('2099-12-31'),
+              cancelAtPeriodEnd: false
+            }
+          });
+        } else {
+          console.log('✅ Artifact SpA already has an active subscription.');
+        }
+      }
+    }
+  }
+
+  await seedChileData(prisma);
 
   console.log('🌱 Seeding complete.');
 }

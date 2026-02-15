@@ -86,11 +86,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     }
     setIsLoading(false)
 
+    // DISABLED: This event listener was causing a logout loop when 401 errors occurred
+    // The SupabaseAuthProvider now handles authentication, so we don't need this
     // Add event listener for auth errors
-    const handleAuthError = () => {
-      console.log('Auth error detected, logging out.')
-      logout()
-    }
+    // const handleAuthError = () => {
+    //   console.log('Auth error detected, logging out.')
+    //   logout()
+    // }
 
     if (storedToken && storedUser) {
       console.log("AuthContext: Found token in localStorage");
@@ -104,11 +106,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       console.log("AuthContext: No token found in localStorage");
     }
 
-    window.addEventListener('auth-error', handleAuthError)
+    // DISABLED: See comment above
+    // window.addEventListener('auth-error', handleAuthError)
 
     // Cleanup listener on component unmount
     return () => {
-      window.removeEventListener('auth-error', handleAuthError)
+      // DISABLED: See comment above
+      // window.removeEventListener('auth-error', handleAuthError)
     }
   }, []) // Removed router from dependency array as it's stable
 

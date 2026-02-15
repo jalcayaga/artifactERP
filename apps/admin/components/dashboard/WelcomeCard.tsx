@@ -45,11 +45,12 @@ const WelcomeCard: React.FC<WelcomeCardProps> = ({ stats }) => {
                 </div>
             </div>
 
-            {/* 3D Illustration Placeholder - Using CSS shapes to mimic the vibe if image fails */}
-            <div className="absolute right-4 bottom-0 w-64 h-64 pointer-events-none">
-                {/* Simple geometric composition to represent the 3D character from the reference */}
-                <div className="absolute bottom-0 right-4 w-40 h-48 bg-gradient-to-t from-blue-600 to-transparent opacity-20 rounded-t-full filter blur-xl"></div>
-            </div>
+            {/* 3D Illustration */}
+            <img
+                src="https://demos.creative-tim.com/material-dashboard-react/static/media/rocket-white.45db47dc.png"
+                alt="Welcome Character"
+                className="absolute right-0 bottom-0 h-full max-h-[200px] object-contain opacity-90 mr-4 mb-2"
+            />
 
             {/* Circle decorations */}
             <div className="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 rounded-full bg-white opacity-5 mix-blend-overlay"></div>

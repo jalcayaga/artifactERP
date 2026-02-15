@@ -1,5 +1,6 @@
 import React from 'react';
 import { UserPlus, Settings, Package, Zap } from 'lucide-react';
+import { ClientIcon } from '../client-icon';
 
 const steps = [
     {
@@ -53,7 +54,7 @@ export default function HowItWorksSection() {
 
                                 <div className="relative text-center">
                                     <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-brand/10 border-2 border-brand/30 mb-4 relative">
-                                        <Icon className="w-10 h-10 text-brand" />
+                                        <ClientIcon icon={Icon} className="w-10 h-10 text-brand" />
                                         <span className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-brand text-black font-bold text-sm flex items-center justify-center">
                                             {step.number}
                                         </span>

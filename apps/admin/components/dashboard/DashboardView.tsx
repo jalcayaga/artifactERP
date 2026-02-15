@@ -4,41 +4,81 @@
 import React, { useState, useEffect } from 'react';
 import {
   Card,
-  CardContent,
+  CardBody,
   CardHeader,
-  CardTitle,
-} from '@artifact/ui'; // Asumiremos que ui/card.tsx será migrado
+  Typography,
+} from '@material-tailwind/react';
 import {
-  ShoppingCartIcon,
-  ArchiveBoxIcon,
   CreditCardIcon,
   CheckCircleIcon,
-} from '@artifact/ui'; // Asumiremos que Icons.tsx será migrado
-import SalesChart from './SalesChart'; // Apunta al componente en la misma carpeta
-import { DashboardStats, formatCurrencyChilean } from '@artifact/core';;
+} from '@heroicons/react/24/solid';
+import SalesChart from './SalesChart';
+import WelcomeBanner from './WelcomeBanner';
+import StatsGroup from './StatsGroup';
+import ProductDoughnut from './ProductDoughnut';
+import DashboardSkeleton from './DashboardSkeleton';
+import { DashboardStats, formatCurrencyChilean } from '@artifact/core';
 import { DashboardService, useCompany } from '@artifact/core/client';;
 
 // Interfaz y componente para las tarjetas de estadísticas.
 interface StatCardProps {
   title: string;
   value: string;
-  icon: React.FC<{ className?: string }>;
+  icon: React.ElementType;
+  footer?: {
+    value: string;
+    label: string;
+    trend: 'up' | 'down' | 'neutral';
+  };
+  color?: 'blue' | 'green' | 'orange' | 'pink';
 }
 
-const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon }) => {
+const MaterialStatCard: React.FC<StatCardProps> = ({
+  title,
+  value,
+  icon: Icon,
+  footer,
+  color = 'blue'
+}) => {
+  const gradients = {
+    blue: 'from-blue-600 to-blue-400',
+    green: 'from-emerald-500 to-teal-400',
+    orange: 'from-orange-600 to-orange-400',
+    pink: 'from-pink-600 to-rose-400',
+  };
+
+  const shadows = {
+    blue: 'shadow-blue-500/40',
+    green: 'shadow-emerald-500/40',
+    orange: 'shadow-orange-500/40',
+    pink: 'shadow-pink-500/40',
+  };
+
   return (
-    <Card className="overflow-hidden border border-border/50">
-      <CardContent className="p-5">
-        <div className="flex items-center">
-          <div className="p-3 rounded-lg bg-primary/10 dark:bg-primary/20 mr-4">
-            <Icon className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-2xl font-semibold text-foreground">{value}</p>
-          </div>
+    <Card className="relative flex flex-col bg-[#1e293b] bg-clip-border rounded-xl text-white shadow-md border border-blue-gray-100/5">
+      <div
+        className={`bg-gradient-to-tr ${gradients[color]} ${shadows[color]} -mt-4 mx-4 rounded-xl overflow-hidden text-white shadow-lg absolute -top-2 grid h-12 w-12 place-items-center`}
+      >
+        <Icon className="w-6 h-6 text-white" />
+      </div>
+      <CardBody className="p-4 text-right">
+        <Typography variant="small" className="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600 dark:text-gray-400">
+          {title}
+        </Typography>
+        <Typography variant="h4" className="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900 dark:text-white">
+          {value}
+        </Typography>
+      </CardBody>
+      {footer && (
+        <div className="border-t border-blue-gray-50 dark:border-zinc-800 p-4">
+          <p className="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600 dark:text-gray-400">
+            <strong className={`${footer.trend === 'up' ? 'text-green-500' : footer.trend === 'down' ? 'text-red-500' : 'text-gray-500'}`}>
+              {footer.value}
+            </strong>
+            &nbsp;{footer.label}
+          </p>
         </div>
-      </CardContent>
+      )}
     </Card>
   );
 };
@@ -86,11 +126,28 @@ const DashboardView: React.FC = () => {
   }, [activeCompany, isCompanyLoading, companyError]);
 
   if (isCompanyLoading || loadingStats) {
-    return <div className="text-center p-8">Cargando dashboard...</div>;
+    return <DashboardSkeleton />;
   }
 
-  if (statsError) {
-    return <div className="text-destructive text-center p-8">{statsError}</div>;
+  if (statsError || !activeCompany) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-6">
+          <div className="w-20 h-20 bg-brand/20 border border-brand/30 rounded-3xl mx-auto flex items-center justify-center">
+            <span className="text-4xl font-bold text-white">A</span>
+          </div>
+          <h1 className="text-3xl font-bold text-white">Bienvenido a Artifact ERP</h1>
+          <p className="text-slate-400">
+            {statsError || 'No hay una empresa activa seleccionada.'}
+          </p>
+          <div className="p-4 rounded-lg bg-slate-900 border border-slate-800">
+            <p className="text-sm text-slate-300">
+              Para comenzar, necesitas configurar una empresa en el sistema.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!dashboardStats) {
@@ -98,72 +155,37 @@ const DashboardView: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 lg:space-y-8 p-4 md:p-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          title="Ventas del Mes"
-          value={formatCurrencyChilean(dashboardStats.totalSalesAmount)}
-          icon={ShoppingCartIcon}
-        />
-        <StatCard
-          title="Productos en Stock"
-          value={dashboardStats.totalProducts.toString()}
-          icon={ArchiveBoxIcon}
-        />
-        <StatCard
-          title="Facturas Pendientes"
-          value={dashboardStats.pendingInvoices.toString()}
-          icon={CreditCardIcon}
-        />
-        <StatCard
-          title="Cotizaciones Aceptadas"
-          value={dashboardStats.acceptedQuotes.toString()}
-          icon={CheckCircleIcon}
-        />
+    <div className="p-4 md:p-6 space-y-6">
+      {/* Row 1: Welcome Banner (66%) + Stats Group (33%) */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2">
+          <WelcomeBanner />
+        </div>
+        <div className="xl:col-span-1 h-full">
+          <StatsGroup />
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        <Card className="lg:col-span-2 border border-border/50">
-          <CardHeader>
-            <CardTitle className="text-xl text-primary">Actividad Reciente</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-4">
-              {dashboardStats.recentActivities.length > 0 ? (
-                dashboardStats.recentActivities.map((activity) => (
-                  <li key={activity.id} className="flex items-start space-x-3">
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold">
-                      {activity.user.firstName.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="text-sm text-foreground">
-                        <span className="font-medium">{`${activity.user.firstName} ${activity.user.lastName}`}</span>
-                        {` creó un pedido con estado ${activity.status}.`}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(activity.createdAt).toLocaleString('es-CL')}
-                      </p>
-                    </div>
-                  </li>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground italic text-center py-4">
-                  No hay actividad reciente.
-                </p>
-              )}
-            </ul>
-          </CardContent>
+      {/* Row 2: Sales Chart (66%) + Product Doughnut (33%) */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <Card className="xl:col-span-2 rounded-3xl bg-[#1e293b] p-6 shadow-sm border border-blue-gray-100/5">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <Typography variant="h6" color="white" className="font-bold">Sales Profit</Typography>
+            </div>
+            <div className="flex gap-2">
+              <button className="px-3 py-1 rounded-full bg-blue-500 text-white text-xs font-medium">Profit</button>
+              <button className="px-3 py-1 rounded-full bg-[#0f172a] text-blue-gray-200 text-xs font-medium border border-blue-gray-100/5">Expenses</button>
+            </div>
+          </div>
+          <SalesChart />
         </Card>
-
-        <Card className="border border-border/50">
-          <CardHeader>
-            <CardTitle className="text-lg">Resumen de Ventas</CardTitle>
-          </CardHeader>
-          <CardContent className="p-5">
-            <SalesChart />
-          </CardContent>
-        </Card>
+        <div className="xl:col-span-1 h-full">
+          <ProductDoughnut />
+        </div>
       </div>
+
+
     </div>
   );
 };

@@ -99,6 +99,7 @@ export interface Sale {
   userId: string
   companyId: string // NEW: Link to Company (client)
   company?: Company // Include company details
+  source: OrderSource // NEW: Source of the order
   status: OrderStatus
   paymentStatus: PaymentStatus
   subTotalAmount: number
@@ -175,6 +176,7 @@ export interface Product {
   longDescription?: string | null
   images?: string[] | null
   category?: string | null
+  categoryId?: string | null // Add categoryId property
   price: number
   unitPrice?: number | null
   reorderLevel?: number | null
@@ -236,7 +238,7 @@ export interface PurchaseOrder {
   company?: Company // Include company details
   orderDate: string
   expectedDeliveryDate?: string | null
-  status: 'PENDING' | 'COMPLETED' | 'CANCELLED'
+  status: 'DRAFT' | 'ISSUED' | 'PARTIALLY_RECEIVED' | 'COMPLETED' | 'CANCELLED'
   subTotalAmount: number
   totalVatAmount: number
   grandTotal: number
@@ -263,7 +265,7 @@ export interface CreatePurchaseOrderDto {
   companyId: string
   orderDate: string
   expectedDeliveryDate?: string
-  status?: 'PENDING' | 'COMPLETED' | 'CANCELLED'
+  status?: 'DRAFT' | 'ISSUED' | 'PARTIALLY_RECEIVED' | 'COMPLETED' | 'CANCELLED'
   items: {
     productId: string
     quantity: number
@@ -279,6 +281,12 @@ export interface CreatePurchaseOrderDto {
 
 export interface UpdatePurchaseOrderDto
   extends Partial<CreatePurchaseOrderDto> { }
+
+export enum OrderSource {
+  WEB = 'WEB',
+  POS = 'POS',
+  ADMIN = 'ADMIN',
+}
 
 export enum OrderStatus {
   PENDING_PAYMENT = 'PENDING_PAYMENT',
@@ -302,6 +310,7 @@ export enum PaymentMethod {
   CREDIT_CARD = 'CREDIT_CARD',
   BANK_TRANSFER = 'BANK_TRANSFER',
   WEBPAY = 'WEBPAY',
+  MERCADO_PAGO = 'MERCADO_PAGO',
   OTHER = 'OTHER',
 }
 
@@ -519,11 +528,13 @@ export interface CreateSaleItemDto {
   totalPrice: number // Changed from string to number for frontend
   itemVatAmount: number // Changed from string to number for frontend
   totalPriceWithVat: number // Changed from string to number for frontend
+  lots?: { lotId: string; quantity: number }[] // NEW: Lots for manual selection
 }
 
 export interface CreateSaleDto {
   userId: string
   companyId: string // NEW: Add companyId property
+  source?: OrderSource // NEW: Source of the order
   status?: OrderStatus
   paymentStatus?: PaymentStatus
   subTotalAmount: number // Changed from string to number for frontend
@@ -538,6 +549,7 @@ export interface CreateSaleDto {
   customerNotes?: string
   paymentMethod?: PaymentMethod
   items: CreateSaleItemDto[]
+  posShiftId?: string
 }
 
 export interface UpdateSaleDto extends Partial<CreateSaleDto> { }
@@ -595,3 +607,81 @@ export interface CreatePurchaseDto {
 }
 
 export interface UpdatePurchaseDto extends Partial<CreatePurchaseDto> { }
+
+// --- Advanced Supply Chain ---
+
+export interface Category {
+  id: string
+  name: string
+  slug: string
+  description?: string | null
+  parentId?: string | null
+  parent?: Category | null
+  children?: Category[]
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface CreateCategoryDto {
+  name: string
+  description?: string
+  parentId?: string
+}
+
+export interface UpdateCategoryDto extends Partial<CreateCategoryDto> { }
+
+export interface Warehouse {
+  id: string
+  name: string
+  address?: string | null
+  isDefault: boolean
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface CreateWarehouseDto {
+  name: string
+  address?: string
+  isDefault?: boolean
+}
+
+export interface UpdateWarehouseDto extends Partial<CreateWarehouseDto> { }
+
+export interface Reception {
+  id: string
+  warehouseId: string
+  warehouse?: Warehouse
+  purchaseOrderId?: string | null
+  purchaseOrder?: PurchaseOrder
+  receptionNumber?: string | null
+  receptionDate: string
+  status: string
+  notes?: string | null
+  createdAt?: string
+  updatedAt?: string
+  items?: ReceptionItem[]
+}
+
+export interface ReceptionItem {
+  id: string
+  receptionId: string
+  productId: string
+  product?: Product
+  quantity: number
+  lotId?: string | null
+  lot?: Lot
+}
+
+export interface CreateReceptionDto {
+  warehouseId: string
+  purchaseOrderId?: string
+  receptionNumber?: string
+  receptionDate?: string
+  notes?: string
+  items: {
+    productId: string
+    quantity: number
+    expirationDate?: string
+    location?: string
+  }[]
+}

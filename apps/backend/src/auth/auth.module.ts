@@ -5,7 +5,9 @@ import { UsersModule } from '../users/users.module'
 import { PassportModule } from '@nestjs/passport'
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt'
 import { ConfigModule, ConfigService } from '@nestjs/config'
+import { PrismaModule } from '../prisma/prisma.module'
 import { JwtStrategy } from './strategies/jwt.strategy'
+import { SupabaseStrategy } from './strategies/supabase.strategy'
 
 @Module({
   imports: [
@@ -36,9 +38,10 @@ import { JwtStrategy } from './strategies/jwt.strategy'
       },
     }),
     ConfigModule, // Ensure ConfigService is available
+    PrismaModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, SupabaseStrategy],
   exports: [AuthService, JwtModule],
 })
-export class AuthModule {}
+export class AuthModule { }

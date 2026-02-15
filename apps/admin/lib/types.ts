@@ -17,3 +17,21 @@ export interface Branding {
   secondaryColor?: string;
   accentColor?: string;
 }
+
+export interface Company {
+  id: string;
+  name: string;
+  fantasyName?: string;
+  rut?: string;
+  giro?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  phone?: string;
+  email?: string;
+  isClient: boolean;
+  isSupplier: boolean;
+  createdAt: string;
+  updatedAt: string;
+}

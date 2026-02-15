@@ -8,41 +8,51 @@ interface TableProps<T> {
 
 const Table = <T extends { id: string | number }>({ data, columns, renderRowActions }: TableProps<T>) => {
   return (
-    <div className="overflow-x-auto card-premium">
-      <table className="min-w-full divide-y divide-[rgba(var(--border-color),0.1)]">
-        <thead className="bg-[rgba(var(--bg-secondary),0.5)]">
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-max table-auto text-left">
+        <thead>
           <tr>
             {columns.map((column) => (
               <th
                 key={String(column.key)}
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-[rgb(var(--text-secondary))] uppercase tracking-wider"
+                className="border-b border-blue-gray-100/5 py-4 px-4"
               >
-                {column.header}
+                <p className="block font-sans text-xs font-bold uppercase text-blue-gray-200 opacity-70">
+                  {column.header}
+                </p>
               </th>
             ))}
             {renderRowActions && (
-              <th scope="col" className="relative px-6 py-3">
+              <th className="border-b border-blue-gray-100/5 py-4 px-4">
                 <span className="sr-only">Actions</span>
               </th>
             )}
           </tr>
         </thead>
-        <tbody className="divide-y divide-[rgba(var(--border-color),0.1)]">
-          {data.map((item) => (
-            <tr key={item.id} className="hover:bg-[rgba(var(--brand-color),0.05)] transition-colors">
-              {columns.map((column) => (
-                <td key={String(column.key)} className="px-6 py-4 whitespace-nowrap text-sm text-[rgb(var(--text-primary))]">
-                  {String(item[column.key])}
-                </td>
-              ))}
-              {renderRowActions && (
-                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  {renderRowActions(item)}
-                </td>
-              )}
-            </tr>
-          ))}
+        <tbody>
+          {data.map((item, index) => {
+            const isLast = index === data.length - 1;
+            const classes = isLast ? "p-4" : "p-4 border-b border-blue-gray-100/5";
+
+            return (
+              <tr key={item.id} className="hover:bg-white/5 transition-colors">
+                {columns.map((column) => (
+                  <td key={String(column.key)} className={classes}>
+                    <p className="block font-sans text-sm font-medium text-white">
+                      {String(item[column.key])}
+                    </p>
+                  </td>
+                ))}
+                {renderRowActions && (
+                  <td className={classes}>
+                    <div className="flex justify-end gap-2">
+                      {renderRowActions(item)}
+                    </div>
+                  </td>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

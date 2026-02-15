@@ -6,6 +6,7 @@ import {
   Query,
   UseGuards,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common'
 import { PaymentsService } from './payments.service'
 import { CreatePaymentDto } from './dto/create-payment.dto'
@@ -48,6 +49,34 @@ export class PaymentsController {
     @Body() body: { invoiceId: string; amount: number }
   ) {
     if (!tenantId) throw new NotFoundException('Tenant ID is required');
-    return await this.paymentsService.generatePaymentLink(tenantId, body.invoiceId, body.amount);
+    // Deprecated in favor of specific endpoints below, keeping for backward compatibility if needed
+    throw new BadRequestException("Use specific provider endpoints");
+  }
+
+  @Post('transbank/init')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'CASHIER')
+  async initWebpay(
+    @TenantId() tenantId: string,
+    @Body() body: { invoiceId: string; amount: number; returnUrl: string }
+  ) {
+    return this.paymentsService.initWebpayTransaction(tenantId, body.invoiceId, body.amount, body.returnUrl);
+  }
+
+  @Post('transbank/commit')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'CASHIER')
+  async commitWebpay(
+    @TenantId() tenantId: string,
+    @Body() body: { token: string }
+  ) {
+    return this.paymentsService.commitWebpayTransaction(body.token, tenantId);
+  }
+
+  @Post('mercadopago/qr')
+  @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'CASHIER')
+  async generateQr(
+    @TenantId() tenantId: string,
+    @Body() body: { invoiceId: string; amount: number; description: string }
+  ) {
+    return this.paymentsService.createMercadoPagoQR(tenantId, body.invoiceId, body.amount, body.description);
   }
 }

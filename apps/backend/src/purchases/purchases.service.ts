@@ -6,31 +6,69 @@ import { UpdatePurchaseDto } from './dto/update-purchase.dto'
 
 @Injectable()
 export class PurchasesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(tenantId: string, data: CreatePurchaseDto): Promise<Purchase> {
     await this.ensureCompanyBelongsToTenant(tenantId, data.companyId)
 
-    return this.prisma.purchase.create({
-      data: {
-        tenant: { connect: { id: tenantId } },
-        company: { connect: { id: data.companyId } },
-        purchaseDate: new Date(data.purchaseDate),
-        subTotalAmount: new Prisma.Decimal(data.subTotalAmount),
-        totalVatAmount: new Prisma.Decimal(data.totalVatAmount),
-        grandTotal: new Prisma.Decimal(data.grandTotal),
-        items: {
-          create: data.items.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            unitPrice: new Prisma.Decimal(item.unitPrice),
-            totalPrice: new Prisma.Decimal(item.totalPrice),
-            itemVatAmount: new Prisma.Decimal(item.itemVatAmount),
-            totalPriceWithVat: new Prisma.Decimal(item.totalPriceWithVat),
-          })),
+    return this.prisma.$transaction(async (tx) => {
+      const purchase = await tx.purchase.create({
+        data: {
+          tenant: { connect: { id: tenantId } },
+          company: { connect: { id: data.companyId } },
+          purchaseDate: new Date(data.purchaseDate),
+          subTotalAmount: new Prisma.Decimal(data.subTotalAmount),
+          totalVatAmount: new Prisma.Decimal(data.totalVatAmount),
+          grandTotal: new Prisma.Decimal(data.grandTotal),
+          items: {
+            create: data.items.map((item) => ({
+              productId: item.productId,
+              quantity: item.quantity,
+              unitPrice: new Prisma.Decimal(item.unitPrice),
+              totalPrice: new Prisma.Decimal(item.totalPrice),
+              itemVatAmount: new Prisma.Decimal(item.itemVatAmount),
+              totalPriceWithVat: new Prisma.Decimal(item.totalPriceWithVat),
+            })),
+          },
         },
-      },
-      include: { company: true, items: true },
+        include: { items: true, company: true },
+      })
+
+      // Link to Inventory: Create lots for PRODUCT items
+      for (const item of purchase.items) {
+        const product = await tx.product.findUnique({
+          where: { id: item.productId },
+        })
+
+        if (product && product.productType === 'PRODUCT') {
+          // Generate a lot number based on date and company name
+          const dateStr = new Date(purchase.purchaseDate)
+            .toISOString()
+            .split('T')[0]
+            .replace(/-/g, '')
+          const companyKey = purchase.company?.name
+            ? purchase.company.name.substring(0, 3).toUpperCase()
+            : 'PUR'
+
+          // Using a combination of date, company and item ID to ensure uniqueness
+          const lotNumber = `${dateStr}-${companyKey}-${item.id.substring(0, 4)}`
+
+          await tx.lot.create({
+            data: {
+              tenantId,
+              productId: item.productId,
+              purchaseItemId: item.id,
+              lotNumber,
+              initialQuantity: item.quantity,
+              currentQuantity: item.quantity,
+              purchasePrice: item.unitPrice,
+              entryDate: purchase.purchaseDate,
+            },
+          })
+        }
+      }
+
+      return purchase
     })
   }
 

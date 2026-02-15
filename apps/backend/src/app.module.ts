@@ -28,6 +28,17 @@ import { StorefrontModule } from './storefront/storefront.module'
 import { TenantsModule } from './tenants/tenants.module'
 import { SubscriptionsModule } from './subscriptions/subscriptions.module'
 import { TenantResolverMiddleware } from './tenants/middleware/tenant-resolver.middleware'
+import { CategoriesModule } from './categories/categories.module'
+import { WarehousesModule } from './warehouses/warehouses.module'
+import { PurchaseOrdersModule } from './purchase-orders/purchase-orders.module'
+import { ReceptionsModule } from './receptions/receptions.module'
+import { LocationsModule } from './locations/locations.module'
+import { IndicatorsModule } from './indicators/indicators.module'
+import { InventoryModule } from './inventory/inventory.module'
+import { PricingModule } from './pricing/pricing.module'
+import { DteModule } from './dte/dte.module'
+import { PosModule } from './pos/pos.module'
+import { DispatchesModule } from './dispatches/dispatches.module'
 
 @Module({
   imports: [
@@ -54,12 +65,23 @@ import { TenantResolverMiddleware } from './tenants/middleware/tenant-resolver.m
     UploadsModule,
     StorefrontModule,
     TenantsModule,
+    DispatchesModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'uploads'),
       serveRoot: '/uploads/',
     }),
     ContactPeopleModule,
     SubscriptionsModule,
+    CategoriesModule,
+    WarehousesModule,
+    PurchaseOrdersModule,
+    ReceptionsModule,
+    LocationsModule,
+    IndicatorsModule,
+    InventoryModule,
+    PricingModule,
+    DteModule,
+    PosModule,
   ],
   controllers: [],
   providers: [

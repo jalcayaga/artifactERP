@@ -300,6 +300,9 @@ export class SalesService {
       // TODO: Generate Payment Link Here if needed
 
       return newOrder;
+    }, {
+      maxWait: 5000, // default: 2000
+      timeout: 20000 // default: 5000
     });
   }
 }

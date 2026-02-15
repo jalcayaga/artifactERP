@@ -39,9 +39,11 @@ export class PosService {
 
     async openShift(tenantId: string, registerId: string, userId: string, initialCash: number) {
         // Check if register exists and belongs to tenant
+        console.log(`[PosService] Finding register ${registerId} for tenant ${tenantId}`);
         const register = await this.prisma.cashRegister.findFirst({
             where: { id: registerId, tenantId }
         });
+        console.log(`[PosService] Register found:`, register);
         if (!register) throw new NotFoundException('Cash register not found');
 
         // Check if already open

@@ -7,7 +7,7 @@ import {
   IsOptional,
 } from 'class-validator'
 import { Type } from 'class-transformer'
-import { OrderStatus, PaymentStatus, PaymentMethod } from '@prisma/client'
+import { OrderStatus, PaymentStatus, PaymentMethod, OrderSource } from '@prisma/client'
 
 export class OrderItemDto {
   @IsString()
@@ -28,6 +28,10 @@ export class OrderItemDto {
 
   @IsNumber()
   totalPriceWithVat: number
+
+  @IsOptional()
+  @IsArray()
+  lots?: { lotId: string; quantity: number }[]
 }
 
 export class CreateOrderDto {
@@ -38,6 +42,10 @@ export class CreateOrderDto {
   @IsString()
   @IsNotEmpty()
   companyId: string
+
+  @IsOptional()
+  @IsString()
+  source?: OrderSource
 
   @IsOptional()
   @IsString()

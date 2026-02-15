@@ -31,17 +31,17 @@ const SalesChart: React.FC = () => {
     const salesData = [1250000, 1980000, 1530000, 2250000, 1870000, 2560000];
     const previousData = [1100000, 1750000, 1400000, 2000000, 1600000, 2200000];
 
-    // Brand color based on theme
-    const primaryColor = 'rgb(0, 255, 127)'; // Neon green
-    const secondaryColor = 'rgba(99, 102, 241, 0.8)'; // Indigo
+    // Brand color based on reference (Blue/Cyan)
+    const primaryColor = '#3b82f6'; // Blue-500
+    const secondaryColor = '#06b6d4'; // Cyan-500
     const textColor = theme === 'dark' ? '#fff' : '#1f2937';
     const mutedTextColor = theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)';
     const gridColor = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
 
     // Create gradient
     const gradient = canvasCtx.createLinearGradient(0, 0, 0, 300);
-    gradient.addColorStop(0, 'rgba(0, 255, 127, 0.3)');
-    gradient.addColorStop(1, 'rgba(0, 255, 127, 0)');
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)'); // Blue
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
 
     chartInstanceRef.current = new Chart(canvasCtx, {
       type: 'line',
@@ -51,24 +51,21 @@ const SalesChart: React.FC = () => {
           {
             label: 'Este Período',
             data: salesData,
-            borderColor: primaryColor,
+            borderColor: '#3b82f6', // Blue line
             backgroundColor: gradient,
             fill: true,
             tension: 0.4,
-            pointBackgroundColor: primaryColor,
-            pointBorderColor: 'transparent',
-            pointBorderWidth: 0,
-            pointRadius: 0,
+            pointBackgroundColor: '#3b82f6',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 4,
             pointHoverRadius: 6,
-            pointHoverBackgroundColor: primaryColor,
-            pointHoverBorderColor: '#000',
-            pointHoverBorderWidth: 2,
             borderWidth: 3,
           },
           {
             label: 'Período Anterior',
             data: previousData,
-            borderColor: secondaryColor,
+            borderColor: '#06b6d4', // Cyan line for comparison
             backgroundColor: 'transparent',
             fill: false,
             tension: 0.4,

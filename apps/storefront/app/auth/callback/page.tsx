@@ -19,7 +19,7 @@ export default function AuthCallbackPage() {
                 router.push('/login?error=auth_failed');
             } else if (session) {
                 // Successfully logged in
-                router.push('/');
+                router.push('/account');
             } else {
                 // No session, maybe redirect to login
                 router.push('/login');

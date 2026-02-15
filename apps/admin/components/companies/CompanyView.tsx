@@ -54,7 +54,7 @@ export default function CompanyView({ show }: CompanyViewProps) {
         }
       }
 
-      const response = await CompanyService.getAllCompanies(1, 1000, filters);
+      const response = await CompanyService.getAllCompanies(1, 100, filters);
       setCompanies(response.data);
     } catch (err) {
       setError('Error al cargar las empresas.');
@@ -121,22 +121,6 @@ export default function CompanyView({ show }: CompanyViewProps) {
 
   const columns = useMemo(() => getColumns(handleEdit, handleDeleteRequest, handleView), []);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 text-center text-red-500">
-        <Typography color="red">{error}</Typography>
-      </div>
-    );
-  }
-
   const title = "Clientes / Proveedores";
 
   return (
@@ -146,6 +130,7 @@ export default function CompanyView({ show }: CompanyViewProps) {
         description="Administra tus relaciones comerciales en un solo lugar"
         columns={columns}
         data={companies}
+        isLoading={loading}
         renderActions={
           <div className="flex flex-col sm:flex-row gap-4 items-center w-full justify-between">
             {!show && (
@@ -156,6 +141,8 @@ export default function CompanyView({ show }: CompanyViewProps) {
                 placeholder=""
                 onPointerEnterCapture={() => { }}
                 onPointerLeaveCapture={() => { }}
+                onResize={undefined}
+                onResizeCapture={undefined}
               >
                 <Button
                   className={currentFilterType === 'all' ? "bg-white/5 text-blue-500" : "text-blue-gray-200"}
@@ -163,6 +150,8 @@ export default function CompanyView({ show }: CompanyViewProps) {
                   placeholder=""
                   onPointerEnterCapture={() => { }}
                   onPointerLeaveCapture={() => { }}
+                  onResize={undefined}
+                  onResizeCapture={undefined}
                 >Todas</Button>
                 <Button
                   className={currentFilterType === 'clients' ? "bg-white/5 text-blue-500" : "text-blue-gray-200"}
@@ -170,6 +159,8 @@ export default function CompanyView({ show }: CompanyViewProps) {
                   placeholder=""
                   onPointerEnterCapture={() => { }}
                   onPointerLeaveCapture={() => { }}
+                  onResize={undefined}
+                  onResizeCapture={undefined}
                 >Clientes</Button>
                 <Button
                   className={currentFilterType === 'suppliers' ? "bg-white/5 text-blue-500" : "text-blue-gray-200"}
@@ -177,6 +168,8 @@ export default function CompanyView({ show }: CompanyViewProps) {
                   placeholder=""
                   onPointerEnterCapture={() => { }}
                   onPointerLeaveCapture={() => { }}
+                  onResize={undefined}
+                  onResizeCapture={undefined}
                 >Proveedores</Button>
               </ButtonGroup>
             )}
@@ -187,6 +180,8 @@ export default function CompanyView({ show }: CompanyViewProps) {
               placeholder=""
               onPointerEnterCapture={() => { }}
               onPointerLeaveCapture={() => { }}
+              onResize={undefined}
+              onResizeCapture={undefined}
             >
               <PlusIcon className="h-4 w-4 text-white" />
               <span className="text-sm font-bold text-white uppercase tracking-wider">Nuevo</span>

@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger'
 import { Public } from '../common/decorators/public.decorator'
 import { ProductsService } from '../products/products.service'
 import { SalesService } from '../sales/sales.service'
+import { PaymentsService } from '../payments/payments.service'
 import {
   TenantContext,
   TenantId,
@@ -15,7 +16,8 @@ import { DefaultValuePipe, ParseIntPipe } from '@nestjs/common'
 export class StorefrontController {
   constructor(
     private readonly productsService: ProductsService,
-    private readonly salesService: SalesService
+    private readonly salesService: SalesService,
+    private readonly paymentsService: PaymentsService
   ) { }
 
   @Public()
@@ -24,6 +26,26 @@ export class StorefrontController {
   async checkout(@TenantId() tenantId: string, @Body() orderData: any) {
     // Basic validation should be added here
     return this.salesService.createGuestSale(tenantId, orderData);
+  }
+
+  @Public()
+  @Post('payments/webpay/init')
+  @ApiOperation({ summary: 'Iniciar pago Webpay (Storefront)' })
+  async initWebpay(
+    @TenantId() tenantId: string,
+    @Body() body: { invoiceId: string; amount: number; returnUrl: string }
+  ) {
+    return this.paymentsService.initWebpayTransaction(tenantId, body.invoiceId, body.amount, body.returnUrl);
+  }
+
+  @Public()
+  @Post('payments/mercadopago/preference')
+  @ApiOperation({ summary: 'Crear preferencia Mercado Pago (Storefront)' })
+  async createMpPreference(
+    @TenantId() tenantId: string,
+    @Body() body: { invoiceId: string; amount: number; backUrls: { success: string; failure: string; pending: string } }
+  ) {
+    return this.paymentsService.createMercadoPagoPreference(tenantId, body.invoiceId, body.amount, body.backUrls);
   }
 
   @Public()

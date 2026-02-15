@@ -21,9 +21,6 @@ export default function ThemeSwitcher() {
                         ? 'text-blue-500 bg-white/5'
                         : 'text-blue-gray-200 hover:text-white hover:bg-white/5'
                         }`}
-                    placeholder=""
-                    onPointerEnterCapture={() => { }}
-                    onPointerLeaveCapture={() => { }}
                 >
                     <Moon className="w-4 h-4" />
                 </IconButton>
@@ -39,9 +36,6 @@ export default function ThemeSwitcher() {
                         ? 'text-yellow-500 bg-white/5'
                         : 'text-blue-gray-200 hover:text-white hover:bg-white/5'
                         }`}
-                    placeholder=""
-                    onPointerEnterCapture={() => { }}
-                    onPointerLeaveCapture={() => { }}
                 >
                     <Sun className="w-4 h-4" />
                 </IconButton>
@@ -57,9 +51,6 @@ export default function ThemeSwitcher() {
                         ? 'text-white bg-white/10'
                         : 'text-blue-gray-200 hover:text-white hover:bg-white/5'
                         }`}
-                    placeholder=""
-                    onPointerEnterCapture={() => { }}
-                    onPointerLeaveCapture={() => { }}
                 >
                     <Eye className="w-4 h-4" />
                 </IconButton>
