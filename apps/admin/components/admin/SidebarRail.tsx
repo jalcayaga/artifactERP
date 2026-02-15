@@ -32,14 +32,14 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({ activeCategory, setAct
         <div className="w-[80px] bg-[#111c2d] border-r border-[#ffffff08] flex flex-col items-center pt-0 pb-6 gap-6 z-[70] relative">
             {/* Brand Logo - Integrated with SidebarPanel header height (64px) */}
             <div className="h-[64px] flex items-center justify-center w-full border-b border-[#ffffff08]">
-                <div className="w-[48px] h-[48px] flex items-center justify-center group cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95">
+                <div className="w-[48px] h-[48px] flex items-center justify-center group cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95">
                     <Image
                         src="/logo-artifact.png"
                         alt="Logo"
                         width={48}
                         height={48}
                         priority
-                        className="transition-transform duration-300 rounded-lg"
+                        className="transition-transform duration-300 object-contain"
                     />
                 </div>
             </div>

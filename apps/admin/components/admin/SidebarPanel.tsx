@@ -126,7 +126,7 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({ activeCategory, onCl
                     <Typography color="white" className="font-extrabold tracking-tight text-white leading-none text-[20px] bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-gray-400">
                         ARTIFACT
                     </Typography>
-                    <Typography className="text-[14px] font-bold text-[#00a1ff] tracking-widest mt-0.5 uppercase">
+                    <Typography className="text-[12px] font-black text-[#00a1ff] tracking-[0.25em] mt-1 uppercase drop-shadow-[0_0_8px_rgba(0,161,255,0.4)]">
                         ERP
                     </Typography>
                 </div>
