@@ -44,7 +44,7 @@ const AuthStatus: React.FC = () => {
   const initials = `${displayUser.firstName?.[0] || ''}${displayUser.lastName?.[0] || ''}`.toUpperCase() || 'AD';
   const displayName = displayUser.firstName || 'Admin';
   const email = displayUser.email || 'admin@artifact.com';
-  const roleName = displayUser.roles?.[0] || displayUser.role || 'Admin';
+  const roleName = (displayUser as any).roles?.[0] || (displayUser as any).role || 'Admin';
 
   return (
     <div className="relative">

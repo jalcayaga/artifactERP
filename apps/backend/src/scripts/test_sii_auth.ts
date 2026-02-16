@@ -10,7 +10,7 @@ async function testAuth() {
     const keyPath = path.join(__dirname, '../dte/utils/test-key.pem');
 
     try {
-        const token = await service.getAuthToken(certPath, keyPath);
+        const token = await service.getToken(certPath, keyPath);
         console.log("✅ SUCCESS: SII Token obtained:", token);
     } catch (error) {
         console.error("❌ FAILURE:", error.message);

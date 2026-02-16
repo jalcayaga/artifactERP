@@ -21,8 +21,13 @@ export class DispatchesController {
 
     @Get()
     @Roles('SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER')
-    findAll(@TenantId() tenantId: string) {
-        return this.dispatchesService.findAll(tenantId);
+    findAll(
+        @TenantId() tenantId: string,
+        @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+        @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+        @Query('orderId') orderId?: string
+    ) {
+        return this.dispatchesService.findAll(tenantId, page, limit, orderId);
     }
 
     @Get(':id')

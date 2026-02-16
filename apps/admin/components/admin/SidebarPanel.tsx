@@ -3,8 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Typography, List, ListItem, ListItemPrefix, ListItemSuffix } from "@material-tailwind/react";
+import { Typography, List, ListItem, ListItemPrefix, ListItemSuffix, IconButton } from "@material-tailwind/react";
 import { SidebarCategory } from './SidebarRail';
+import { TenantService } from '@/lib/services/tenant.service';
+import { defaultTheme } from '@/lib/theme';
+import Image from 'next/image';
 import {
     ShoppingCart,
     Monitor,
@@ -14,21 +17,47 @@ import {
     Warehouse,
     Boxes,
     Users,
+    Settings,
     ShieldCheck,
     Zap,
     Palette,
     StickyNote,
     TrendingUp,
     History,
+    Receipt,
 } from "lucide-react";
 
 interface SidebarPanelProps {
     activeCategory: SidebarCategory;
     onCloseMobile?: () => void;
+    sidebarCollapsed?: boolean;
+    setSidebarCollapsed?: (collapsed: boolean) => void;
 }
 
-export const SidebarPanel: React.FC<SidebarPanelProps> = ({ activeCategory, onCloseMobile }) => {
+export const SidebarPanel: React.FC<SidebarPanelProps> = ({
+    activeCategory,
+    onCloseMobile,
+    sidebarCollapsed,
+    setSidebarCollapsed
+}) => {
+    const [logoUrl, setLogoUrl] = React.useState(defaultTheme.logoUrl);
+
+    React.useEffect(() => {
+        const fetchBrand = async () => {
+            try {
+                const config = await TenantService.getConfig();
+                if (config.branding?.logoUrl) {
+                    setLogoUrl(config.branding.logoUrl);
+                }
+            } catch (error) {
+                console.error("Error fetching panel logo:", error);
+            }
+        };
+        fetchBrand();
+    }, []);
+
     const pathname = usePathname();
+    const [theme, setThemeState] = React.useState('dark'); // Minor hook usage if needed
     const isActive = (path: string) => pathname === path;
 
     const categoryData: Record<SidebarCategory, { title: string; sections: any[] }> = {
@@ -60,6 +89,7 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({ activeCategory, onCl
                     items: [
                         { name: 'Clientes/Prov', path: '/companies', icon: Users },
                         { name: 'Facturación', path: '/invoices', icon: CircleDollarSign },
+                        { name: 'Boletas', path: '/boletas', icon: StickyNote },
                     ]
                 }
             ]
@@ -88,7 +118,7 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({ activeCategory, onCl
                 {
                     label: 'DISTRIBUCIÓN',
                     items: [
-                        { name: 'Guías Despacho', path: '/logistics/dispatches', icon: StickyNote },
+                        { name: 'Guías Despacho', path: '/dispatches', icon: StickyNote },
                         { name: 'Couriers', path: '/logistics/couriers', icon: Zap },
                     ]
                 }
@@ -120,13 +150,13 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({ activeCategory, onCl
 
     return (
         <div className="flex-1 flex flex-col bg-[#1a2537] overflow-hidden w-[240px]">
-            {/* Header Section - Branding Text restored per user request */}
-            <div className="px-5 h-[64px] flex items-center border-b border-[#ffffff08]">
+            {/* Header Section - Branding Text restored with Toggle control */}
+            <div className="px-5 h-[64px] flex items-center border-b border-[#ffffff08] justify-between">
                 <div className="flex items-center gap-2">
                     <Typography color="white" className="font-extrabold tracking-tight text-white leading-none text-[20px] bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-gray-400">
                         ARTIFACT
                     </Typography>
-                    <Typography className="text-[11px] font-[900] tracking-[0.4em] mt-1 ml-0.5 uppercase bg-clip-text text-transparent bg-gradient-to-r from-[#00a1ff] via-[#4cc2ff] to-[#00a1ff] animate-pulse-slow">
+                    <Typography className="text-[12px] font-bold text-blue-400 tracking-widest ml-1 opacity-80">
                         ERP
                     </Typography>
                 </div>

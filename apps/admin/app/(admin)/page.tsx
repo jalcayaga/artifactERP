@@ -30,7 +30,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const res = await apiClient.get('/dashboard');
+        const res = await apiClient.get<any>('/dashboard');
         setData(res as DashboardData);
       } catch (e) {
         console.error("Error loading dashboard", e);

@@ -112,7 +112,8 @@ export class InvoicesService {
     tenantId: string,
     page: number,
     limit: number,
-    status?: InvoiceStatus
+    status?: InvoiceStatus,
+    dteType?: number
   ): Promise<{
     data: Invoice[]
     total: number
@@ -123,6 +124,9 @@ export class InvoicesService {
     const where: Prisma.InvoiceWhereInput = { tenantId }
     if (status) {
       where.status = status
+    }
+    if (dteType) {
+      where.dteType = dteType
     }
 
     const [data, total] = await this.prisma.$transaction([

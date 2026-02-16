@@ -19,7 +19,7 @@ export class SiiService {
      * 2. Sign Seed
      * 3. Get Token
      */
-    async getAuthToken(certPath: string, keyPath: string): Promise<string> {
+    async getToken(certPath?: string, keyPath?: string): Promise<string> {
         try {
             console.log("1. Requesting Seed from SII...");
             const seed = await this.soapClient.getSeed();

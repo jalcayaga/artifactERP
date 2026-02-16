@@ -86,23 +86,42 @@ export class DispatchesService {
         });
     }
 
-    async findAll(tenantId: string) {
-        return this.prisma.dispatch.findMany({
-            where: { tenantId },
-            include: {
-                order: {
-                    select: {
-                        id: true,
-                        user: { select: { firstName: true, lastName: true } },
-                        company: { select: { name: true } }
+    async findAll(tenantId: string, page: number = 1, limit: number = 10, orderId?: string) {
+        const skip = (page - 1) * limit;
+        const where: any = { tenantId };
+
+        if (orderId) {
+            where.orderId = orderId;
+        }
+
+        const [data, total] = await this.prisma.$transaction([
+            this.prisma.dispatch.findMany({
+                where,
+                skip,
+                take: limit,
+                include: {
+                    order: {
+                        select: {
+                            id: true,
+                            user: { select: { firstName: true, lastName: true } },
+                            company: { select: { name: true } }
+                        }
+                    },
+                    courier: {
+                        select: { name: true }
                     }
                 },
-                courier: {
-                    select: { name: true }
-                }
-            },
-            orderBy: { createdAt: 'desc' },
-        });
+                orderBy: { createdAt: 'desc' },
+            }),
+            this.prisma.dispatch.count({ where }),
+        ]);
+
+        return {
+            data,
+            total,
+            pages: Math.ceil(total / limit),
+            currentPage: page
+        };
     }
 
     async findOne(tenantId: string, id: string) {

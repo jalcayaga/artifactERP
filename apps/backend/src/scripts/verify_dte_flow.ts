@@ -3,7 +3,8 @@ import { DteService } from '../dte/dte.service';
 import { DteXmlBuilder } from '../dte/utils/dte-xml.builder';
 
 const prisma = new PrismaClient() as any;
-const dteService = new DteService(prisma as any);
+const siiService = { getToken: async () => 'mock-token' } as any;
+const dteService = new DteService(prisma as any, siiService);
 
 async function main() {
     console.log('🧪 Starting DTE Flow Verification...');

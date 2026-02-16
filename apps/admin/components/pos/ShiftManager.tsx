@@ -116,7 +116,7 @@ export default function ShiftManager() {
     if (isLoading) {
         return (
             <div className="flex flex-col items-center justify-center p-12 h-full min-h-[400px]">
-                <Spinner className="h-12 w-12 text-blue-500" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} />
+                <Spinner className="h-12 w-12 text-blue-500" onResize={undefined} onResizeCapture={undefined}  />
                 <Typography className="mt-4 text-slate-400 font-medium animate-pulse">Cargando cajas registradoras...</Typography>
             </div>
         );
@@ -193,7 +193,7 @@ export default function ShiftManager() {
                                 onClick={handleCreateDefaultRegister}
                                 disabled={isLoading}
                             >
-                                {isLoading ? <Spinner className="h-5 w-5" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} /> : 'Crear Caja Automática'}
+                                {isLoading ? <Spinner className="h-5 w-5" onResize={undefined} onResizeCapture={undefined}  /> : 'Crear Caja Automática'}
                             </Button>
                             <Button
                                 variant="text"
@@ -326,7 +326,7 @@ export default function ShiftManager() {
                         >
                             {posLoading ? (
                                 <div className="flex items-center justify-center gap-2">
-                                    <Spinner className="h-5 w-5" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} />
+                                    <Spinner className="h-5 w-5" onResize={undefined} onResizeCapture={undefined}  />
                                     <span>Abriendo...</span>
                                 </div>
                             ) : (

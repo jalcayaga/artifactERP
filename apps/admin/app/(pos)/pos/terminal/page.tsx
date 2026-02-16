@@ -19,7 +19,7 @@ export default function PosTerminalPage() {
     if (isLoading || !shift) {
         return (
             <div className="flex-1 flex items-center justify-center bg-[#020617]">
-                <Spinner className="h-12 w-12 text-blue-500" />
+                <Spinner className="h-12 w-12 text-blue-500" onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} />
             </div>
         );
     }

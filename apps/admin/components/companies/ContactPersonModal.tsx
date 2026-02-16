@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
@@ -25,8 +24,8 @@ const ContactPersonModal: React.FC<ContactPersonModalProps> = ({
   isOpen,
 }) => {
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-2xl'>
+    <Dialog onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} open={isOpen} onOpenChange={onClose}>
+      <div className="p-0">
         <DialogHeader>
           <DialogTitle>
             {contactPersonData
@@ -45,7 +44,7 @@ const ContactPersonModal: React.FC<ContactPersonModalProps> = ({
           onSave={onSave}
           onCancel={onClose}
         />
-      </DialogContent>
+      </div>
     </Dialog>
   );
 };

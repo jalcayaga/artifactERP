@@ -12,7 +12,7 @@ export default function DispatchesPage() {
     const { data: dispatches, isLoading } = useQuery({
         queryKey: ['dispatches'],
         queryFn: async () => {
-            const res = await apiClient.get('/dispatches');
+            const res = await apiClient.get<any>('/dispatches');
             return res.data;
         }
     });
@@ -29,7 +29,7 @@ export default function DispatchesPage() {
                 </div>
             </div>
 
-            <Card className="bg-slate-900 border border-white/10 overflow-hidden" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+            <Card className="bg-slate-900 border border-white/10 overflow-hidden" placeholder="" >
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
@@ -89,7 +89,7 @@ export default function DispatchesPage() {
                                         </td>
                                         <td className="p-4 text-right">
                                             <Link href={`/logistics/dispatches/${dispatch.id}`}>
-                                                <Button size="sm" variant="text" color="blue" className="flex items-center gap-2 ml-auto" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+                                                <Button size="sm" variant="text" color="blue" className="flex items-center gap-2 ml-auto" placeholder="" >
                                                     <FileText size={16} /> Ver Guía
                                                 </Button>
                                             </Link>

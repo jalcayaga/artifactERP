@@ -26,6 +26,7 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({ onSave }) => {
             brandColor: b.primaryColor || defaultTheme.brandColor,
             textColor: lightTheme.textColor || defaultTheme.textColor,
             logoUrl: b.logoUrl || defaultTheme.logoUrl,
+            secondaryLogoUrl: b.secondaryLogoUrl || defaultTheme.secondaryLogoUrl,
             radius: lightTheme.radius || defaultTheme.radius,
             font: lightTheme.font || defaultTheme.font,
           });
@@ -57,6 +58,7 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({ onSave }) => {
       const brandingPayload = {
         primaryColor: theme.brandColor,
         logoUrl: theme.logoUrl,
+        secondaryLogoUrl: theme.secondaryLogoUrl,
         lightTheme: {
           textColor: theme.textColor,
           radius: theme.radius,
@@ -138,7 +140,7 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({ onSave }) => {
 
       <div className="space-y-4">
         <div>
-          <label htmlFor="logoUrl" className="block text-sm font-medium text-gray-700">URL del Logo</label>
+          <label htmlFor="logoUrl" className="block text-sm font-medium text-gray-700">Logo Principal (Panel Expandido)</label>
           <input
             type="text"
             id="logoUrl"
@@ -146,7 +148,20 @@ const ThemeEditor: React.FC<ThemeEditorProps> = ({ onSave }) => {
             value={theme.logoUrl}
             onChange={handleChange}
             className="input-primary mt-1 block w-full"
-            placeholder="https://ejemplo.com/logo.png"
+            placeholder="https://ejemplo.com/logo-principal.png"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="secondaryLogoUrl" className="block text-sm font-medium text-gray-700">Logo Secundario (Sidebar Rail)</label>
+          <input
+            type="text"
+            id="secondaryLogoUrl"
+            name="secondaryLogoUrl"
+            value={theme.secondaryLogoUrl}
+            onChange={handleChange}
+            className="input-primary mt-1 block w-full"
+            placeholder="https://ejemplo.com/logo-sidebar.png"
           />
         </div>
 

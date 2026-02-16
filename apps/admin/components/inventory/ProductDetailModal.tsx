@@ -1,21 +1,29 @@
 import React, { useEffect, useState } from 'react';
-import { Product, Lot, formatCurrencyChilean, api,  } from '@artifact/core';;
+import { Product, Lot, formatCurrencyChilean, api, cn, formatDate } from '@artifact/core';
 import {
-  XIcon,
-  CubeIcon,
-  ArchiveBoxIcon,
-  TagIcon,
-  CheckCircleIcon,
-  XCircleIcon,
-  CreditCardIcon,
-  CalendarIcon,
-  InboxIcon,
-  PencilIcon,
-  DocumentTextIcon,
-} from '@artifact/ui';
-import { formatDate } from '@artifact/core';; // Assuming formatDate is in utils
-import LotEditModal from './LotEditModal'; // Será migrado
-import ProductPurchaseHistory from './ProductPurchaseHistory'; // Será migrado
+  X,
+  Package,
+  Archive,
+  Tag,
+  CheckCircle2,
+  AlertCircle,
+  CreditCard,
+  Calendar,
+  Layers,
+  Pencil,
+  FileText,
+  TrendingUp,
+  Boxes,
+  Info
+} from 'lucide-react';
+import {
+  Button,
+  IconButton,
+  Typography,
+  Chip
+} from "@material-tailwind/react";
+import LotEditModal from './LotEditModal';
+import ProductPurchaseHistory from './ProductPurchaseHistory';
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -31,34 +39,34 @@ const DetailItem: React.FC<{
   let displayValue: React.ReactNode;
 
   if (isCurrency && typeof value === 'number') {
-    displayValue = formatCurrencyChilean(value);
+    displayValue = <span className="text-white font-black italic">{formatCurrencyChilean(value)}</span>;
   } else if (typeof value === 'boolean') {
     displayValue = value ? (
-      <span className='flex items-center text-emerald-600 dark:text-emerald-400'>
-        <CheckCircleIcon className='w-4 h-4 mr-1.5' /> Sí
-      </span>
+      <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest">
+        <CheckCircle2 className="h-3 w-3" /> Sí
+      </div>
     ) : (
-      <span className='flex items-center text-amber-600 dark:text-amber-400'>
-        <XCircleIcon className='w-4 h-4 mr-1.5' /> No
-      </span>
+      <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-md bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] font-black uppercase tracking-widest">
+        <AlertCircle className="h-3 w-3" /> No
+      </div>
     );
   } else if (
     value === undefined ||
     value === null ||
     (typeof value === 'string' && value.trim() === '')
   ) {
-    displayValue = <span className='italic text-muted-foreground'>N/A</span>;
+    displayValue = <span className='italic text-slate-600 font-bold text-[10px] uppercase tracking-widest'>No especificado</span>;
   } else {
-    displayValue = value;
+    displayValue = <span className="text-slate-300 font-bold text-sm leading-tight tracking-tight">{value}</span>;
   }
 
   return (
-    <div className='flex flex-col sm:flex-row sm:items-start py-2'>
-      <dt className='w-full sm:w-2/5 md:w-1/3 text-sm font-medium text-muted-foreground flex items-center'>
-        {Icon && <Icon className='w-4 h-4 mr-2 opacity-70 flex-shrink-0' />}
+    <div className='flex flex-col sm:flex-row sm:items-center py-4 border-b border-white/[0.03] last:border-0 group'>
+      <dt className='w-full sm:w-1/3 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center group-hover:text-slate-400 transition-colors'>
+        {Icon && <Icon className='w-3.5 h-3.5 mr-3 text-blue-500/30 group-hover:text-blue-500 group-hover:scale-110 transition-all' />}
         {label}
       </dt>
-      <dd className='w-full sm:w-3/5 md:w-2/3 mt-1 sm:mt-0 text-sm text-foreground break-words'>
+      <dd className='w-full sm:w-2/3 mt-2 sm:mt-0'>
         {displayValue}
       </dd>
     </div>
@@ -112,195 +120,215 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
 
   if (!product) return null;
 
-  const ProductTypeIcon =
-    product.productType === 'PRODUCT' ? CubeIcon : ArchiveBoxIcon;
-
   return (
     <div
-      className='fixed inset-0 z-50 flex items-center justify-center bg-black/60 dark:bg-black/75 p-4 transition-opacity duration-300 ease-in-out'
+      className='fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 transition-all'
       onClick={onClose}
       role='dialog'
       aria-modal='true'
-      aria-labelledby='product-detail-modal-title'
     >
       <div
-        className='bg-card text-card-foreground rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden'
+        className='bg-[#1e293b]/90 backdrop-blur-2xl border border-white/[0.08] shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl overflow-hidden'
         onClick={(e) => e.stopPropagation()}
       >
-        <div className='flex items-start justify-between p-4 sm:p-5 border-b border-border'>
-          <div className='flex items-center'>
-            {product.images && product.images.length > 0 ? (
-              <img
-                src={product.images[0]}
-                alt={product.name}
-                className='w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover mr-3 sm:mr-4'
-              />
-            ) : (
-              <div className='w-16 h-16 sm:w-20 sm:h-20 rounded-lg bg-muted flex items-center justify-center mr-3 sm:mr-4'>
-                <ProductTypeIcon className='w-8 h-8 sm:w-10 sm:h-10 text-muted-foreground' />
+        <div className='flex items-center justify-between p-6 bg-white/[0.02] border-b border-white/[0.05]'>
+          <div className='flex items-center gap-5'>
+            <div className="relative group">
+              {product.images && product.images.length > 0 ? (
+                <img
+                  src={product.images[0]}
+                  alt={product.name}
+                  className='w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover ring-2 ring-white/5 transition-transform group-hover:scale-105'
+                />
+              ) : (
+                <div className='w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-slate-800/50 flex items-center justify-center ring-2 ring-white/5'>
+                  <Package className='w-8 h-8 sm:w-10 sm:h-10 text-slate-500' />
+                </div>
+              )}
+              <div className="absolute -bottom-2 -right-2 p-1.5 bg-blue-600 rounded-lg shadow-lg">
+                {product.productType === 'PRODUCT' ? <Boxes className="w-3 h-3 text-white" /> : <Archive className="w-3 h-3 text-white" />}
               </div>
-            )}
+            </div>
             <div>
-              <h2
-                id='product-detail-modal-title'
-                className='text-lg sm:text-xl font-semibold text-foreground leading-tight'
-              >
+              <Typography variant="h5" color="white" className="font-black uppercase italic tracking-tight leading-tight" placeholder="" >
                 {product.name}
-              </h2>
-              <span
-                className={`mt-1 px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${product.productType === 'PRODUCT'
-                    ? 'bg-primary/10 text-primary'
-                    : 'bg-secondary/10 text-secondary-foreground'
-                  }`}
-              >
-                {product.productType}
-              </span>
+              </Typography>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
+                  {product.sku || 'SIN SKU'}
+                </span>
+                <Chip
+                  value={product.productType === 'PRODUCT' ? 'Producto' : 'Servicio'}
+                  size="sm"
+                  color={product.productType === 'PRODUCT' ? 'blue' : 'purple'}
+                  className="rounded-full py-0 px-2 text-[9px] font-black uppercase tracking-widest"
+                  placeholder="" 
+                />
+              </div>
             </div>
           </div>
-          <button
+          <IconButton
+            variant="text"
+            color="white"
             onClick={onClose}
-            className='p-1.5 rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring transition-colors ml-2'
-            aria-label='Cerrar modal'
+            className="rounded-full bg-white/5 hover:bg-white/10"
+            placeholder=""  onResize={undefined} onResizeCapture={undefined}
           >
-            <XIcon className='w-5 h-5' />
-          </button>
+            <X className='w-5 h-5' />
+          </IconButton>
         </div>
 
-        <div className='p-4 sm:p-5 space-y-4 overflow-y-auto'>
-          <dl className='divide-y divide-border/50'>
-            <DetailItem label='SKU' value={product.sku} icon={TagIcon} />
-            <DetailItem
-              label='Descripción'
-              value={
-                <p className='whitespace-pre-wrap'>{product.description}</p>
-              }
-            />
-            <DetailItem label='Categoría' value={product.category} />
-            <DetailItem
-              label='Precio Venta (sin IVA)'
-              value={product.price}
-              icon={CreditCardIcon}
-              isCurrency={true}
-            />
-            {product.productType === 'PRODUCT' &&
-              product.unitPrice !== undefined && (
+        <div className='p-8 space-y-8 overflow-y-auto custom-scrollbar'>
+          <section>
+            <Typography variant="small" color="blue" className="font-black uppercase tracking-[0.2em] mb-4 flex items-center gap-2" placeholder="" >
+              <Info className="w-4 h-4" /> Especificaciones Generales
+            </Typography>
+            <dl className='bg-white/[0.02] border border-white/[0.05] rounded-2xl p-6'>
+              <DetailItem label='Categoría' value={product.category} icon={Layers} />
+              <DetailItem
+                label='Descripción'
+                value={product.description}
+                icon={FileText}
+              />
+              <DetailItem
+                label='Precio Venta'
+                value={product.price}
+                icon={TrendingUp}
+                isCurrency={true}
+              />
+              {product.productType === 'PRODUCT' && product.unitPrice !== undefined && (
                 <DetailItem
-                  label='Precio Costo (sin IVA)'
+                  label='Precio Costo'
                   value={product.unitPrice}
-                  icon={CreditCardIcon}
+                  icon={CreditCard}
                   isCurrency={true}
                 />
               )}
-            {product.productType === 'PRODUCT' && (
-              <DetailItem
-                label='Stock Actual'
-                value={product.totalStock}
-                icon={ArchiveBoxIcon}
-              />
-            )}
-            <DetailItem label='Publicado' value={product.isPublished} />
-            {product.longDescription && (
-              <DetailItem
-                label='Descripción Larga'
-                value={
-                  <p className='whitespace-pre-wrap'>
-                    {product.longDescription}
-                  </p>
-                }
-              />
-            )}
-            {product.technicalSheetUrl && (
-              <DetailItem
-                label='Ficha Técnica'
-                icon={DocumentTextIcon}
-                value={
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002'}${product.technicalSheetUrl}`}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-secondary hover:bg-secondary/80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary'
-                  >
-                    Descargar PDF
-                  </a>
-                }
-              />
-            )}
-          </dl>
+              {product.productType === 'PRODUCT' && (
+                <DetailItem
+                  label='Stock Disponible'
+                  value={`${product.totalStock} unidades`}
+                  icon={Boxes}
+                />
+              )}
+              <DetailItem label='Visibilidad POS' value={product.isPublished} icon={Package} />
+              {product.technicalSheetUrl && (
+                <DetailItem
+                  label='Ficha Técnica'
+                  icon={FileText}
+                  value={
+                    <Button
+                      size="sm"
+                      variant="gradient"
+                      color="blue"
+                      className="rounded-xl flex items-center gap-2 font-black uppercase tracking-widest text-[10px]"
+                      onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3002'}${product.technicalSheetUrl}`, '_blank')}
+                      placeholder=""  onResize={undefined} onResizeCapture={undefined}
+                    >
+                      <FileText className="w-4 h-4" /> Descargar PDF
+                    </Button>
+                  }
+                />
+              )}
+            </dl>
+          </section>
 
           {product.productType === 'PRODUCT' && (
-            <div>
-              <h3 className='text-md font-semibold text-foreground mb-2 flex items-center'>
-                <InboxIcon className='w-5 h-5 mr-2 opacity-80' />
-                Lotes de Stock Activos
-              </h3>
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Typography variant="small" color="blue" className="font-black uppercase tracking-[0.2em] flex items-center gap-2" placeholder="" >
+                  <Archive className="w-4 h-4" /> Desglose de Lotes
+                </Typography>
+                <Chip
+                  value={`${lots.length} Lotes`}
+                  size="sm"
+                  className="bg-slate-800 text-[10px] font-black uppercase tracking-widest rounded-md"
+                  variant="ghost"
+                  placeholder="" 
+                />
+              </div>
+
               {isLoadingLots ? (
-                <p className='text-sm text-muted-foreground'>
-                  Cargando lotes...
-                </p>
+                <div className="flex items-center justify-center p-12 bg-white/[0.02] rounded-2xl border border-dashed border-white/5">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                </div>
               ) : lots.length > 0 ? (
-                <div className='border border-border rounded-lg overflow-hidden'>
-                  <ul className='divide-y divide-border/50'>
+                <div className='bg-white/[0.02] border border-white/[0.05] rounded-2xl overflow-hidden'>
+                  <ul className='divide-y divide-white/[0.03]'>
                     {lots.map((lot) => (
                       <li
                         key={lot.id}
-                        className='p-2.5 grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm'
+                        className='p-4 hover:bg-white/[0.02] transition-colors flex items-center justify-between gap-4'
                       >
-                        <div className='font-medium'>
-                          #{lot.lotNumber || 'N/A'}
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-slate-900 rounded-xl border border-white/5">
+                            <Tag className="w-4 h-4 text-slate-500" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-white uppercase tracking-tight">#{lot.lotNumber || 'SIN NUM'}</p>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Lote de Stock</p>
+                          </div>
                         </div>
-                        <div>
-                          <span className='font-semibold'>Cant:</span>{' '}
-                          {lot.currentQuantity}
-                        </div>
-                        <div className='text-muted-foreground'>
-                          <span className='font-semibold text-foreground'>
-                            Costo:
-                          </span>{' '}
-                          {formatCurrencyChilean(lot.purchasePrice)}
-                        </div>
-                        <div className='text-muted-foreground'>
-                          <span className='font-semibold text-foreground'>
-                            Venc:
-                          </span>{' '}
-                          {lot.expirationDate
-                            ? formatDate(lot.expirationDate)
-                            : 'N/A'}
-                        </div>
-                        <div className='flex items-center justify-end'>
-                          <button
+
+                        <div className="flex items-center gap-8">
+                          <div className="text-right">
+                            <p className="text-xs font-black text-white">{lot.currentQuantity}</p>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Unidades</p>
+                          </div>
+                          <div className="text-right hidden sm:block">
+                            <p className="text-xs font-black text-blue-400">{formatCurrencyChilean(lot.purchasePrice)}</p>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Costo Uni.</p>
+                          </div>
+                          <div className="text-right hidden sm:block">
+                            <p className="text-xs font-black text-white">{lot.expirationDate ? formatDate(lot.expirationDate) : 'N/A'}</p>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Vencimiento</p>
+                          </div>
+                          <IconButton
+                            size="sm"
+                            variant="text"
+                            color="blue"
+                            className="bg-blue-500/5 hover:bg-blue-500/10"
                             onClick={() => setEditingLot(lot)}
-                            className='p-1 text-muted-foreground hover:text-primary'
+                            placeholder=""  onResize={undefined} onResizeCapture={undefined}
                           >
-                            <PencilIcon className='w-4 h-4' />
-                          </button>
+                            <Pencil className='w-4 h-4' />
+                          </IconButton>
                         </div>
                       </li>
                     ))}
                   </ul>
                 </div>
               ) : (
-                <p className='text-sm text-muted-foreground italic'>
-                  No hay lotes activos para este producto.
-                </p>
+                <div className="p-12 bg-white/[0.02] rounded-2xl border border-dashed border-white/5 text-center">
+                  <Archive className="w-8 h-8 text-slate-700 mx-auto mb-3" />
+                  <p className='text-xs font-bold text-slate-500 uppercase tracking-widest'>Sin lotes operativos</p>
+                </div>
               )}
-            </div>
+            </section>
           )}
 
           {product.productType === 'PRODUCT' && (
-            <div className='mt-4'>
-              <ProductPurchaseHistory productId={product.id} />
-            </div>
+            <section className="space-y-4">
+              <Typography variant="small" color="blue" className="font-black uppercase tracking-[0.2em] flex items-center gap-2" placeholder="" >
+                <Calendar className="w-4 h-4" /> Historial de Movimientos
+              </Typography>
+              <div className='bg-white/[0.02] border border-white/[0.05] rounded-3xl p-2'>
+                <ProductPurchaseHistory productId={product.id} />
+              </div>
+            </section>
           )}
         </div>
 
-        <div className='px-4 py-3 sm:px-5 bg-muted/50 border-t border-border flex justify-end'>
-          <button
-            type='button'
+        <div className='p-6 bg-white/[0.02] border-t border-white/[0.05] flex justify-end gap-3'>
+          <Button
+            variant="text"
+            color="white"
             onClick={onClose}
-            className='px-4 py-2 border border-border text-sm font-medium rounded-md text-foreground bg-background hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring dark:focus:ring-offset-card transition-colors'
+            className="font-black uppercase tracking-widest text-[10px]"
+            placeholder=""  onResize={undefined} onResizeCapture={undefined}
           >
-            Cerrar
-          </button>
+            Cerrar Detalle
+          </Button>
         </div>
       </div>
       {editingLot && (

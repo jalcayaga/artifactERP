@@ -24,6 +24,7 @@ export * from './lib/services/userService';
 export * from './lib/services/categoryService';
 export * from './lib/services/warehouseService';
 export * from './lib/services/receptionService';
+export * from './lib/services/dispatchService';
 
 // Utilities
 export { default as fetchWithAuth } from './lib/fetchWithAuth';

@@ -124,7 +124,7 @@ const PosView = () => {
                 // Using apiClient since I don't have ProductService imported yet
                 // Assuming standard endpoint /products
                 const { apiClient } = require('@/lib/api'); // Dynamic require to avoid top-level import issue in this block
-                const res = await apiClient.get('/products');
+                const res = await apiClient.get<any>('/products');
                 // Check response structure
                 const list = Array.isArray(res) ? res : (res as any).data || [];
                 setProducts(list);
@@ -354,7 +354,7 @@ const PosView = () => {
                             labelProps={{ className: "!text-white/70" }}
                             value={selectedCompanyId || ''}
                             onChange={(val) => setSelectedCompanyId(val || null)}
-                            placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
+                            placeholder={undefined} onResize={undefined} onResizeCapture={undefined}
                         >
                             {companies.map(c => (
                                 <Option key={c.id} value={c.id}>{c.name}</Option>
@@ -411,7 +411,7 @@ const PosView = () => {
                             <ShoppingCartIcon className="h-5 w-5 text-blue-400" />
                             <Typography color="white" className="font-bold">Carrito ({cart.reduce((acc, i) => acc + i.quantity, 0)})</Typography>
                         </div>
-                        <IconButton variant="text" color="red" onClick={clearCart} placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                        <IconButton variant="text" color="red" onClick={clearCart} placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                             <TrashIcon className="h-5 w-5" />
                         </IconButton>
                     </div>
@@ -424,18 +424,18 @@ const PosView = () => {
                             </div>
                         ) : (
                             cart.map((item) => (
-                                <Card key={item.id} className="bg-slate-800 border border-white/5" placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
-                                    <CardBody className="p-3 flex justify-between items-center" placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                                <Card key={item.id} className="bg-slate-800 border border-white/5" placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
+                                    <CardBody className="p-3 flex justify-between items-center" placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                                         <div className="flex-1">
                                             <Typography color="white" className="font-bold text-sm">{item.name}</Typography>
                                             <Typography className="text-blue-400 text-xs">${item.price.toLocaleString()}</Typography>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <IconButton size="sm" variant="text" color="white" onClick={() => removeFromCart(item.id)} placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                                            <IconButton size="sm" variant="text" color="white" onClick={() => removeFromCart(item.id)} placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                                                 <MinusIcon className="h-4 w-4" />
                                             </IconButton>
                                             <span className="text-white font-bold">{item.quantity}</span>
-                                            <IconButton size="sm" variant="text" color="white" onClick={() => addToCart({ ...item, quantity: 1 })} placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                                            <IconButton size="sm" variant="text" color="white" onClick={() => addToCart({ ...item, quantity: 1 })} placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                                                 <PlusIcon className="h-4 w-4" />
                                             </IconButton>
                                         </div>
@@ -465,53 +465,53 @@ const PosView = () => {
                             size="lg"
                             disabled={cart.length === 0 || !shift || isCheckingOut}
                             onClick={handleInitiateCheckout}
-                            placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
+                            placeholder={undefined} onResize={undefined} onResizeCapture={undefined}
                         >
-                            {isCheckingOut ? <Spinner className="h-5 w-5 mx-auto" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} /> : "PAGAR"}
+                            {isCheckingOut ? <Spinner className="h-5 w-5 mx-auto" onResize={undefined} onResizeCapture={undefined} /> : "PAGAR"}
                         </Button>
                     </div>
                 </div>
             </div>
 
             {/* Payment Modal */}
-            <Dialog open={paymentModalOpen} handler={() => !isCheckingOut && setPaymentModalOpen(false)} className="bg-slate-900 border border-white/10" size="lg" placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
-                <DialogHeader className="justify-between" placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+            <Dialog onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} open={paymentModalOpen} handler={() => !isCheckingOut && setPaymentModalOpen(false)} className="bg-slate-900 border border-white/10" size="lg" placeholder={undefined}>
+                <DialogHeader className="justify-between" placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                     <Typography variant="h5" color="white">Seleccionar Método de Pago</Typography>
-                    <IconButton variant="text" color="white" onClick={() => setPaymentModalOpen(false)} disabled={digitalPaymentStep === 'PROCESSING'} placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                    <IconButton variant="text" color="white" onClick={() => setPaymentModalOpen(false)} disabled={digitalPaymentStep === 'PROCESSING'} placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                         <XMarkIcon className="h-5 w-5" />
                     </IconButton>
                 </DialogHeader>
-                <DialogBody placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                <DialogBody placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                     <div className="grid grid-cols-2 gap-4">
                         {digitalPaymentStep === 'SELECT' ? (
                             <>
-                                <Button onClick={() => handleProcessPayment(PaymentMethod.CASH)} className="h-24 bg-green-600/20 border border-green-500/50 hover:bg-green-600/40 flex flex-col items-center justify-center gap-2" placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                                <Button onClick={() => handleProcessPayment(PaymentMethod.CASH)} className="h-24 bg-green-600/20 border border-green-500/50 hover:bg-green-600/40 flex flex-col items-center justify-center gap-2" placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                                     <BanknotesIcon className="h-8 w-8 text-green-400" />
                                     <span className="text-white font-bold">Efectivo</span>
                                 </Button>
-                                <Button onClick={() => handleProcessPayment(PaymentMethod.DEBIT_CARD)} className="h-24 bg-blue-600/20 border border-blue-500/50 hover:bg-blue-600/40 flex flex-col items-center justify-center gap-2" placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                                <Button onClick={() => handleProcessPayment(PaymentMethod.DEBIT_CARD)} className="h-24 bg-blue-600/20 border border-blue-500/50 hover:bg-blue-600/40 flex flex-col items-center justify-center gap-2" placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                                     <CreditCardIcon className="h-8 w-8 text-blue-400" />
                                     <span className="text-white font-bold">Débito/Crédito (POS)</span>
                                 </Button>
-                                <Button onClick={() => handleProcessPayment(PaymentMethod.WEBPAY)} className="h-24 bg-orange-600/20 border border-orange-500/50 hover:bg-orange-600/40 flex flex-col items-center justify-center gap-2" placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                                <Button onClick={() => handleProcessPayment(PaymentMethod.WEBPAY)} className="h-24 bg-orange-600/20 border border-orange-500/50 hover:bg-orange-600/40 flex flex-col items-center justify-center gap-2" placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                                     <CreditCardIcon className="h-8 w-8 text-orange-400" />
                                     <span className="text-white font-bold">Webpay Plus</span>
                                 </Button>
-                                <Button onClick={() => handleProcessPayment(PaymentMethod.MERCADO_PAGO)} className="h-24 bg-cyan-600/20 border border-cyan-500/50 hover:bg-cyan-600/40 flex flex-col items-center justify-center gap-2" placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                                <Button onClick={() => handleProcessPayment(PaymentMethod.MERCADO_PAGO)} className="h-24 bg-cyan-600/20 border border-cyan-500/50 hover:bg-cyan-600/40 flex flex-col items-center justify-center gap-2" placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                                     <QRCodeSVG value="MP" size={32} fgColor="#22d3ee" bgColor="transparent" />
                                     <span className="text-white font-bold">Mercado Pago QR</span>
                                 </Button>
                             </>
                         ) : digitalPaymentStep === 'PROCESSING' ? (
                             <div className="col-span-2 flex flex-col items-center py-12">
-                                <Spinner className="h-12 w-12 text-blue-500 mb-4" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} />
+                                <Spinner className="h-12 w-12 text-blue-500 mb-4" onResize={undefined} onResizeCapture={undefined} />
                                 <Typography color="white" className="font-bold">Procesando...</Typography>
                             </div>
                         ) : digitalPaymentStep === 'WAITING_CONFIRMATION' ? (
                             <div className="col-span-2 flex flex-col items-center py-8">
                                 {activePaymentProvider === 'WEBPAY' && (
                                     <div className="text-center">
-                                        <Spinner className="h-12 w-12 text-orange-500 mb-4 mx-auto" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} />
+                                        <Spinner className="h-12 w-12 text-orange-500 mb-4 mx-auto" onResize={undefined} onResizeCapture={undefined} />
                                         <Typography color="white" className="font-bold mb-2">Pago Webpay iniciado</Typography>
                                         <Typography className="text-slate-400 text-sm">Por favor complete el pago en la nueva ventana.</Typography>
                                         <Typography className="text-slate-500 text-xs mt-4">Esperando confirmación...</Typography>
@@ -536,13 +536,13 @@ const PosView = () => {
                             <div className="col-span-2 flex flex-col items-center py-8 text-red-500">
                                 <ExclamationTriangleIcon className="h-16 w-16 mb-4" />
                                 <Typography variant="h4" color="red">Error al procesar</Typography>
-                                <Button variant="text" color="white" onClick={() => setDigitalPaymentStep('SELECT')} className="mt-4" placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>Intentar de nuevo</Button>
+                                <Button variant="text" color="white" onClick={() => setDigitalPaymentStep('SELECT')} className="mt-4" placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>Intentar de nuevo</Button>
                             </div>
                         )}
                     </div>
                 </DialogBody>
-                <DialogFooter placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
-                    <Button variant="text" color="gray" onClick={() => setPaymentModalOpen(false)} disabled={isCheckingOut} placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                <DialogFooter placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
+                    <Button variant="text" color="gray" onClick={() => setPaymentModalOpen(false)} disabled={isCheckingOut} placeholder={undefined} onResize={undefined} onResizeCapture={undefined}>
                         Cerrar
                     </Button>
                 </DialogFooter>

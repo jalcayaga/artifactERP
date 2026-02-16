@@ -12,7 +12,7 @@ export const InvoiceService = {
   async getAllInvoices(
     page: number = 1,
     limit: number = 10,
-    filters: { status?: InvoiceStatus; companyId?: string } = {}
+    filters: { status?: InvoiceStatus; companyId?: string; dteType?: number } = {}
   ): Promise<PaginatedResponse<Invoice>> {
     const params = new URLSearchParams({
       page: page.toString(),
@@ -23,6 +23,9 @@ export const InvoiceService = {
     }
     if (filters.companyId) {
       params.append('companyId', filters.companyId);
+    }
+    if (filters.dteType) {
+      params.append('dteType', filters.dteType.toString());
     }
     const data = await fetchWithAuth(`/invoices?${params.toString()}`);
     return {

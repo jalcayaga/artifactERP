@@ -1,33 +1,60 @@
 'use client';
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { Sale, OrderStatus, formatCurrencyChilean, cn } from '@artifact/core';
-import { useCompany, SaleService, InvoiceService } from '@artifact/core/client';
+import { Sale, OrderStatus, formatCurrencyChilean, UserRole } from '@artifact/core';
+import { useCompany, SaleService, InvoiceService, useAuth } from '@artifact/core/client';
 import { useRouter } from 'next/navigation';
-import { PlusIcon, EyeIcon, PencilIcon, TrashIcon, ShoppingCartIcon, DocumentTextIcon, MoreVertical, PlusCircle } from 'lucide-react';
+import {
+  Plus,
+  Eye,
+  Edit2,
+  Trash2,
+  ShoppingCart,
+  FileText,
+  MoreVertical,
+  PlusCircle,
+  Search,
+  Filter,
+  ArrowUpRight,
+  TrendingUp,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
+  Package,
+  ArrowDownLeft,
+  ChevronRight,
+  Building2,
+  Calendar,
+  Receipt
+} from 'lucide-react';
 import {
   Card,
-  CardContent,
+  Typography,
   Button,
-  DataTable,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from '@artifact/ui';
-import { ColumnDef } from '@tanstack/react-table';
+  IconButton,
+  Input,
+  Chip,
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+} from "@material-tailwind/react";
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import SaleForm from './SaleForm';
 import SaleDetailModal from './SaleDetailModal';
 import ConfirmationModal from '@/components/common/ConfirmationModal';
+import { formatDate } from '@artifact/core';
 
 const PAGE_SIZE = 10;
+const allowedRoles: UserRole[] = [UserRole.ADMIN, UserRole.EDITOR, UserRole.VIEWER];
 
 const SalesView: React.FC = () => {
-  const { activeCompany, isLoading: isCompanyLoading, error: companyError } = useCompany();
+  const { activeCompany } = useCompany();
+  const { isAuthenticated, currentUser, token } = useAuth();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const [showSaleForm, setShowSaleForm] = useState(false);
   const [editingSale, setEditingSale] = useState<Sale | null>(null);
@@ -35,18 +62,19 @@ const SalesView: React.FC = () => {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [saleToDelete, setSaleToDelete] = useState<Sale | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const hasAccess = isAuthenticated && currentUser?.role && allowedRoles.includes(currentUser.role as UserRole);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [activeCompany?.id]);
 
   const salesQuery = useQuery({
-    queryKey: ['sales', activeCompany?.id, currentPage],
-    enabled: Boolean(activeCompany),
-    placeholderData: (prev: any) => prev,
-    queryFn: async ({ queryKey }) => {
-      const [, , page] = queryKey;
-      const response = await SaleService.getAllSales(page as number, PAGE_SIZE);
+    queryKey: ['sales', activeCompany?.id, currentPage, token],
+    enabled: Boolean(activeCompany && token && hasAccess),
+    queryFn: async () => {
+      const response = await SaleService.getAllSales(currentPage, PAGE_SIZE);
       return response;
     },
   });
@@ -64,18 +92,11 @@ const SalesView: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['sales'] });
     },
     onError: (error: any) => {
-      console.error('Error deleting sale:', error);
       toast.error(error?.message || 'Error al eliminar la venta.');
     },
     onSettled: () => {
       setSaleToDelete(null);
       setShowDeleteConfirmModal(false);
-      setViewingSale((prev) => {
-        if (prev && prev.id === saleToDelete?.id) {
-          return null;
-        }
-        return prev;
-      });
     },
   });
 
@@ -88,326 +109,299 @@ const SalesView: React.FC = () => {
     try {
       const detailedSale = await SaleService.getSaleById(sale.id);
       setEditingSale(detailedSale);
+      setShowSaleForm(true);
     } catch (err) {
-      console.error('Error fetching sale details:', err);
-      toast.error(
-        err instanceof Error ? err.message : 'Error al cargar los detalles de la venta.'
-      );
-      setEditingSale(sale);
+      toast.error('Error al cargar los detalles de la venta.');
     }
-    setShowSaleForm(true);
   }, []);
-
-  const handleDeleteSaleRequest = useCallback((sale: Sale) => {
-    setSaleToDelete(sale);
-    setShowDeleteConfirmModal(true);
-  }, []);
-
-  const handleConfirmDeleteSale = useCallback(() => {
-    if (saleToDelete) {
-      deleteSaleMutation.mutate(saleToDelete.id);
-    }
-  }, [saleToDelete, deleteSaleMutation]);
-
-  const handleCloseDeleteConfirmModal = useCallback(() => {
-    setSaleToDelete(null);
-    setShowDeleteConfirmModal(false);
-  }, []);
-
-  const handleSaveSale = useCallback(() => {
-    setShowSaleForm(false);
-    setEditingSale(null);
-    queryClient.invalidateQueries({ queryKey: ['sales'] });
-  }, [queryClient]);
-
-  const handleCancelSaleForm = useCallback(() => {
-    setShowSaleForm(false);
-    setEditingSale(null);
-  }, []);
-
-  const handleViewSale = useCallback((sale: Sale) => {
-    setViewingSale(sale);
-  }, []);
-
-  const handleCloseSaleDetailModal = useCallback(() => {
-    setViewingSale(null);
-  }, []);
-
-  const handlePageChange = (newPage: number) => {
-    if (newPage < 1 || newPage > totalPages) return;
-    setCurrentPage(newPage);
-  };
 
   const handleGenerateInvoice = async (orderId: string) => {
     try {
       const invoice = await InvoiceService.createInvoiceFromOrder(orderId);
-      toast.success(`Factura ${invoice.invoiceNumber} creada exitosamente.`);
+      toast.success(`Factura ${invoice.invoiceNumber} creada exitosamente.`, {
+        icon: <Receipt className="w-4 h-4 text-emerald-500" />
+      });
       queryClient.invalidateQueries({ queryKey: ['sales'] });
     } catch (error: any) {
-      console.error('Error creating invoice:', error);
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        'Error al crear la factura.';
-      toast.error(message);
+      toast.error(error?.message || 'Error al crear la factura.');
     }
   };
 
-  const columns = useMemo<ColumnDef<Sale>[]>(() => {
-    return [
-      {
-        id: 'saleId',
-        header: 'ID Venta',
-        accessorFn: (sale) => sale.id,
-        cell: ({ row }) => (
-          <span className='font-mono text-muted-foreground'>
-            {row.original.id.substring(0, 8)}...
-          </span>
-        ),
-      },
-      {
-        id: 'company',
-        header: 'Empresa',
-        accessorFn: (sale) => sale.company?.name ?? 'Sin empresa',
-        cell: ({ row }) => {
-          const sale = row.original;
-          return (
-            <div>
-              <div className='font-semibold text-slate-200 text-[14px]'>{sale.company?.name ?? 'Sin empresa'}</div>
-              <div className='text-xs text-slate-400 sm:hidden'>
-                {new Date(sale.createdAt).toLocaleDateString()} · Total:{' '}
-                {formatCurrencyChilean(sale.grandTotalAmount)}
-              </div>
-            </div>
-          );
-        },
-      },
-      {
-        accessorKey: 'createdAt',
-        header: 'Fecha',
-        cell: ({ row }) => (
-          <span className='text-muted-foreground'>
-            {new Date(row.original.createdAt).toLocaleDateString()}
-          </span>
-        ),
-      },
-      {
-        id: 'subTotal',
-        header: 'Subtotal',
-        cell: ({ row }) => (
-          <span className='text-muted-foreground'>
-            {formatCurrencyChilean(row.original.subTotalAmount)}
-          </span>
-        ),
-      },
-      {
-        id: 'vat',
-        header: 'IVA',
-        cell: ({ row }) => (
-          <span className='text-muted-foreground'>
-            {formatCurrencyChilean(row.original.vatAmount)}
-          </span>
-        ),
-      },
-      {
-        id: 'total',
-        header: 'Total',
-        cell: ({ row }) => (
-          <span className='font-bold text-[#5d87ff]'>
-            {formatCurrencyChilean(row.original.grandTotalAmount)}
-          </span>
-        ),
-      },
-      {
-        id: 'actions',
-        header: 'Acciones',
-        cell: ({ row }) => {
-          const sale = row.original;
-          return (
-            <div className='flex justify-center'>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className="w-10 h-10 rounded-full text-slate-400 hover:text-white hover:bg-white/[0.05] transition-all"
-                  >
-                    <MoreVertical className="w-5 h-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-[180px] bg-[#1a2537] border-white/[0.08] shadow-2xl">
-                  <DropdownMenuItem onClick={() => handleViewSale(sale)} className="gap-2 cursor-pointer py-2.5">
-                    <EyeIcon className="w-4 h-4 text-[#5d87ff]" />
-                    <span className="font-medium">Ver Detalles</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleEditSale(sale)} className="gap-2 cursor-pointer py-2.5">
-                    <PencilIcon className="w-4 h-4 text-orange-400" />
-                    <span className="font-medium">Editar Venta</span>
-                  </DropdownMenuItem>
-
-                  {(sale.status === OrderStatus.DELIVERED || sale.status === OrderStatus.SHIPPED) && !sale.invoice && (
-                    <DropdownMenuItem onClick={() => handleGenerateInvoice(sale.id)} className="gap-2 cursor-pointer py-2.5">
-                      <DocumentTextIcon className="w-4 h-4 text-emerald-400" />
-                      <span className="font-medium">Generar Factura</span>
-                    </DropdownMenuItem>
-                  )}
-
-                  <DropdownMenuSeparator className="bg-white/[0.05]" />
-                  <DropdownMenuItem
-                    onClick={() => handleDeleteSaleRequest(sale)}
-                    className="gap-2 cursor-pointer py-2.5 text-red-400 focus:text-red-400 focus:bg-red-400/10"
-                  >
-                    <TrashIcon className="w-4 h-4" />
-                    <span className="font-medium">Eliminar</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          );
-        },
-      },
-    ];
-  }, [handleDeleteSaleRequest, handleEditSale, handleViewSale, handleGenerateInvoice]);
-
-  if (isCompanyLoading) {
-    return <div className='text-center py-8'>Cargando datos de la empresa...</div>;
-  }
-
-  if (companyError) {
-    return <div className='text-center py-8 text-destructive'>{companyError}</div>;
-  }
+  const getStatusBadge = (status: OrderStatus) => {
+    const config = {
+      [OrderStatus.PENDING]: { color: 'bg-orange-500/10 text-orange-400 border-orange-500/20', icon: Clock, label: 'Pendiente' },
+      [OrderStatus.CONFIRMED]: { color: 'bg-blue-500/10 text-blue-400 border-blue-500/20', icon: CheckCircle2, label: 'Confirmada' },
+      [OrderStatus.PROCESSING]: { color: 'bg-purple-500/10 text-purple-400 border-purple-500/20', icon: Package, label: 'Procesando' },
+      [OrderStatus.SHIPPED]: { color: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20', icon: ArrowUpRight, label: 'Enviada' },
+      [OrderStatus.DELIVERED]: { color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20', icon: CheckCircle2, label: 'Entregada' },
+      [OrderStatus.CANCELLED]: { color: 'bg-red-500/10 text-red-400 border-red-500/20', icon: XCircle, label: 'Cancelada' },
+    };
+    const { color, icon: Icon, label } = config[status] || config[OrderStatus.PENDING];
+    return (
+      <Chip
+        value={label}
+        size="sm"
+        icon={<Icon className="w-3 h-3" />}
+        className={`${color} text-[9px] font-black uppercase tracking-widest rounded-lg px-2 border`}
+        
+      />
+    );
+  };
 
   if (!activeCompany) {
     return (
-      <div className='text-center py-8'>
-        Por favor, selecciona una empresa para ver sus ventas.
+      <div className="flex flex-col items-center justify-center h-[60vh] text-center animate-in fade-in duration-700">
+        <ShoppingCart className="w-16 h-16 text-slate-500 opacity-20 mb-6" />
+        <Typography variant="h4" color="white" className="font-black uppercase tracking-tighter italic" placeholder="" >
+          Actuar desde una <span className="text-blue-500">Organización</span>
+        </Typography>
+        <Typography className="text-slate-500 font-bold uppercase tracking-widest text-xs mt-2" placeholder="" >
+          Selecciona una empresa para gestionar sus flujos de ventas.
+        </Typography>
       </div>
     );
-  }
-
-  if (salesQuery.isLoading) {
-    return <div className='text-center py-8'>Cargando ventas...</div>;
-  }
-
-  if (salesQuery.isError) {
-    const message =
-      salesQuery.error instanceof Error
-        ? salesQuery.error.message
-        : 'Error al cargar las ventas.';
-    return <div className='text-center py-8 text-destructive'>{message}</div>;
   }
 
   if (showSaleForm) {
     return (
       <SaleForm
         saleData={editingSale}
-        onSave={handleSaveSale}
-        onCancel={handleCancelSaleForm}
+        onSave={() => {
+          setShowSaleForm(false);
+          setEditingSale(null);
+          queryClient.invalidateQueries({ queryKey: ['sales'] });
+        }}
+        onCancel={() => setShowSaleForm(false)}
       />
     );
   }
 
   return (
-    <>
-      <div className='space-y-6 lg:space-y-8'>
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 mt-8 px-1">
-          <div>
-            <h1 className="text-[32px] font-bold text-white tracking-tight">Ventas</h1>
-            <p className="text-slate-400 text-[15px] font-normal">Gestiona y monitorea todas las transacciones comerciales.</p>
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-6">
+      {/* Premium Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+            <ShoppingCart className="w-8 h-8 text-white" />
           </div>
-          <Button
-            className="bg-[#5d87ff] hover:bg-[#4f73d9] text-white px-6 py-6 rounded-xl font-semibold shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-95 flex items-center gap-2 h-12"
-            onClick={() => router.push('/sales/new')}
-          >
-            <PlusCircle className="w-5 h-5" />
-            Nueva Venta
-          </Button>
+          <div>
+            <Typography variant="h3" color="white" className="font-black uppercase italic tracking-tighter leading-none" placeholder="" >
+              Gestión de <span className="text-blue-500">Ventas</span>
+            </Typography>
+            <Typography variant="small" className="text-slate-500 font-bold uppercase tracking-[0.2em] mt-2 flex items-center gap-2" placeholder="" >
+              <TrendingUp className="w-4 h-4 text-blue-500/50" /> Pipeline de ingresos y flujo comercial
+            </Typography>
+          </div>
         </div>
 
-        <Card className='overflow-hidden border-white/[0.05] bg-transparent shadow-none'>
-          <CardContent className='p-0'>
-            <DataTable<Sale>
-              columns={columns}
-              data={sales}
-              filterColumn='company'
-              filterPlaceholder='Buscar por empresa...'
-              hidePagination
-              emptyState={
-                <div className='text-center py-12 px-4'>
-                  <ShoppingCartIcon className='mx-auto h-16 w-16 text-muted-foreground opacity-40' />
-                  <h3 className='mt-3 text-xl font-semibold text-foreground'>
-                    No hay ventas registradas
-                  </h3>
-                  <p className='mt-1.5 text-sm text-muted-foreground'>
-                    Comienza creando una nueva venta para verla listada aquí.
-                  </p>
-                  <div className='mt-6'>
-                    <Button type='button' onClick={handleCreateNewSale}>
-                      <PlusIcon className='w-5 h-5 mr-2' />
-                      <span>Crear Primera Venta</span>
-                    </Button>
-                  </div>
-                </div>
-              }
-            />
-          </CardContent>
-        </Card>
-
-        {sales.length > 0 && totalPages > 1 && (
-          <div className='flex justify-between items-center mt-4'>
-            <div>
-              <p className='text-sm text-muted-foreground'>
-                Página {currentPage} de {totalPages} (Total: {totalSales} ventas)
-              </p>
-            </div>
-            <div className='flex items-center space-x-2'>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage <= 1 || salesQuery.isFetching}
-              >
-                Anterior
-              </Button>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage >= totalPages || salesQuery.isFetching}
-              >
-                Siguiente
-              </Button>
-            </div>
-          </div>
-        )}
+        <Button
+          variant="gradient"
+          color="blue"
+          size="lg"
+          onClick={handleCreateNewSale}
+          className="flex items-center gap-3 rounded-2xl font-black uppercase tracking-widest text-xs group py-4 px-8 shadow-xl shadow-blue-500/20"
+          placeholder=""  onResize={undefined} onResizeCapture={undefined}
+        >
+          <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+          Nueva Venta
+        </Button>
       </div>
+
+      {/* High Density Listing Card */}
+      <Card className="bg-[#1a2537]/40 backdrop-blur-3xl border border-white/[0.05] rounded-[2.5rem] overflow-hidden shadow-2xl" placeholder="" >
+        {/* Table Toolbar */}
+        <div className="p-5 border-b border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/[0.02]">
+          <div className="relative flex-1 max-w-md group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-blue-500 transition-colors" />
+            <input
+              type="text"
+              placeholder="BUSCAR VENTA POR EMPRESA O ID..."
+              className="w-full bg-slate-900/50 border border-white/5 rounded-2xl py-3 px-10 text-xs font-bold text-white placeholder:text-slate-600 focus:ring-2 focus:ring-blue-500/20 transition-all uppercase tracking-widest"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="text" color="white" className="flex items-center gap-2 rounded-xl bg-white/5 px-4 font-black uppercase tracking-widest text-[10px]" placeholder=""  onResize={undefined} onResizeCapture={undefined}>
+              <Filter className="w-4 h-4 text-blue-500" />
+              Filtros
+            </Button>
+          </div>
+        </div>
+
+        {/* Table Body */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-white/[0.01]">
+                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ID Venta / Fecha</th>
+                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Empresa / Cliente</th>
+                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Estado</th>
+                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Total Bruto</th>
+                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/[0.02]">
+              {sales.map((sale) => (
+                <tr key={sale.id} className="group hover:bg-white/[0.03] transition-all duration-300">
+                  <td className="p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                        <ShoppingCart className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-black italic text-white group-hover:text-blue-400 transition-colors uppercase tracking-widest">#{sale.id.substring(0, 8)}</span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <Calendar className="w-3 h-3 text-slate-600" />
+                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{formatDate(sale.createdAt)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-6">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-bold text-slate-200 uppercase tracking-tight italic">
+                        {sale.company?.name || 'Cliente No Registrado'}
+                      </span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Building2 className="w-3 h-3 text-slate-600" />
+                        <span className="text-[10px] text-slate-500 font-bold tracking-widest">{sale.company?.taxId || 'RUT NO DISPONIBLE'}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-6 text-center">
+                    <div className="flex justify-center">
+                      {getStatusBadge(sale.status)}
+                    </div>
+                  </td>
+                  <td className="p-6 text-right">
+                    <div className="flex flex-col items-end">
+                      <span className="text-md font-black italic text-[#5d87ff]">{formatCurrencyChilean(sale.grandTotalAmount)}</span>
+                      <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">IVA Inc.</span>
+                    </div>
+                  </td>
+                  <td className="p-6">
+                    <div className="flex items-center justify-end gap-1">
+                      <IconButton variant="text" color="blue" onClick={() => handleViewSale(sale)} className="rounded-xl bg-blue-500/5 hover:bg-blue-500/15" placeholder=""  onResize={undefined} onResizeCapture={undefined}>
+                        <Eye className="w-4 h-4 text-blue-400" />
+                      </IconButton>
+
+                      <Menu placement="bottom-end">
+                        <MenuHandler>
+                          <IconButton variant="text" color="blue" className="rounded-xl bg-white/5 hover:bg-white/10" placeholder=""  onResize={undefined} onResizeCapture={undefined}>
+                            <MoreVertical className="w-4 h-4 text-slate-400" />
+                          </IconButton>
+                        </MenuHandler>
+                        <MenuList className="bg-[#1a2537] border-white/5 p-2 rounded-2xl min-w-[180px]" placeholder="" >
+                          <MenuItem onClick={() => handleEditSale(sale)} className="flex items-center gap-3 py-3 rounded-xl hover:bg-white/5" placeholder="" >
+                            <Edit2 className="w-4 h-4 text-orange-400" />
+                            <span className="text-[10px] font-black uppercase text-white tracking-widest">Editar Venta</span>
+                          </MenuItem>
+
+                          {(sale.status === OrderStatus.DELIVERED || sale.status === OrderStatus.SHIPPED) && !sale.invoice && (
+                            <MenuItem onClick={() => handleGenerateInvoice(sale.id)} className="flex items-center gap-3 py-3 rounded-xl hover:bg-white/5" placeholder="" >
+                              <Receipt className="w-4 h-4 text-emerald-400" />
+                              <span className="text-[10px] font-black uppercase text-white tracking-widest">Generar Factura</span>
+                            </MenuItem>
+                          )}
+
+                          <div className="h-px bg-white/5 my-1" />
+
+                          <MenuItem
+                            onClick={() => { setSaleToDelete(sale); setShowDeleteConfirmModal(true); }}
+                            className="flex items-center gap-3 py-3 rounded-xl hover:bg-red-500/10"
+                            placeholder="" 
+                          >
+                            <Trash2 className="w-4 h-4 text-red-400" />
+                            <span className="text-[10px] font-black uppercase text-red-400 tracking-widest">Eliminar Registro</span>
+                          </MenuItem>
+                        </MenuList>
+                      </Menu>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+              {salesQuery.isLoading && (
+                <tr>
+                  <td colSpan={5} className="p-20 text-center border-none">
+                    <div className="flex flex-col items-center gap-4 animate-pulse">
+                      <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                      <Typography className="text-slate-500 font-black uppercase tracking-widest text-xs" placeholder="" >
+                        Sincronizando órdenes de venta...
+                      </Typography>
+                    </div>
+                  </td>
+                </tr>
+              )}
+              {!salesQuery.isLoading && sales.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="p-20 text-center border-none">
+                    <div className="flex flex-col items-center gap-4 opacity-40">
+                      <ShoppingCart className="w-16 h-16 text-slate-500" />
+                      <Typography className="text-slate-500 font-black uppercase tracking-widest text-xs" placeholder="" >
+                        No hay ventas registradas en este período.
+                      </Typography>
+                      <Button variant="text" color="blue" onClick={handleCreateNewSale} className="font-black uppercase tracking-widest text-[10px]" placeholder=""  onResize={undefined} onResizeCapture={undefined}>
+                        Crear Primera Venta
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      {/* Pagination Footer */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-8 bg-white/5 w-fit mx-auto p-2 rounded-2xl border border-white/5 backdrop-blur-xl">
+          <IconButton
+            size="sm"
+            variant="text"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            color="white"
+            className="rounded-xl hover:bg-white/10"
+            placeholder=""  onResize={undefined} onResizeCapture={undefined}
+          >
+            <ChevronRight className="w-4 h-4 rotate-180" />
+          </IconButton>
+          <Typography color="white" className="font-black text-xs uppercase tracking-widest px-4" placeholder="" >
+            Página <span className="text-blue-500">{currentPage}</span> de <span className="text-slate-500">{totalPages}</span>
+          </Typography>
+          <IconButton
+            size="sm"
+            variant="text"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            color="white"
+            className="rounded-xl hover:bg-white/10"
+            placeholder=""  onResize={undefined} onResizeCapture={undefined}
+          >
+            <ChevronRight className="w-4 h-4" />
+          </IconButton>
+        </div>
+      )}
+
+      {/* Modals */}
       {viewingSale && (
         <SaleDetailModal
           sale={viewingSale}
-          onClose={handleCloseSaleDetailModal}
+          onClose={() => setViewingSale(null)}
           onInvoiceCreated={() => queryClient.invalidateQueries({ queryKey: ['sales'] })}
         />
       )}
-      {showDeleteConfirmModal && saleToDelete && (
-        <ConfirmationModal
-          isOpen={showDeleteConfirmModal}
-          onClose={handleCloseDeleteConfirmModal}
-          onConfirm={handleConfirmDeleteSale}
-          title='Confirmar Eliminación de Venta'
-          message={
-            <>
-              ¿Estás seguro de que quieres eliminar la venta{' '}
-              <strong>ID: {saleToDelete.id.substring(0, 8)}...</strong> para la empresa{' '}
-              <strong>{saleToDelete.company?.name ?? 'Sin empresa'}</strong>? Esta acción
-              no se puede deshacer.
-            </>
-          }
-          confirmText='Eliminar Venta'
-          confirmButtonClass='bg-destructive hover:bg-destructive/90 text-destructive-foreground'
-          icon={<TrashIcon className='w-5 h-5 mr-2' />}
-        />
-      )}
-    </>
+
+      <ConfirmationModal
+        isOpen={showDeleteConfirmModal}
+        onClose={() => setShowDeleteConfirmModal(false)}
+        onConfirm={handleConfirmDeleteSale}
+        title='Confirmar Eliminación'
+        message={`¿Estás seguro de que deseas eliminar permanentemente esta venta? Los registros contables asociados podrían verse afectados.`}
+        confirmText='Sí, eliminar registro'
+      />
+    </div>
   );
 };
 

@@ -36,9 +36,10 @@ export class InvoicesController {
     @TenantId() tenantId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-    @Query('status') status?: InvoiceStatus
+    @Query('status') status?: InvoiceStatus,
+    @Query('dteType', new DefaultValuePipe(undefined)) dteType?: string
   ) {
-    return this.invoicesService.findAll(tenantId, page, limit, status)
+    return this.invoicesService.findAll(tenantId, page, limit, status, dteType ? parseInt(dteType) : undefined)
   }
 
   @Post(':id/factoring')

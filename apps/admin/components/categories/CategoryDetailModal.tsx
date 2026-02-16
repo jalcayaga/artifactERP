@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Product, Lot, formatCurrencyChilean, api,  } from '@artifact/core';;
+import { Product, Lot, formatCurrencyChilean, api, } from '@artifact/core';;
 import {
   XIcon,
   CubeIcon,
@@ -14,8 +14,8 @@ import {
   DocumentTextIcon,
 } from '@artifact/ui';
 import { formatDate } from '@artifact/core';; // Assuming formatDate is in utils
-import LotEditModal from './LotEditModal'; // Será migrado
-import ProductPurchaseHistory from './ProductPurchaseHistory'; // Será migrado
+import LotEditModal from '../inventory/LotEditModal'; // Se migró a inventory
+import ProductPurchaseHistory from '../inventory/ProductPurchaseHistory'; // Se migró a inventory
 
 interface ProductDetailModalProps {
   product: Product | null;
@@ -149,8 +149,8 @@ const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               </h2>
               <span
                 className={`mt-1 px-2 py-0.5 inline-flex text-xs leading-5 font-semibold rounded-full ${product.productType === 'PRODUCT'
-                    ? 'bg-primary/10 text-primary'
-                    : 'bg-secondary/10 text-secondary-foreground'
+                  ? 'bg-primary/10 text-primary'
+                  : 'bg-secondary/10 text-secondary-foreground'
                   }`}
               >
                 {product.productType}

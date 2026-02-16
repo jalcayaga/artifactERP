@@ -7,6 +7,7 @@ import { Sidebar } from '../admin/sidebar';
 import AuthGuard from '../auth/AuthGuard';
 import AuthStatus from '../auth/AuthStatus';
 import ThemeSwitcher from '../theme/ThemeSwitcher';
+import { Toaster, toast } from 'sonner';
 import {
   Navbar,
   Typography,
@@ -67,6 +68,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex bg-[#0f172a] text-white font-sans selection:bg-[#00a1ff] selection:text-white">
+      <Toaster richColors position="bottom-right" />
       {/* Sidebar - Controlled by collapse state */}
       <Sidebar
         mobileOpen={mobileMenuOpen}
@@ -81,7 +83,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         {/* Top Header/Navbar */}
         <Navbar
           {...({} as any)}
-          className={`sticky top-0 z-40 w-full rounded-none bg-transparent px-4 py-2.5 transition-all duration-300 shadow-none ${showHeader ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          className={`sticky top-0 z-40 w-full rounded-none bg-[#0f172a] border-b border-white/5 px-4 py-2.5 transition-all duration-300 shadow-none ${showHeader ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
             }`}
           fullWidth
           blurred={false}
@@ -94,7 +96,13 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 variant="text"
                 color="white"
                 className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5"
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                onClick={() => {
+                  if (window.innerWidth >= 1024) {
+                    setSidebarCollapsed(!sidebarCollapsed);
+                  } else {
+                    setMobileMenuOpen(!mobileMenuOpen);
+                  }
+                }}
               >
                 <Bars3Icon className="h-5 w-5 stroke-2" />
               </IconButton>
@@ -105,7 +113,12 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 </IconButton>
               </Link>
 
-              <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
+              <IconButton
+                variant="text"
+                color="white"
+                className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5"
+                onClick={() => toast.info('Búsqueda próximamente...')}
+              >
                 <MagnifyingGlassIcon className="h-5 w-5" />
               </IconButton>
             </div>
@@ -119,7 +132,12 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
                 <ThemeSwitcher />
               </div>
 
-              <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
+              <IconButton
+                variant="text"
+                color="white"
+                className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5"
+                onClick={() => toast.info('Cambio de idioma próximamente...')}
+              >
                 {/* SVG for UK Flag to match reference */}
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -143,13 +161,23 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
               </IconButton>
 
               <Badge content="3" withBorder className="border-[#1e293b] bg-blue-500 min-w-[18px] min-h-[18px] !p-0 grid place-items-center">
-                <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
+                <IconButton
+                  variant="text"
+                  color="white"
+                  className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5"
+                  onClick={() => toast.info('Centro de mensajes próximamente...')}
+                >
                   <ChatBubbleOvalLeftEllipsisIcon className="h-5 w-5" />
                 </IconButton>
               </Badge>
 
               <Badge content="5" withBorder className="border-[#1e293b] bg-red-500 min-w-[18px] min-h-[18px] !p-0 grid place-items-center">
-                <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
+                <IconButton
+                  variant="text"
+                  color="white"
+                  className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5"
+                  onClick={() => toast.info('Notificaciones próximamente...')}
+                >
                   <BellIcon className="h-5 w-5" />
                 </IconButton>
               </Badge>

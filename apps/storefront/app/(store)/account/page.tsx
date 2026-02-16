@@ -101,7 +101,7 @@ export default function AccountPage() {
                     <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-white/10 pb-8">
                         <div>
                             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
-                                Hola, <span className="text-brand">{user?.user_metadata?.name || user?.email?.split('@')[0] || 'Usuario'}</span>
+                                Hola, <span className="text-brand">{user?.user_metadata?.firstName || user?.firstName || user?.email?.split('@')[0] || 'Usuario'}</span>
                             </h1>
                             <p className="text-neutral-400">
                                 Bienvenido a tu portal personal. Gestiona tus compras y tu negocio desde aquí.

@@ -48,6 +48,8 @@ export function Sidebar({
           <SidebarPanel
             activeCategory={activeCategory}
             onCloseMobile={() => setMobileOpen(false)}
+            sidebarCollapsed={sidebarCollapsed}
+            setSidebarCollapsed={setSidebarCollapsed}
           />
         </div>
       </aside>

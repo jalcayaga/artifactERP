@@ -47,7 +47,13 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
                                 firstName: payload.firstName,
                                 lastName: payload.lastName,
                                 role: payload.role || 'user',
-                                roles: payload.roles || []
+                                roles: payload.roles || [],
+                                user_metadata: {
+                                    name: payload.firstName,
+                                    firstName: payload.firstName,
+                                    lastName: payload.lastName,
+                                    hasErpAccess: payload.hasErpAccess || false
+                                }
                             };
                             setUser(userData as any);
                             // Sync for old AuthContext
@@ -177,7 +183,13 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
                     firstName: payload.firstName,
                     lastName: payload.lastName,
                     role: payload.role || 'user',
-                    roles: payload.roles || []
+                    roles: payload.roles || [],
+                    user_metadata: {
+                        name: payload.firstName,
+                        firstName: payload.firstName,
+                        lastName: payload.lastName,
+                        hasErpAccess: payload.hasErpAccess || false
+                    }
                 };
                 setUser(userData as any);
                 // Sync for old AuthContext

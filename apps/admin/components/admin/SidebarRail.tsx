@@ -1,6 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { TenantService } from '@/lib/services/tenant.service';
+import { defaultTheme } from '@/lib/theme';
+import Link from 'next/link';
 import {
     LayoutGrid,
     Banknote,
@@ -29,6 +32,22 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
     sidebarCollapsed,
     setSidebarCollapsed
 }) => {
+    const [logoUrl, setLogoUrl] = useState(defaultTheme.secondaryLogoUrl);
+
+    useEffect(() => {
+        const fetchBrand = async () => {
+            try {
+                const config = await TenantService.getConfig();
+                if (config.branding?.secondaryLogoUrl) {
+                    setLogoUrl(config.branding.secondaryLogoUrl);
+                }
+            } catch (error) {
+                console.error("Error fetching rail logo:", error);
+            }
+        };
+        fetchBrand();
+    }, []);
+
     const categories = [
         { id: 'overview' as const, icon: LayoutGrid, label: 'Dashboard' },
         { id: 'commerce' as const, icon: Banknote, label: 'Commerce' },
@@ -43,10 +62,10 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
             <div className="h-[64px] flex items-center justify-center w-full border-b border-[#ffffff08]">
                 <div className="w-[48px] h-[48px] flex items-center justify-center group cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95">
                     <Image
-                        src="/logo-artifact.png"
+                        src={logoUrl}
                         alt="Logo"
-                        width={48}
-                        height={48}
+                        width={40}
+                        height={40}
                         priority
                         className="transition-transform duration-300 object-contain"
                     />
@@ -84,33 +103,27 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
                 })}
             </div>
 
-            {/* Footer / User - 1:1 MaterialM with Toggle */}
-            <div className="pb-6 w-full flex flex-col items-center gap-6 mt-auto">
-                <IconButton
-                    variant="text"
-                    onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                    className="w-[48px] h-[48px] rounded-full text-[#7b8893] hover:bg-[rgba(0,161,255,0.12)] hover:text-[#00a1ff] transition-all duration-300 hidden lg:flex items-center justify-center shadow-lg border border-[#ffffff08]"
+            {/* Footer / Settings - Pro Style & Aligned */}
+            <div className="pb-8 w-full flex flex-col items-center mt-auto">
+                <Tooltip
+                    content="Configuración"
+                    placement="right"
+                    className="bg-[#111c2d] text-white py-2 px-3 border border-white/10 shadow-2xl text-[12px] font-medium rounded-lg"
                 >
-                    {sidebarCollapsed ? (
-                        <ChevronRight className="h-[22px] w-[22px]" strokeWidth={2} />
-                    ) : (
-                        <ChevronLeft className="h-[22px] w-[22px]" strokeWidth={2} />
-                    )}
-                </IconButton>
-
-                <IconButton variant="text" className="w-[48px] h-[48px] rounded-full text-[#7b8893] hover:bg-[rgba(0,161,255,0.12)] hover:text-[#00a1ff] transition-all duration-300">
-                    <Settings className="h-[22px] w-[22px]" strokeWidth={1.5} />
-                </IconButton>
-                <div className="relative group cursor-pointer">
-                    <div className="w-10 h-10 rounded-full border-2 border-transparent group-hover:border-[#00a1ff] transition-all duration-300 p-0.5 overflow-hidden">
-                        <Avatar
-                            src="https://docs.material-tailwind.com/img/face-2.jpg"
-                            alt="avatar"
-                            size="sm"
-                            className="w-full h-full object-cover"
-                        />
+                    <div className="relative flex items-center justify-center w-full">
+                        <Link href="/settings">
+                            <IconButton
+                                variant="text"
+                                className="w-[48px] h-[48px] max-w-none max-h-none rounded-full transition-all duration-300 flex items-center justify-center text-[#7b8893] bg-white/5 border border-white/5 hover:bg-[rgba(0,161,255,0.12)] hover:text-[#00a1ff] hover:border-[#00a1ff20] hover:scale-105 shadow-lg group"
+                            >
+                                <Settings
+                                    className="h-6 w-6 transition-transform duration-300 group-hover:rotate-45"
+                                    strokeWidth={1.5}
+                                />
+                            </IconButton>
+                        </Link>
                     </div>
-                </div>
+                </Tooltip>
             </div>
         </div>
     );

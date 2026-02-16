@@ -16,7 +16,7 @@ export default function DispatchDetailPage() {
     const { data: dispatch, isLoading } = useQuery({
         queryKey: ['dispatch', id],
         queryFn: async () => {
-            const res = await apiClient.get(`/dispatches/${id}`);
+            const res = await apiClient.get<any>(`/dispatches/${id}`);
             return res.data;
         },
         enabled: !!id,
@@ -35,7 +35,7 @@ export default function DispatchDetailPage() {
                         color="white"
                         className="flex items-center gap-2 pl-0 hover:bg-white/5 text-blue-200"
                         onClick={() => router.back()}
-                        placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+                        placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                     >
                         <ArrowLeft size={18} /> Volver
                     </Button>
@@ -52,7 +52,7 @@ export default function DispatchDetailPage() {
                 <Button
                     color="blue"
                     className="flex items-center gap-2 shadow-[0_0_15px_rgba(37,99,235,0.4)] hover:shadow-[0_0_25px_rgba(37,99,235,0.6)] transition-all duration-300"
-                    placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+                    placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                     onClick={() => window.print()}
                 >
                     <Printer size={18} /> Imprimir Documento

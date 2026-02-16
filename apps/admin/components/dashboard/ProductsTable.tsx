@@ -13,7 +13,7 @@ const ProductsTable: React.FC = () => {
     React.useEffect(() => {
         async function loadProducts() {
             try {
-                const res = await apiClient.get('/products?limit=5');
+                const res = await apiClient.get<any>('/products?limit=5');
                 setProducts(res.data || []);
             } catch (e) {
                 console.error("Error loading products for dashboard", e);

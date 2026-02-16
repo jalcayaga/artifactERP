@@ -34,11 +34,17 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials')
     }
 
+    const erpRoles = ['SUPERADMIN', 'ADMIN', 'EDITOR', 'VIEWER'];
+    const hasErpAccess = user.roles.some((role) => erpRoles.includes(role.name));
+
     const payload = {
       email: user.email,
       sub: user.id,
       roles: user.roles.map((role) => role.name),
       tenantId,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      hasErpAccess,
     }
 
     const accessToken = this.jwtService.sign(payload)

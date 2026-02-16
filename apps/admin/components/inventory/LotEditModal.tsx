@@ -1,18 +1,16 @@
 import React, { useState, useEffect, FormEvent } from 'react';
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
-  DialogTitle,
-  DialogDescription,
+  DialogBody,
   DialogFooter,
-} from '@artifact/ui';
-import { Button } from '@artifact/ui';
-import { Input } from '@artifact/ui';
-import { Label } from '@artifact/ui';
-import { ArchiveBoxIcon, CalendarIcon } from '@artifact/ui';
+  Typography,
+  Button,
+  IconButton,
+} from '@material-tailwind/react';
+import { Archive, Calendar, X, DollarSign, MapPin, Hash, Package } from 'lucide-react';
 import { Lot, formatDate } from '@artifact/core';
-import { ProductService } from '@artifact/core/client';;
+import { ProductService } from '@artifact/core/client';
 import { toast } from 'sonner';
 
 interface LotEditModalProps {
@@ -93,108 +91,156 @@ const LotEditModal: React.FC<LotEditModalProps> = ({
     }
   };
 
+  const inputBaseClass =
+    'block w-full px-4 py-2.5 bg-slate-900/50 border border-white/[0.08] rounded-xl text-sm text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 transition-all font-medium';
+  const labelClass = 'block text-[10px] font-black text-slate-500 uppercase tracking-[0.15em] mb-1.5 ml-1';
+  const errorTextClass = 'mt-1.5 text-[10px] font-bold text-red-400 uppercase tracking-wider ml-1';
+
   if (!lot) return null;
 
   return (
-    <Dialog open={!!lot} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className='flex items-center'>
-            <ArchiveBoxIcon className='w-5 h-5 mr-2' /> Editar Lote: {lot.lotNumber}
-          </DialogTitle>
-          <DialogDescription>
-            Actualiza los detalles del lote de stock.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className='grid gap-4 py-4'>
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='lotNumber' className='text-right'>
-              Número de Lote
-            </Label>
-            <Input
-              id='lotNumber'
-              value={lotNumber}
-              onChange={(e) => setLotNumber(e.target.value)}
-              className='col-span-3'
-              required
-            />
-            {errors.lotNumber && <p className='col-span-4 text-destructive text-sm text-right'>{errors.lotNumber}</p>}
+    <Dialog onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+      open={!!lot}
+      handler={onClose}
+      size="sm"
+      className="bg-[#1e293b]/90 backdrop-blur-2xl border border-white/[0.08] shadow-2xl rounded-3xl overflow-hidden"
+      placeholder=""
+    >
+      <DialogHeader className="flex items-center justify-between p-6 border-b border-white/[0.05] bg-white/[0.02]" placeholder="" >
+        <div className="flex items-center gap-4">
+          <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20">
+            <Archive className='w-5 h-5 text-blue-500' />
           </div>
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='currentQuantity' className='text-right'>
-              Cantidad Actual
-            </Label>
-            <Input
-              id='currentQuantity'
-              type='number'
-              value={currentQuantity}
-              onChange={(e) => setCurrentQuantity(e.target.value)}
-              className='col-span-3'
-              required
-            />
-            {errors.currentQuantity && <p className='col-span-4 text-destructive text-sm text-right'>{errors.currentQuantity}</p>}
+          <div>
+            <Typography variant="h6" color="white" className="font-black uppercase tracking-tight italic" placeholder="" >
+              Editar Lote de Stock
+            </Typography>
+            <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Lote: {lot.lotNumber}</p>
           </div>
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='purchasePrice' className='text-right'>
-              Precio de Compra
-            </Label>
-            <Input
-              id='purchasePrice'
-              type='number'
-              value={purchasePrice}
-              onChange={(e) => setPurchasePrice(e.target.value)}
-              className='col-span-3'
-              required
-            />
-            {errors.purchasePrice && <p className='col-span-4 text-destructive text-sm text-right'>{errors.purchasePrice}</p>}
+        </div>
+        <IconButton variant="text" color="white" onClick={onClose} placeholder="" onResize={undefined} onResizeCapture={undefined}>
+          <X className="h-5 w-5" />
+        </IconButton>
+      </DialogHeader>
+
+      <form onSubmit={handleSubmit}>
+        <DialogBody className="p-8 space-y-6" placeholder="" >
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor='lotNumber' className={labelClass}>Número de Lote</label>
+              <div className="relative">
+                <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <input
+                  id='lotNumber'
+                  value={lotNumber}
+                  onChange={(e) => setLotNumber(e.target.value)}
+                  className={`${inputBaseClass} pl-10`}
+                  required
+                />
+              </div>
+              {errors.lotNumber && <p className={errorTextClass}>{errors.lotNumber}</p>}
+            </div>
+            <div>
+              <label htmlFor='currentQuantity' className={labelClass}>Cantidad Actual</label>
+              <div className="relative">
+                <Package className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <input
+                  id='currentQuantity'
+                  type='number'
+                  value={currentQuantity}
+                  onChange={(e) => setCurrentQuantity(e.target.value)}
+                  className={`${inputBaseClass} pl-10`}
+                  required
+                />
+              </div>
+              {errors.currentQuantity && <p className={errorTextClass}>{errors.currentQuantity}</p>}
+            </div>
           </div>
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='entryDate' className='text-right'>
-              Fecha de Entrada
-            </Label>
-            <Input
-              id='entryDate'
-              type='date'
-              value={entryDate}
-              onChange={(e) => setEntryDate(e.target.value)}
-              className='col-span-3'
-              required
-            />
-            {errors.entryDate && <p className='col-span-4 text-destructive text-sm text-right'>{errors.entryDate}</p>}
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor='purchasePrice' className={labelClass}>Precio de Compra</label>
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <input
+                  id='purchasePrice'
+                  type='number'
+                  value={purchasePrice}
+                  onChange={(e) => setPurchasePrice(e.target.value)}
+                  className={`${inputBaseClass} pl-10`}
+                  required
+                />
+              </div>
+              {errors.purchasePrice && <p className={errorTextClass}>{errors.purchasePrice}</p>}
+            </div>
+            <div>
+              <label htmlFor='location' className={labelClass}>Ubicación / Bodega</label>
+              <div className="relative">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <input
+                  id='location'
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className={`${inputBaseClass} pl-10`}
+                  placeholder="Ej: Pasillo A-1"
+                />
+              </div>
+            </div>
           </div>
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='expirationDate' className='text-right'>
-              Fecha de Vencimiento
-            </Label>
-            <Input
-              id='expirationDate'
-              type='date'
-              value={expirationDate}
-              onChange={(e) => setExpirationDate(e.target.value)}
-              className='col-span-3'
-            />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor='entryDate' className={labelClass}>Fecha de Entrada</label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                <input
+                  id='entryDate'
+                  type='date'
+                  value={entryDate}
+                  onChange={(e) => setEntryDate(e.target.value)}
+                  className={`${inputBaseClass} pl-10`}
+                  required
+                />
+              </div>
+              {errors.entryDate && <p className={errorTextClass}>{errors.entryDate}</p>}
+            </div>
+            <div>
+              <label htmlFor='expirationDate' className={labelClass}>Fecha Vencimiento</label>
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-orange-500/50" />
+                <input
+                  id='expirationDate'
+                  type='date'
+                  value={expirationDate}
+                  onChange={(e) => setExpirationDate(e.target.value)}
+                  className={`${inputBaseClass} pl-10 border-orange-500/10`}
+                />
+              </div>
+            </div>
           </div>
-          <div className='grid grid-cols-4 items-center gap-4'>
-            <Label htmlFor='location' className='text-right'>
-              Ubicación
-            </Label>
-            <Input
-              id='location'
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className='col-span-3'
-            />
-          </div>
-        </form>
-        <DialogFooter>
-          <Button type='button' variant='outline' onClick={onClose}>
-            Cancelar
+        </DialogBody>
+
+        <DialogFooter onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} className="p-6 border-t border-white/[0.05] bg-white/[0.02] flex items-center justify-end gap-3" placeholder="" >
+          <Button
+            variant="text"
+            color="white"
+            onClick={onClose}
+            className="font-black uppercase tracking-widest text-[10px]"
+            placeholder="" onResize={undefined} onResizeCapture={undefined}
+          >
+            Descartar
           </Button>
-          <Button type='submit' onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
+          <Button
+            type='submit'
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className='bg-blue-600 hover:bg-blue-700 text-white font-black py-2.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 active:scale-95 transition-all text-[10px] uppercase tracking-widest'
+            placeholder="" onResize={undefined} onResizeCapture={undefined}
+          >
+            {isSubmitting ? 'Procesando...' : 'Actualizar Lote'}
           </Button>
         </DialogFooter>
-      </DialogContent>
+      </form>
     </Dialog>
   );
 };

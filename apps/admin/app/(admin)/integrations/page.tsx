@@ -117,10 +117,10 @@ const IntegrationsPage = () => {
         <div className="mt-4 mb-8 flex flex-col gap-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <Typography variant="h3" color="white" className="font-bold" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+                    <Typography variant="h3" color="white" className="font-bold" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                         Integraciones
                     </Typography>
-                    <Typography color="gray" className="mt-1 font-normal text-blue-gray-200" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+                    <Typography color="gray" className="mt-1 font-normal text-blue-gray-200" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                         Configura las conexiones con servicios externos de facturación y pagos.
                     </Typography>
                 </div>
@@ -128,7 +128,7 @@ const IntegrationsPage = () => {
                     onClick={handleSave}
                     disabled={isSaving}
                     className="flex items-center gap-2 bg-blue-500"
-                    placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+                    placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                 >
                     {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
                     Guardar Cambios
@@ -193,9 +193,9 @@ const IntegrationsPage = () => {
 
                 {/* Main Content */}
                 <div className="md:col-span-3">
-                    <Card className="bg-[#1e293b] shadow-none border border-blue-gray-100/5" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                    <Card className="bg-[#1e293b] shadow-none border border-blue-gray-100/5" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                         {activeTab === 'facto' && (
-                            <CardBody className="space-y-6 animate-in fade-in duration-300" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                            <CardBody className="space-y-6 animate-in fade-in duration-300" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                                 <div className="pb-6 border-b border-blue-gray-100/5">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4">
@@ -203,12 +203,12 @@ const IntegrationsPage = () => {
                                                 <Database className="h-6 w-6" />
                                             </div>
                                             <div>
-                                                <Typography variant="h6" color="white" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>Configuración de Facto.cl</Typography>
-                                                <Typography variant="small" className="text-blue-gray-200" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>Emisión de Facturas y Boletas Electrónicas (Chile)</Typography>
+                                                <Typography variant="h6" color="white" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}>Configuración de Facto.cl</Typography>
+                                                <Typography variant="small" className="text-blue-gray-200" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}>Emisión de Facturas y Boletas Electrónicas (Chile)</Typography>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
-                                            <Typography variant="small" className="font-medium text-white" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                                            <Typography variant="small" className="font-medium text-white" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                                                 {settings.facto?.enabled ? 'Activado' : 'Desactivado'}
                                             </Typography>
                                             <Switch
@@ -225,7 +225,7 @@ const IntegrationsPage = () => {
                                                     className: "before:hidden left-0.5 border-none",
                                                 }}
                                                 crossOrigin={undefined}
-                                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
+                                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                                             />
                                         </div>
                                     </div>
@@ -241,7 +241,7 @@ const IntegrationsPage = () => {
                                                 placeholder="usuario@facto.cl"
                                                 className="!border-t-blue-gray-200 focus:!border-t-white"
                                                 crossOrigin={undefined}
-                                                onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
+                                                onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -254,7 +254,7 @@ const IntegrationsPage = () => {
                                                 placeholder="••••••••"
                                                 className="!border-t-blue-gray-200 focus:!border-t-white"
                                                 crossOrigin={undefined}
-                                                onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
+                                                onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -266,7 +266,7 @@ const IntegrationsPage = () => {
                                                 placeholder="12.345.678-9"
                                                 className="!border-t-blue-gray-200 focus:!border-t-white"
                                                 crossOrigin={undefined}
-                                                onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
+                                                onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                                             />
                                         </div>
                                         <div className="space-y-2">
@@ -278,7 +278,7 @@ const IntegrationsPage = () => {
                                                 placeholder="https://conexion.facto.cl/..."
                                                 className="!border-t-blue-gray-200 focus:!border-t-white"
                                                 crossOrigin={undefined}
-                                                onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
+                                                onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                                             />
                                         </div>
                                     </div>
@@ -297,7 +297,7 @@ const IntegrationsPage = () => {
                         )}
 
                         {activeTab === 'payments' && (
-                            <CardBody className="space-y-6 animate-in fade-in duration-300" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                            <CardBody className="space-y-6 animate-in fade-in duration-300" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                                 <div className="pb-6 border-b border-blue-gray-100/5">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4">
@@ -305,8 +305,8 @@ const IntegrationsPage = () => {
                                                 <CreditCard className="h-6 w-6" />
                                             </div>
                                             <div>
-                                                <Typography variant="h6" color="white" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>Webpay Plus (Transbank)</Typography>
-                                                <Typography variant="small" className="text-blue-gray-200" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>Cobros con Tarjetas de Débito y Crédito</Typography>
+                                                <Typography variant="h6" color="white" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>Webpay Plus (Transbank)</Typography>
+                                                <Typography variant="small" className="text-blue-gray-200" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>Cobros con Tarjetas de Débito y Crédito</Typography>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
@@ -327,7 +327,7 @@ const IntegrationsPage = () => {
                                                     className: "before:hidden left-0.5 border-none",
                                                 }}
                                                 crossOrigin={undefined}
-                                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+                                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                                             />
                                         </div>
                                     </div>
@@ -355,7 +355,7 @@ const IntegrationsPage = () => {
                                                 placeholder="••••••••••••••••"
                                                 className="!border-t-blue-gray-200 focus:!border-t-white"
                                                 crossOrigin={undefined}
-                                                onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+                                                onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                                             />
                                         </div>
                                     </div>
@@ -368,7 +368,7 @@ const IntegrationsPage = () => {
                         )}
 
                         {activeTab === 'factoring' && (
-                            <CardBody className="space-y-6 animate-in fade-in duration-300" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                            <CardBody className="space-y-6 animate-in fade-in duration-300" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                                 <div className="pb-6 border-b border-blue-gray-100/5">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-4">
@@ -376,8 +376,8 @@ const IntegrationsPage = () => {
                                                 <ShareIcon className="h-6 w-6" />
                                             </div>
                                             <div>
-                                                <Typography variant="h6" color="white" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>Integración de Factoring</Typography>
-                                                <Typography variant="small" className="text-blue-gray-200" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>Cesión electrónica de facturas para obtención de liquidez</Typography>
+                                                <Typography variant="h6" color="white" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>Integración de Factoring</Typography>
+                                                <Typography variant="small" className="text-blue-gray-200" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>Cesión electrónica de facturas para obtención de liquidez</Typography>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-3">
@@ -398,7 +398,7 @@ const IntegrationsPage = () => {
                                                     className: "before:hidden left-0.5 border-none",
                                                 }}
                                                 crossOrigin={undefined}
-                                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+                                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                                             />
                                         </div>
                                     </div>
@@ -418,7 +418,7 @@ const IntegrationsPage = () => {
                                                 menuProps={{
                                                     className: "bg-[#1e293b] border border-blue-gray-100/5 text-white"
                                                 }}
-                                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
+                                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                                             >
                                                 <Option value="cumplo">Cumplo</Option>
                                                 <Option value="larrainvial">LarrainVial</Option>

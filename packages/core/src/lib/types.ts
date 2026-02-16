@@ -339,6 +339,18 @@ export enum UserRole {
   EDITOR = 'EDITOR',
   VIEWER = 'VIEWER',
   CLIENT = 'CLIENT',
+  CASHIER = 'CASHIER',
+  WAREHOUSE_MANAGER = 'WAREHOUSE_MANAGER',
+  WEB_SALES = 'WEB_SALES',
+}
+
+export enum DispatchStatus {
+  DRAFT = 'DRAFT',
+  ISSUED = 'ISSUED',
+  IN_TRANSIT = 'IN_TRANSIT',
+  DELIVERED = 'DELIVERED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED',
 }
 
 export interface Invoice {
@@ -685,3 +697,59 @@ export interface CreateReceptionDto {
     location?: string
   }[]
 }
+
+// --- Logistics & Dispatches ---
+export interface Courier {
+  id: string
+  name: string
+  contactName?: string | null
+  email?: string | null
+  phone?: string | null
+  websiteUrl?: string | null
+  integrationType?: string | null
+  isActive: boolean
+}
+
+export interface Dispatch {
+  id: string
+  tenantId: string
+  orderId: string
+  courierId?: string | null
+  dispatchNumber?: string | null
+  trackingNumber?: string | null
+  status: DispatchStatus
+  dispatchDate: string
+  estimatedArrival?: string | null
+  shippingCost: number
+  notes?: string | null
+  originAddress?: string | null
+  destinationAddress?: string | null
+  createdAt: string
+  updatedAt: string
+  order?: Sale
+  courier?: Courier | null
+  items: DispatchItem[]
+}
+
+export interface DispatchItem {
+  id: string
+  dispatchId: string
+  orderItemId: string
+  quantity: number
+  orderItem?: OrderItem
+}
+
+export interface CreateDispatchDto {
+  orderId: string
+  courierId?: string
+  status?: DispatchStatus
+  dispatchDate?: string
+  estimatedArrival?: string
+  shippingCost?: number
+  notes?: string
+  originAddress?: string
+  destinationAddress?: string
+  dispatchNumber?: string
+}
+
+export interface UpdateDispatchDto extends Partial<CreateDispatchDto> { }

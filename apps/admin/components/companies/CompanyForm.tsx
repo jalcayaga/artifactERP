@@ -1,6 +1,6 @@
 import React, { useState, useEffect, FormEvent } from 'react';
-import { Company, CreateCompanyDto, UpdateCompanyDto, ContactPerson, validateRut, chileanRegions, countries,  } from '@artifact/core';;
-import {  } from '@artifact/core';
+import { Company, CreateCompanyDto, UpdateCompanyDto, ContactPerson, validateRut, chileanRegions, countries, } from '@artifact/core';;
+import { } from '@artifact/core';
 import { CompanyService, ContactPersonService, useAuth } from '@artifact/core/client';;
 import {
   Select,
@@ -24,7 +24,6 @@ import { toast } from 'sonner';
 import { Checkbox } from '@artifact/ui'; // Será migrado
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
@@ -719,14 +718,14 @@ const CompanyForm: React.FC<CompanyFormProps> = ({
       </form>
 
       {companyData && (
-        <Dialog
+        <Dialog onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
           open={showContactPeopleModal}
           onOpenChange={setShowContactPeopleModal}
         >
-          <DialogContent className='sm:max-w-[800px]'>
-            <DialogHeader>
-              <DialogTitle>Gestionar Personas de Contacto</DialogTitle>
-              <DialogDescription>
+          <div className="p-0">
+            <DialogHeader onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+              <DialogTitle onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>Gestionar Personas de Contacto</DialogTitle>
+              <DialogDescription onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
                 Aquí puedes añadir, editar o eliminar personas de contacto para
                 esta empresa.
               </DialogDescription>
@@ -735,7 +734,7 @@ const CompanyForm: React.FC<CompanyFormProps> = ({
               companyId={companyData.id}
               onClose={() => setShowContactPeopleModal(false)}
             />
-          </DialogContent>
+          </div>
         </Dialog>
       )}
     </Card>

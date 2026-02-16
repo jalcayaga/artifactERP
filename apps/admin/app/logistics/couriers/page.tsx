@@ -17,7 +17,7 @@ export default function CouriersPage() {
     const { data: couriers, isLoading } = useQuery({
         queryKey: ['couriers'],
         queryFn: async () => {
-            const res = await apiClient.get('/couriers');
+            const res = await apiClient.get<any>('/couriers');
             return res.data;
         }
     });
@@ -94,7 +94,7 @@ export default function CouriersPage() {
                     </h1>
                     <p className="text-gray-400">Administra las empresas de transporte y sus integraciones.</p>
                 </div>
-                <Button onClick={() => { setEditingCourier(null); setIsOpen(true); }} className="bg-blue-600 flex items-center gap-2" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+                <Button onClick={() => { setEditingCourier(null); setIsOpen(true); }} className="bg-blue-600 flex items-center gap-2" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                     <Plus size={18} /> Nuevo Courier
                 </Button>
             </div>
@@ -112,7 +112,7 @@ export default function CouriersPage() {
                 </div>
             </div>
 
-            <Card className="bg-slate-900 border border-white/10 overflow-hidden" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+            <Card className="bg-slate-900 border border-white/10 overflow-hidden" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
@@ -141,19 +141,19 @@ export default function CouriersPage() {
                                         </td>
                                         <td className="p-4">
                                             <span className={`px-2 py-1 rounded text-xs font-medium ${courier.integrationType === 'MANUAL'
-                                                    ? 'bg-gray-800 text-gray-300'
-                                                    : 'bg-green-900/30 text-green-400 border border-green-500/30'
+                                                ? 'bg-gray-800 text-gray-300'
+                                                : 'bg-green-900/30 text-green-400 border border-green-500/30'
                                                 }`}>
                                                 {courier.integrationType || 'MANUAL'}
                                             </span>
                                         </td>
                                         <td className="p-4 text-right space-x-2">
-                                            <IconButton variant="text" color="blue" onClick={() => handleEdit(courier)} placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+                                            <IconButton variant="text" color="blue" onClick={() => handleEdit(courier)} placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                                                 <Pencil size={18} />
                                             </IconButton>
                                             <IconButton variant="text" color="red" onClick={() => {
                                                 if (confirm('¿Eliminar este courier?')) deleteMutation.mutate(courier.id);
-                                            }} placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+                                            }} placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                                                 <Trash2 size={18} />
                                             </IconButton>
                                         </td>
@@ -165,19 +165,19 @@ export default function CouriersPage() {
                 </div>
             </Card>
 
-            <Dialog open={isOpen} handler={() => setIsOpen(false)} className="bg-slate-900 border border-white/10" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
-                <DialogHeader className="text-white" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+            <Dialog onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} open={isOpen} handler={() => setIsOpen(false)} className="bg-slate-900 border border-white/10" placeholder="">
+                <DialogHeader onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} className="text-white" placeholder="">
                     {editingCourier ? 'Editar Courier' : 'Nuevo Courier'}
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
-                    <DialogBody className="grid gap-4" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
-                        <Input label="Nombre de la Empresa" name="name" defaultValue={editingCourier?.name} required className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} />
+                    <DialogBody onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} className="grid gap-4" placeholder="">
+                        <Input label="Nombre de la Empresa" name="name" defaultValue={editingCourier?.name} required className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} />
                         <div className="grid grid-cols-2 gap-4">
-                            <Input label="Nombre de Contacto" name="contactName" defaultValue={editingCourier?.contactName} className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} />
-                            <Input label="Teléfono" name="phone" defaultValue={editingCourier?.phone} className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} />
+                            <Input label="Nombre de Contacto" name="contactName" defaultValue={editingCourier?.contactName} className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} />
+                            <Input label="Teléfono" name="phone" defaultValue={editingCourier?.phone} className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} />
                         </div>
-                        <Input label="Email" name="email" type="email" defaultValue={editingCourier?.email} className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} />
-                        <Input label="Sitio Web" name="websiteUrl" defaultValue={editingCourier?.websiteUrl} className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} />
+                        <Input label="Email" name="email" type="email" defaultValue={editingCourier?.email} className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} />
+                        <Input label="Sitio Web" name="websiteUrl" defaultValue={editingCourier?.websiteUrl} className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} />
 
                         <div className="space-y-2">
                             <label className="text-sm text-gray-400 ml-1">Tipo de Integración</label>
@@ -192,13 +192,13 @@ export default function CouriersPage() {
                             </select>
                         </div>
 
-                        <Input label="API Key (Opcional)" name="apiKey" type="password" defaultValue={editingCourier?.apiKey} className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} />
+                        <Input label="API Key (Opcional)" name="apiKey" type="password" defaultValue={editingCourier?.apiKey} className="text-white" crossOrigin={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined} />
                     </DialogBody>
-                    <DialogFooter className="gap-2" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
-                        <Button variant="text" color="white" onClick={() => setIsOpen(false)} placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+                    <DialogFooter onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} className="gap-2" placeholder="">
+                        <Button variant="text" color="white" onClick={() => setIsOpen(false)} placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                             Cancelar
                         </Button>
-                        <Button type="submit" color="blue" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+                        <Button type="submit" color="blue" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                             Guardar
                         </Button>
                     </DialogFooter>

@@ -28,7 +28,7 @@ export default function ProvidersView() {
         setLoading(true);
         try {
             // Fetch only suppliers
-            const data: any = await apiClient.get('/companies?isSupplier=true');
+            const data: any = await apiClient.get<any>('/companies?isSupplier=true');
             if (Array.isArray(data)) {
                 setProviders(data);
             } else if (data.data && Array.isArray(data.data)) {

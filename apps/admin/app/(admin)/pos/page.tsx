@@ -52,7 +52,7 @@ export default function PosAdminDashboard() {
                                 color="white"
                                 className="flex items-center gap-2 border border-white/10 hover:bg-white/5 lowercase font-normal"
                                 onClick={() => refreshShift()}
-                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                             >
                                 <ArrowPathIcon className="h-4 w-4" />
                                 Actualizar
@@ -61,7 +61,7 @@ export default function PosAdminDashboard() {
                                 size="lg"
                                 className="bg-blue-600 hover:bg-blue-500 flex items-center gap-2 px-8 rounded-2xl font-black shadow-xl shadow-blue-500/20"
                                 onClick={() => router.push('/pos/terminal')}
-                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+                                placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                             >
                                 IR A CAJA (TOTEM)
                                 <ArrowRightIcon className="h-5 w-5" />
@@ -95,8 +95,8 @@ export default function PosAdminDashboard() {
 
                     {/* Quick Actions & Details */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
-                        <Card className="lg:col-span-2 bg-[#0b1120] border border-white/5 rounded-[1.5rem] overflow-hidden shadow-2xl" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
-                            <CardBody className="p-8" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+                        <Card className="lg:col-span-2 bg-[#0b1120] border border-white/5 rounded-[1.5rem] overflow-hidden shadow-2xl" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                            <CardBody className="p-8" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                                 <Typography variant="h5" color="white" className="font-black mb-6">
                                     Información de Sesión
                                 </Typography>
@@ -115,8 +115,8 @@ export default function PosAdminDashboard() {
                             </CardBody>
                         </Card>
 
-                        <Card className="bg-[#0b1120] border border-white/5 rounded-[1.5rem] overflow-hidden shadow-2xl" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
-                            <CardBody className="p-8 flex flex-col h-full" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+                        <Card className="bg-[#0b1120] border border-white/5 rounded-[1.5rem] overflow-hidden shadow-2xl" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+                            <CardBody className="p-8 flex flex-col h-full" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                                 <Typography variant="h5" color="white" className="font-black mb-6">
                                     Finalizar Turno
                                 </Typography>
@@ -134,7 +134,7 @@ export default function PosAdminDashboard() {
                                                 closeShift(Number(shift.totalSales || 0) + Number(shift.initialCash));
                                             }
                                         }}
-                                        placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+                                        placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}
                                     >
                                         Cerrar Turno de Caja
                                     </Button>
@@ -167,12 +167,12 @@ export default function PosAdminDashboard() {
 
 function StatsCard({ title, value, icon }: { title: string; value: string; icon: React.ReactNode }) {
     return (
-        <Card className="bg-[#0b1120] border border-white/5 rounded-[1.5rem] overflow-hidden shadow-xl" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
-            <CardBody className="p-6" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+        <Card className="bg-[#0b1120] border border-white/5 rounded-[1.5rem] overflow-hidden shadow-xl" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
+            <CardBody className="p-6" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>
                 <div className="flex items-start justify-between">
                     <div>
-                        <Typography className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>{title}</Typography>
-                        <Typography variant="h4" color="white" className="font-black" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>{value}</Typography>
+                        <Typography className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>{title}</Typography>
+                        <Typography variant="h4" color="white" className="font-black" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>{value}</Typography>
                     </div>
                     <div className="p-3 bg-white/5 rounded-xl">
                         {icon}
@@ -186,13 +186,13 @@ function StatsCard({ title, value, icon }: { title: string; value: string; icon:
 function DetailItem({ label, value, isBadge = false }: { label: string; value: string; isBadge?: boolean }) {
     return (
         <div>
-            <Typography className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>{label}</Typography>
+            <Typography className="text-slate-500 text-[10px] uppercase font-bold tracking-wider mb-1" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>{label}</Typography>
             {isBadge ? (
                 <span className="inline-flex items-center px-3 py-0.5 rounded-full text-[10px] font-black bg-green-500/10 text-green-500 border border-green-500/20">
                     {value}
                 </span>
             ) : (
-                <Typography color="white" className="font-bold text-sm" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>{value}</Typography>
+                <Typography color="white" className="font-bold text-sm" placeholder="" onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} onResize={undefined} onResizeCapture={undefined}>{value}</Typography>
             )}
         </div>
     );

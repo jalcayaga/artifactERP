@@ -14,7 +14,6 @@ import {
 import { PlusIcon, PencilIcon, TrashIcon } from '@artifact/ui';
 import {
   Dialog,
-  DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
@@ -36,22 +35,21 @@ const ContactPeopleManagement: React.FC<ContactPeopleManagementProps> = ({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Gestión de Personas de Contacto</DialogTitle>
-          <DialogDescription>
-            Aquí puedes gestionar las personas de contacto asociadas a esta
-            empresa.
+    <Dialog onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} open={true} onOpenChange={onClose}>
+      <div className="p-0">
+        <DialogHeader onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+          <DialogTitle onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>Gestión de Personas de Contacto</DialogTitle>
+          <DialogDescription onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+            Administra las personas de contacto vinculadas a esta empresa.
           </DialogDescription>
         </DialogHeader>
         <ContactPeopleView companyId={companyId} isManagementView={true} />
-        <DialogFooter>
+        <DialogFooter onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
           <Button variant='outline' onClick={onClose}>
             Cerrar
           </Button>
         </DialogFooter>
-      </DialogContent>
+      </div>
     </Dialog>
   );
 };

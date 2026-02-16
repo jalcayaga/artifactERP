@@ -29,10 +29,10 @@ const WelcomeKPICard: React.FC<WelcomeKPICardProps> = ({ totalSales, totalProduc
                     backgroundColor: ['#3b82f6', 'rgba(255, 255, 255, 0.05)'],
                     borderWidth: 0,
                     borderRadius: 20,
-                    cutout: '80%',
                 }]
             },
             options: {
+                cutout: '80%',
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
