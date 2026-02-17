@@ -23,8 +23,7 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "seed:compile": "tsc prisma/seed.ts --outDir dist/prisma --module commonjs --resolveJsonModule true --esModuleInterop true --target es2017",
-    "seed:run": "node dist/prisma/seed.js",
-    "postinstall": "prisma generate"
+    "seed:run": "node dist/prisma/seed.js"
   },
   "dependencies": {
     "@artifact/core": "*",
