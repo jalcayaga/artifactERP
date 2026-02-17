@@ -25,7 +25,7 @@ RUN npm ci
 COPY packages/ packages/
 # Copy application source
 COPY apps/storefront/ apps/storefront/
-...
+
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_ADMIN_URL
 ARG NEXT_PUBLIC_API_BASE_URL
