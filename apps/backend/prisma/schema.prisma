@@ -145,6 +145,13 @@ enum SalesModel {
   SUBSCRIPTION
 }
 
+enum SocialProvider {
+  WHATSAPP
+  INSTAGRAM
+  FACEBOOK
+  TIKTOK
+}
+
 // --------------------
 // Multi-tenant core
 // --------------------
@@ -186,6 +193,12 @@ model Tenant {
   // Logistics
   couriers       Courier[]
   dispatches     Dispatch[]
+
+  integrationConfigs IntegrationConfig[]
+  socialAccounts     SocialAccount[]
+  socialConversations SocialConversation[]
+  socialMessages      SocialMessage[]
+  channelOffers       ChannelOffer[]
 
   @@map("tenants")
 }
@@ -270,6 +283,7 @@ model Company {
 
   subscriptions Subscription[]
   dteCafs        DteCaf[]
+  socialConversations SocialConversation[]
 
   @@index([tenantId])
   @@index([userId])
@@ -343,6 +357,7 @@ model Product {
   invoiceItems  InvoiceItem[]
   subscriptions Subscription[]
   productPrices ProductPrice[]
+  channelOffers ChannelOffer[]
 
   @@index([tenantId])
   @@index([category])
@@ -491,6 +506,7 @@ model Lot {
   purchaseItem PurchaseItem? @relation(fields: [purchaseItemId], references: [id])
   orderItemLots OrderItemLot[]
   receptionItems ReceptionItem[]
+  quoteItems    QuoteItem[]
 
   @@index([tenantId])
   @@index([productId])
@@ -507,6 +523,13 @@ enum OrderSource {
   WEB
   POS
   ADMIN
+  MERCADO_LIBRE
+  UBER_EATS
+  PEDIDOS_YA
+  WHATSAPP
+  INSTAGRAM
+  FACEBOOK
+  TIKTOK
 }
 
 model Order {
@@ -540,6 +563,10 @@ model Order {
   invoice    Invoice?
   posShift   PosShift? @relation(fields: [posShiftId], references: [id])
   dispatches Dispatch[]
+
+  // Integration fields
+  channelId       String?
+  externalOrderId String?
 
   @@index([tenantId])
   @@index([userId])
@@ -665,9 +692,12 @@ model QuoteItem {
 
   quote   Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
+  lot     Lot?    @relation(fields: [lotId], references: [id])
+  lotId   String?
 
   @@index([quoteId])
   @@index([productId])
+  @@index([lotId])
   @@map("quote_items")
 }
 
@@ -1041,4 +1071,106 @@ model PosShift {
   @@index([cashRegisterId])
   @@index([userId])
   @@map("pos_shifts")
+}
+
+model IntegrationConfig {
+  id        String   @id @default(cuid())
+  tenantId  String
+  provider  OrderSource
+  config    Json     // API keys, tokens, webhooks secrets
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, provider])
+  @@map("integration_configs")
+}
+
+// --------------------
+// Social Commerce
+// --------------------
+
+model SocialAccount {
+  id           String         @id @default(cuid())
+  tenantId     String
+  provider     SocialProvider
+  instanceName String         // name in Evolution API
+  token        String         // API Key for this instance
+  status       String         @default("DISCONNECTED")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversations SocialConversation[]
+
+  @@unique([tenantId, instanceName])
+  @@map("social_accounts")
+}
+
+model SocialConversation {
+  id           String         @id @default(cuid())
+  tenantId     String
+  accountId    String
+  platform     SocialProvider
+  externalId   String         // Phone number or handle
+  contactId    String?        // Link to Company (ERP Client)
+  lastMessage  String?        @db.Text
+  unreadCount  Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  tenant       Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account      SocialAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  contact      Company?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  messages     SocialMessage[]
+
+  @@unique([accountId, externalId])
+  @@map("social_conversations")
+}
+
+model SocialMessage {
+  id             String         @id @default(cuid())
+  tenantId       String
+  conversationId String
+  direction      String         // "IN" or "OUT"
+  content        String?        @db.Text
+  mediaPath      String?        // Path in Supabase Storage bucket
+  mediaType      String?        // image, audio, video, document
+  externalId     String?        // ID from provider
+  timestamp      DateTime       @default(now())
+
+  tenant         Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  conversation   SocialConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([conversationId])
+  @@map("social_messages")
+}
+
+model ChannelOffer {
+  id          String      @id @default(cuid())
+  tenantId    String
+  channel     OrderSource
+  productId   String
+  price       Decimal     @db.Decimal(10, 2)
+  isActive    Boolean     @default(true)
+  metadata    Json?       // ML category, PedidosYa tags, etc.
+  
+  // For specialized inventory: list of Lot IDs allowed for this channel.
+  // Empty = Any lot (standard strategy).
+  allowedLotIds String[]  @default([])
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  product     Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([tenantId, channel, productId])
+  @@index([tenantId])
+  @@index([channel])
+  @@index([productId])
+  @@map("channel_offers")
 }

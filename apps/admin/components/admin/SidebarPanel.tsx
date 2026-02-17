@@ -25,6 +25,9 @@ import {
     TrendingUp,
     History,
     Receipt,
+    Camera,
+    MessageSquare,
+    CreditCard,
 } from "lucide-react";
 
 interface SidebarPanelProps {
@@ -124,6 +127,45 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({
                 }
             ]
         },
+        integrations: {
+            title: 'Integraciones',
+            sections: [
+                {
+                    label: 'MARKETPLACES',
+                    items: [
+                        { name: 'Mercado Libre', path: '/integrations/meli', icon: ShoppingCart },
+                        { name: 'Uber Eats', path: '/integrations/uber', icon: ShoppingCart, badge: 'Próximamente', disabled: true },
+                        { name: 'PedidosYa', path: '/integrations/pedidosya', icon: ShoppingCart, badge: 'Próximamente', disabled: true },
+                    ]
+                },
+                {
+                    label: 'OMNICANALIDAD',
+                    items: [
+                        { name: 'Inbox Central', path: '/social', icon: MessageSquare, badge: 'Enterprise' },
+                        { name: 'Configuración', path: '/social/settings', icon: Settings, disabled: true },
+                    ]
+                }
+            ]
+        },
+        social: {
+            title: 'Social Inbox',
+            sections: [
+                {
+                    label: 'MENSAJERÍA',
+                    items: [
+                        { name: 'Inbox Central', path: '/social', icon: MessageSquare, badge: 'Active' },
+                        { name: 'Plantillas', path: '/social/templates', icon: StickyNote, disabled: true },
+                    ]
+                },
+                {
+                    label: 'VENTAS',
+                    items: [
+                        { name: 'Links de Pago', path: '/social/payments', icon: CreditCard, disabled: true },
+                        { name: 'Funnels', path: '/social/funnels', icon: TrendingUp, disabled: true },
+                    ]
+                }
+            ]
+        },
         admin: {
             title: 'Administración',
             sections: [
@@ -137,7 +179,7 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({
                 {
                     label: 'SISTEMA',
                     items: [
-                        { name: 'Integraciones', path: '/integrations', icon: Zap },
+                        { name: 'Ajustes App', path: '/settings', icon: Settings },
                         { name: 'Branding UI', path: '/branding', icon: Palette },
                         { name: 'Suscripciones', path: '/subscriptions', icon: FileText },
                     ]

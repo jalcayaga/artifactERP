@@ -17,7 +17,7 @@ export class InvoicesService {
     private dteService: DteService
   ) { }
 
-  async createFromOrder(tenantId: string, orderId: string): Promise<Invoice> {
+  async createFromOrder(tenantId: string, orderId: string, dteType?: number): Promise<Invoice> {
     return this.prisma.$transaction(async (tx) => {
       const order = await tx.order.findFirst({
         where: { id: orderId, tenantId },
@@ -33,10 +33,13 @@ export class InvoicesService {
         throw new ConflictException(
           `Order with ID ${orderId} has already been invoiced.`
         )
-      if (!order.company.rut || !order.company.giro)
+
+      // Basic validation for Factura (Type 33)
+      if (dteType === 33 && (!order.company.rut || !order.company.giro)) {
         throw new ConflictException(
-          `Company for order ${orderId} is missing RUT or Giro.`
+          `Company for order ${orderId} is missing RUT or Giro for Factura emission.`
         )
+      }
 
       const invoiceCount = await tx.invoice.count({ where: { tenantId } })
       const invoiceNumber = `INV-${new Date().getFullYear()}-${invoiceCount + 1}`
@@ -52,6 +55,7 @@ export class InvoicesService {
           subTotalAmount: order.subTotalAmount,
           vatAmount: order.vatAmount,
           grandTotal: order.grandTotalAmount,
+          dteType: dteType || 33, // Default to 33 if not provided
           items: {
             create: order.orderItems.map((item) => ({
               productId: item.productId,

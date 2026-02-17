@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Sale, OrderStatus, formatCurrencyChilean, UserRole } from '@artifact/core';
-import { useCompany, SaleService, InvoiceService, useAuth } from '@artifact/core/client';
+import { useCompany, SaleService, InvoiceService, useAuth, OrderService } from '@artifact/core/client';
 import { useRouter } from 'next/navigation';
 import {
   Plus,
@@ -26,7 +26,9 @@ import {
   ChevronRight,
   Building2,
   Calendar,
-  Receipt
+  Receipt,
+  LayoutGrid,
+  List as ListIcon
 } from 'lucide-react';
 import {
   Card,
@@ -44,7 +46,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import SaleForm from './SaleForm';
 import SaleDetailModal from './SaleDetailModal';
+import SalesWorkflowView from './SalesWorkflowView';
 import ConfirmationModal from '@/components/common/ConfirmationModal';
+import { TenantService } from '@/lib/services/tenant.service';
 import { formatDate } from '@artifact/core';
 
 const PAGE_SIZE = 10;
@@ -63,12 +67,28 @@ const SalesView: React.FC = () => {
   const [saleToDelete, setSaleToDelete] = useState<Sale | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'list' | 'workflow'>('list');
+  const [customLabels, setCustomLabels] = useState<Record<string, string>>({});
 
   const hasAccess = isAuthenticated && currentUser?.role && allowedRoles.includes(currentUser.role as UserRole);
 
   useEffect(() => {
     setCurrentPage(1);
   }, [activeCompany?.id]);
+
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const config = await TenantService.getConfig();
+        if (config.settings?.workflow?.customLabels) {
+          setCustomLabels(config.settings.workflow.customLabels);
+        }
+      } catch (error) {
+        console.error('Error fetching tenant config:', error);
+      }
+    };
+    fetchConfig();
+  }, []);
 
   const salesQuery = useQuery({
     queryKey: ['sales', activeCompany?.id, currentPage, token],
@@ -115,6 +135,16 @@ const SalesView: React.FC = () => {
     }
   }, []);
 
+  const handleConfirmDeleteSale = async () => {
+    if (saleToDelete) {
+      deleteSaleMutation.mutate(saleToDelete.id);
+    }
+  };
+
+  const handleViewSale = (sale: Sale) => {
+    setViewingSale(sale);
+  };
+
   const handleGenerateInvoice = async (orderId: string) => {
     try {
       const invoice = await InvoiceService.createInvoiceFromOrder(orderId);
@@ -127,6 +157,23 @@ const SalesView: React.FC = () => {
     }
   };
 
+  const updateStatusMutation = useMutation({
+    mutationFn: async ({ saleId, newStatus }: { saleId: string, newStatus: OrderStatus }) => {
+      return OrderService.updateOrderStatus(saleId, newStatus);
+    },
+    onSuccess: () => {
+      toast.success('Estado actualizado correctamente');
+      queryClient.invalidateQueries({ queryKey: ['sales'] });
+    },
+    onError: (error: any) => {
+      toast.error(error?.message || 'Error al actualizar el estado');
+    }
+  });
+
+  const handleUpdateStatus = (saleId: string, newStatus: OrderStatus) => {
+    updateStatusMutation.mutate({ saleId, newStatus });
+  };
+
   const getStatusBadge = (status: OrderStatus) => {
     const config = {
       [OrderStatus.PENDING]: { color: 'bg-orange-500/10 text-orange-400 border-orange-500/20', icon: Clock, label: 'Pendiente' },
@@ -137,13 +184,16 @@ const SalesView: React.FC = () => {
       [OrderStatus.CANCELLED]: { color: 'bg-red-500/10 text-red-400 border-red-500/20', icon: XCircle, label: 'Cancelada' },
     };
     const { color, icon: Icon, label } = config[status] || config[OrderStatus.PENDING];
+
+    const displayLabel = customLabels[status] || label;
+
     return (
       <Chip
-        value={label}
+        value={displayLabel}
         size="sm"
-        icon={<Icon className="w-3 h-3" />}
+        icon={React.createElement(Icon, { className: "w-3 h-3" })}
         className={`${color} text-[9px] font-black uppercase tracking-widest rounded-lg px-2 border`}
-        
+        placeholder=""
       />
     );
   };
@@ -200,7 +250,7 @@ const SalesView: React.FC = () => {
           size="lg"
           onClick={handleCreateNewSale}
           className="flex items-center gap-3 rounded-2xl font-black uppercase tracking-widest text-xs group py-4 px-8 shadow-xl shadow-blue-500/20"
-          placeholder=""  onResize={undefined} onResizeCapture={undefined}
+          placeholder="" onResize={undefined} onResizeCapture={undefined}
         >
           <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
           Nueva Venta
@@ -222,135 +272,169 @@ const SalesView: React.FC = () => {
             />
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="text" color="white" className="flex items-center gap-2 rounded-xl bg-white/5 px-4 font-black uppercase tracking-widest text-[10px]" placeholder=""  onResize={undefined} onResizeCapture={undefined}>
+            <div className="flex bg-slate-900/50 p-1 rounded-xl border border-white/5 mr-2">
+              <IconButton
+                variant="text"
+                size="sm"
+                color={viewMode === 'list' ? 'blue' : 'white'}
+                onClick={() => setViewMode('list')}
+                className={`rounded-lg transition-all ${viewMode === 'list' ? 'bg-blue-500/20 shadow-lg' : 'opacity-40 hover:opacity-100'}`}
+                placeholder=""
+              >
+                <ListIcon className="w-4 h-4" />
+              </IconButton>
+              <IconButton
+                variant="text"
+                size="sm"
+                color={viewMode === 'workflow' ? 'blue' : 'white'}
+                onClick={() => setViewMode('workflow')}
+                className={`rounded-lg transition-all ${viewMode === 'workflow' ? 'bg-blue-500/20 shadow-lg' : 'opacity-40 hover:opacity-100'}`}
+                placeholder=""
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </IconButton>
+            </div>
+            <Button variant="text" color="white" className="flex items-center gap-2 rounded-xl bg-white/5 px-4 font-black uppercase tracking-widest text-[10px]" placeholder="" onResize={undefined} onResizeCapture={undefined}>
               <Filter className="w-4 h-4 text-blue-500" />
               Filtros
             </Button>
           </div>
         </div>
 
-        {/* Table Body */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-white/[0.01]">
-                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ID Venta / Fecha</th>
-                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Empresa / Cliente</th>
-                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Estado</th>
-                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Total Bruto</th>
-                <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/[0.02]">
-              {sales.map((sale) => (
-                <tr key={sale.id} className="group hover:bg-white/[0.03] transition-all duration-300">
-                  <td className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                        <ShoppingCart className="w-5 h-5 text-blue-500" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-black italic text-white group-hover:text-blue-400 transition-colors uppercase tracking-widest">#{sale.id.substring(0, 8)}</span>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <Calendar className="w-3 h-3 text-slate-600" />
-                          <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{formatDate(sale.createdAt)}</span>
+        {/* Table/Workflow Body */}
+        {viewMode === 'list' ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              {/* ... table content remains the same ... */}
+              <thead>
+                <tr className="bg-white/[0.01]">
+                  <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">ID Venta / Fecha</th>
+                  <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Empresa / Cliente</th>
+                  <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-center">Estado</th>
+                  <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Total Bruto</th>
+                  <th className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.02]">
+                {sales.map((sale) => (
+                  <tr key={sale.id} className="group hover:bg-white/[0.03] transition-all duration-300">
+                    <td className="p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                          <ShoppingCart className="w-5 h-5 text-blue-500" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-black italic text-white group-hover:text-blue-400 transition-colors uppercase tracking-widest">#{sale.id.substring(0, 8)}</span>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <Calendar className="w-3 h-3 text-slate-600" />
+                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{formatDate(sale.createdAt)}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="p-6">
-                    <div className="flex flex-col">
-                      <span className="text-sm font-bold text-slate-200 uppercase tracking-tight italic">
-                        {sale.company?.name || 'Cliente No Registrado'}
-                      </span>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Building2 className="w-3 h-3 text-slate-600" />
-                        <span className="text-[10px] text-slate-500 font-bold tracking-widest">{sale.company?.taxId || 'RUT NO DISPONIBLE'}</span>
+                    </td>
+                    <td className="p-6">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-slate-200 uppercase tracking-tight italic">
+                          {sale.company?.name || 'Cliente No Registrado'}
+                        </span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Building2 className="w-3 h-3 text-slate-600" />
+                          <span className="text-[10px] text-slate-500 font-bold tracking-widest">{sale.company?.taxId || 'RUT NO DISPONIBLE'}</span>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="p-6 text-center">
-                    <div className="flex justify-center">
-                      {getStatusBadge(sale.status)}
-                    </div>
-                  </td>
-                  <td className="p-6 text-right">
-                    <div className="flex flex-col items-end">
-                      <span className="text-md font-black italic text-[#5d87ff]">{formatCurrencyChilean(sale.grandTotalAmount)}</span>
-                      <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">IVA Inc.</span>
-                    </div>
-                  </td>
-                  <td className="p-6">
-                    <div className="flex items-center justify-end gap-1">
-                      <IconButton variant="text" color="blue" onClick={() => handleViewSale(sale)} className="rounded-xl bg-blue-500/5 hover:bg-blue-500/15" placeholder=""  onResize={undefined} onResizeCapture={undefined}>
-                        <Eye className="w-4 h-4 text-blue-400" />
-                      </IconButton>
+                    </td>
+                    <td className="p-6 text-center">
+                      <div className="flex justify-center">
+                        {getStatusBadge(sale.status)}
+                      </div>
+                    </td>
+                    <td className="p-6 text-right">
+                      <div className="flex flex-col items-end">
+                        <span className="text-md font-black italic text-[#5d87ff]">{formatCurrencyChilean(sale.grandTotalAmount)}</span>
+                        <span className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">IVA Inc.</span>
+                      </div>
+                    </td>
+                    <td className="p-6">
+                      <div className="flex items-center justify-end gap-1">
+                        <IconButton variant="text" color="blue" onClick={() => handleViewSale(sale)} className="rounded-xl bg-blue-500/5 hover:bg-blue-500/15" placeholder="" onResize={undefined} onResizeCapture={undefined}>
+                          <Eye className="w-4 h-4 text-blue-400" />
+                        </IconButton>
 
-                      <Menu placement="bottom-end">
-                        <MenuHandler>
-                          <IconButton variant="text" color="blue" className="rounded-xl bg-white/5 hover:bg-white/10" placeholder=""  onResize={undefined} onResizeCapture={undefined}>
-                            <MoreVertical className="w-4 h-4 text-slate-400" />
-                          </IconButton>
-                        </MenuHandler>
-                        <MenuList className="bg-[#1a2537] border-white/5 p-2 rounded-2xl min-w-[180px]" placeholder="" >
-                          <MenuItem onClick={() => handleEditSale(sale)} className="flex items-center gap-3 py-3 rounded-xl hover:bg-white/5" placeholder="" >
-                            <Edit2 className="w-4 h-4 text-orange-400" />
-                            <span className="text-[10px] font-black uppercase text-white tracking-widest">Editar Venta</span>
-                          </MenuItem>
-
-                          {(sale.status === OrderStatus.DELIVERED || sale.status === OrderStatus.SHIPPED) && !sale.invoice && (
-                            <MenuItem onClick={() => handleGenerateInvoice(sale.id)} className="flex items-center gap-3 py-3 rounded-xl hover:bg-white/5" placeholder="" >
-                              <Receipt className="w-4 h-4 text-emerald-400" />
-                              <span className="text-[10px] font-black uppercase text-white tracking-widest">Generar Factura</span>
+                        <Menu placement="bottom-end">
+                          <MenuHandler>
+                            <IconButton variant="text" color="blue" className="rounded-xl bg-white/5 hover:bg-white/10" placeholder="" onResize={undefined} onResizeCapture={undefined}>
+                              <MoreVertical className="w-4 h-4 text-slate-400" />
+                            </IconButton>
+                          </MenuHandler>
+                          <MenuList className="bg-[#1a2537] border-white/5 p-2 rounded-2xl min-w-[180px]" placeholder="" >
+                            <MenuItem onClick={() => handleEditSale(sale)} className="flex items-center gap-3 py-3 rounded-xl hover:bg-white/5" placeholder="" >
+                              <Edit2 className="w-4 h-4 text-orange-400" />
+                              <span className="text-[10px] font-black uppercase text-white tracking-widest">Editar Venta</span>
                             </MenuItem>
-                          )}
 
-                          <div className="h-px bg-white/5 my-1" />
+                            {(sale.status === OrderStatus.DELIVERED || sale.status === OrderStatus.SHIPPED) && !sale.invoice && (
+                              <MenuItem onClick={() => handleGenerateInvoice(sale.id)} className="flex items-center gap-3 py-3 rounded-xl hover:bg-white/5" placeholder="" >
+                                <Receipt className="w-4 h-4 text-emerald-400" />
+                                <span className="text-[10px] font-black uppercase text-white tracking-widest">Generar Factura</span>
+                              </MenuItem>
+                            )}
 
-                          <MenuItem
-                            onClick={() => { setSaleToDelete(sale); setShowDeleteConfirmModal(true); }}
-                            className="flex items-center gap-3 py-3 rounded-xl hover:bg-red-500/10"
-                            placeholder="" 
-                          >
-                            <Trash2 className="w-4 h-4 text-red-400" />
-                            <span className="text-[10px] font-black uppercase text-red-400 tracking-widest">Eliminar Registro</span>
-                          </MenuItem>
-                        </MenuList>
-                      </Menu>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {salesQuery.isLoading && (
-                <tr>
-                  <td colSpan={5} className="p-20 text-center border-none">
-                    <div className="flex flex-col items-center gap-4 animate-pulse">
-                      <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
-                      <Typography className="text-slate-500 font-black uppercase tracking-widest text-xs" placeholder="" >
-                        Sincronizando órdenes de venta...
-                      </Typography>
-                    </div>
-                  </td>
-                </tr>
-              )}
-              {!salesQuery.isLoading && sales.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="p-20 text-center border-none">
-                    <div className="flex flex-col items-center gap-4 opacity-40">
-                      <ShoppingCart className="w-16 h-16 text-slate-500" />
-                      <Typography className="text-slate-500 font-black uppercase tracking-widest text-xs" placeholder="" >
-                        No hay ventas registradas en este período.
-                      </Typography>
-                      <Button variant="text" color="blue" onClick={handleCreateNewSale} className="font-black uppercase tracking-widest text-[10px]" placeholder=""  onResize={undefined} onResizeCapture={undefined}>
-                        Crear Primera Venta
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                            <div className="h-px bg-white/5 my-1" />
+
+                            <MenuItem
+                              onClick={() => { setSaleToDelete(sale); setShowDeleteConfirmModal(true); }}
+                              className="flex items-center gap-3 py-3 rounded-xl hover:bg-red-500/10"
+                              placeholder=""
+                            >
+                              <Trash2 className="w-4 h-4 text-red-400" />
+                              <span className="text-[10px] font-black uppercase text-red-400 tracking-widest">Eliminar Registro</span>
+                            </MenuItem>
+                          </MenuList>
+                        </Menu>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {salesQuery.isLoading && (
+                  <tr>
+                    <td colSpan={5} className="p-20 text-center border-none">
+                      <div className="flex flex-col items-center gap-4 animate-pulse">
+                        <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+                        <Typography className="text-slate-500 font-black uppercase tracking-widest text-xs" placeholder="" >
+                          Sincronizando órdenes de venta...
+                        </Typography>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                {!salesQuery.isLoading && sales.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="p-20 text-center border-none">
+                      <div className="flex flex-col items-center gap-4 opacity-40">
+                        <ShoppingCart className="w-16 h-16 text-slate-500" />
+                        <Typography className="text-slate-500 font-black uppercase tracking-widest text-xs" placeholder="" >
+                          No hay ventas registradas en este período.
+                        </Typography>
+                        <Button variant="text" color="blue" onClick={handleCreateNewSale} className="font-black uppercase tracking-widest text-[10px]" placeholder="" onResize={undefined} onResizeCapture={undefined}>
+                          Crear Primera Venta
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="p-6">
+            <SalesWorkflowView
+              sales={sales}
+              onViewDetails={setViewingSale}
+              onUpdateStatus={handleUpdateStatus}
+              customLabels={customLabels}
+            />
+          </div>
+        )}
       </Card>
 
       {/* Pagination Footer */}
@@ -363,7 +447,7 @@ const SalesView: React.FC = () => {
             disabled={currentPage === 1}
             color="white"
             className="rounded-xl hover:bg-white/10"
-            placeholder=""  onResize={undefined} onResizeCapture={undefined}
+            placeholder="" onResize={undefined} onResizeCapture={undefined}
           >
             <ChevronRight className="w-4 h-4 rotate-180" />
           </IconButton>
@@ -377,7 +461,7 @@ const SalesView: React.FC = () => {
             disabled={currentPage === totalPages}
             color="white"
             className="rounded-xl hover:bg-white/10"
-            placeholder=""  onResize={undefined} onResizeCapture={undefined}
+            placeholder="" onResize={undefined} onResizeCapture={undefined}
           >
             <ChevronRight className="w-4 h-4" />
           </IconButton>

@@ -12,7 +12,7 @@ import {
   IsPositive,
 } from 'class-validator'
 import { Type } from 'class-transformer'
-import { OrderStatus, PaymentStatus, PaymentMethod } from '@prisma/client'
+import { OrderStatus, PaymentStatus, PaymentMethod, OrderSource } from '@prisma/client'
 
 export class SaleItemDto {
   @IsString({ message: 'Product ID is required' })
@@ -114,4 +114,16 @@ export class CreateSaleDto {
   @IsOptional()
   @IsString()
   posShiftId?: string
+
+  @IsOptional()
+  @IsEnum(OrderSource, { message: 'Invalid order source' })
+  source?: OrderSource
+
+  @IsOptional()
+  @IsString()
+  channelId?: string
+
+  @IsOptional()
+  @IsString()
+  externalOrderId?: string
 }

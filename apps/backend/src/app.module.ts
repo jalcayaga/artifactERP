@@ -39,6 +39,8 @@ import { PricingModule } from './pricing/pricing.module'
 import { DteModule } from './dte/dte.module'
 import { PosModule } from './pos/pos.module'
 import { DispatchesModule } from './dispatches/dispatches.module'
+import { IntegrationsModule } from './integrations/integrations.module'
+import { SocialModule } from './social/social.module'
 
 @Module({
   imports: [
@@ -82,6 +84,8 @@ import { DispatchesModule } from './dispatches/dispatches.module'
     PricingModule,
     DteModule,
     PosModule,
+    IntegrationsModule,
+    SocialModule,
   ],
   controllers: [],
   providers: [

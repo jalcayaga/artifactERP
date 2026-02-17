@@ -402,4 +402,78 @@ export class ProductsService {
       })
     }
   }
+
+  async getIntelligence(
+    tenantId: string,
+    productId: string
+  ): Promise<{
+    lots: any[];
+    averagePurchasePrice: number;
+    suggestedPrice: number;
+    branchPrices: { price: number; name: string }[];
+  }> {
+    const product = await this.ensureBelongsToTenant(tenantId, productId);
+
+    const [lots, productPrices] = await Promise.all([
+      this.prisma.lot.findMany({
+        where: {
+          tenantId,
+          productId,
+          currentQuantity: { gt: 0 }
+        },
+        include: {
+          warehouse: true
+        },
+        orderBy: { entryDate: 'asc' }
+      }),
+      this.prisma.productPrice.findMany({
+        where: { productId },
+        include: { priceList: { select: { name: true, type: true } } }
+      })
+    ]);
+
+    if (lots.length === 0) {
+      return {
+        lots: [],
+        averagePurchasePrice: 0,
+        suggestedPrice: Number(product.price),
+        branchPrices: productPrices.map(pp => ({
+          price: Number(pp.price),
+          name: pp.priceList.name
+        }))
+      };
+    }
+
+    let totalCost = 0;
+    let totalQuantity = 0;
+
+    lots.forEach(lot => {
+      totalCost += Number(lot.purchasePrice) * lot.currentQuantity;
+      totalQuantity += lot.currentQuantity;
+    });
+
+    const averagePurchasePrice = totalQuantity > 0 ? totalCost / totalQuantity : 0;
+
+    // Default margin of 30% if not specified
+    const suggestedPrice = averagePurchasePrice * 1.3;
+
+    return {
+      lots: lots.map(l => ({
+        id: l.id,
+        lotNumber: l.lotNumber,
+        currentQuantity: l.currentQuantity,
+        purchasePrice: Number(l.purchasePrice),
+        entryDate: l.entryDate.toISOString(),
+        expirationDate: l.expirationDate?.toISOString(),
+        warehouseName: l.warehouse?.name || 'N/A',
+        warehouseId: l.warehouseId
+      })),
+      averagePurchasePrice,
+      suggestedPrice,
+      branchPrices: productPrices.map(pp => ({
+        price: Number(pp.price),
+        name: pp.priceList.name
+      }))
+    };
+  }
 }

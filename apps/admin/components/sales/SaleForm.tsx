@@ -44,6 +44,7 @@ import {
   Company,
   OrderStatus,
   PaymentStatus,
+  OrderSource,
   formatCurrencyChilean,
 } from '@artifact/core';
 import {
@@ -74,6 +75,17 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
   const { token, currentUser } = useAuth();
   const [selectedCompanyId, setSelectedCompanyId] = useState<string>('');
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [isNewClient, setIsNewClient] = useState(false);
+  const [newClientData, setNewClientData] = useState({
+    name: '',
+    rut: '',
+    giro: '',
+    address: '',
+    city: '',
+    phone: '',
+    email: '',
+  });
+
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [observations, setObservations] = useState('');
   const [items, setItems] = useState<SaleFormItem[]>([]);
@@ -236,14 +248,42 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!selectedCompanyId) { toast.error('Selecciona un cliente.'); return; }
-    if (items.length === 0) { toast.error('Añade al menos un producto.'); return; }
+
+    // Validation
+    const schemaErrors: { [key: string]: string } = {};
+    if (!isNewClient && !selectedCompanyId) schemaErrors.client = 'Selecciona un cliente';
+    if (isNewClient) {
+      if (!newClientData.name) schemaErrors.name = 'Nombre requerido';
+      if (!newClientData.rut) schemaErrors.rut = 'RUT requerido';
+      if (!newClientData.giro) schemaErrors.giro = 'Giro requerido';
+    }
+    if (items.length === 0) schemaErrors.items = 'Añade al menos un producto';
+
+    if (Object.keys(schemaErrors).length > 0) {
+      setErrors(schemaErrors);
+      Object.values(schemaErrors).forEach(err => toast.error(err));
+      return;
+    }
+
     if (!currentUser?.id && !isEditing) { toast.error('Error de sesión.'); return; }
 
     setIsSubmitting(true);
     try {
+      let finalCompanyId = selectedCompanyId;
+
+      if (isNewClient) {
+        const createdCompany = await CompanyService.createCompany({
+          ...newClientData,
+          isClient: true,
+          isSupplier: false,
+        });
+        finalCompanyId = createdCompany.id;
+        toast.success(`Cliente ${createdCompany.name} creado.`);
+      }
+
       const basePayload = {
-        companyId: selectedCompanyId,
+        companyId: finalCompanyId,
+        source: OrderSource.ADMIN,
         status: saleData?.status || OrderStatus.PENDING_PAYMENT,
         paymentStatus: saleData?.paymentStatus || PaymentStatus.PENDING,
         subTotalAmount: subTotal,
@@ -338,35 +378,124 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
               </Typography>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cliente Solicitante</label>
-                <Select
-                  label="Seleccionar Cliente"
-                  value={selectedCompanyId}
-                  onChange={(val) => setSelectedCompanyId(val || '')}
-                  className="!border-white/10 !bg-white/5 text-white focus:!border-blue-500 rounded-xl h-12"
-                  labelProps={{ className: "hidden" }}
-                >
-                  {companies.map((company) => (
-                    <Option key={company.id} value={company.id} className="font-bold uppercase text-xs tracking-tight">
-                      {company.name} ({company.rut})
-                    </Option>
-                  ))}
-                </Select>
+            <div className="flex flex-col space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Typography variant="small" color="white" className="font-bold uppercase tracking-widest text-[10px]" placeholder="" >
+                    ¿Cliente Nuevo?
+                  </Typography>
+                  <Button
+                    size="sm"
+                    variant={isNewClient ? "gradient" : "text"}
+                    color="blue"
+                    onClick={() => setIsNewClient(!isNewClient)}
+                    className="rounded-lg py-1 px-3 text-[9px] font-black"
+                    placeholder=""
+                  >
+                    {isNewClient ? "CANCELAR" : "CREAR NUEVO"}
+                  </Button>
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Registro</label>
-                <Input
-                  type="date"
-                  className="!border-white/10 !bg-white/5 text-white focus:!border-blue-500 rounded-xl font-bold uppercase"
-                  labelProps={{ className: "hidden" }}
-                  value={saleDate}
-                  onChange={(e) => setSaleDate(e.target.value)}
-                   crossOrigin={undefined}
-                />
-              </div>
+              {!isNewClient ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Cliente Solicitante</label>
+                    <Select
+                      label="Seleccionar Cliente"
+                      value={selectedCompanyId}
+                      onChange={(val) => setSelectedCompanyId(val || '')}
+                      className="!border-white/10 !bg-white/5 text-white focus:!border-blue-500 rounded-xl h-12"
+                      labelProps={{ className: "hidden" }}
+                    >
+                      {companies.map((company) => (
+                        <Option key={company.id} value={company.id} className="font-bold uppercase text-xs tracking-tight">
+                          {company.name} ({company.rut})
+                        </Option>
+                      ))}
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha de Registro</label>
+                    <Input
+                      type="date"
+                      className="!border-white/10 !bg-white/5 text-white focus:!border-blue-500 rounded-xl font-bold uppercase"
+                      labelProps={{ className: "hidden" }}
+                      value={saleDate}
+                      onChange={(e) => setSaleDate(e.target.value)}
+                      crossOrigin={undefined}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-6 bg-white/[0.02] p-6 rounded-[2rem] border border-white/5 animate-in fade-in duration-500">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Razón Social</label>
+                      <Input
+                        className="!border-white/10 !bg-white/5 text-white focus:!border-blue-500 rounded-xl font-bold uppercase h-12"
+                        labelProps={{ className: "hidden" }}
+                        value={newClientData.name}
+                        onChange={(e) => setNewClientData({ ...newClientData, name: e.target.value })}
+                        crossOrigin={undefined}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">RUT</label>
+                      <Input
+                        placeholder="12.345.678-9"
+                        className="!border-white/10 !bg-white/5 text-white focus:!border-blue-500 rounded-xl font-bold h-12"
+                        labelProps={{ className: "hidden" }}
+                        value={newClientData.rut}
+                        onChange={(e) => setNewClientData({ ...newClientData, rut: e.target.value })}
+                        crossOrigin={undefined}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Giro</label>
+                      <Input
+                        className="!border-white/10 !bg-white/5 text-white focus:!border-blue-500 rounded-xl font-bold uppercase h-12"
+                        labelProps={{ className: "hidden" }}
+                        value={newClientData.giro}
+                        onChange={(e) => setNewClientData({ ...newClientData, giro: e.target.value })}
+                        crossOrigin={undefined}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Dirección</label>
+                      <Input
+                        className="!border-white/10 !bg-white/5 text-white focus:!border-blue-500 rounded-xl font-bold uppercase h-12"
+                        labelProps={{ className: "hidden" }}
+                        value={newClientData.address}
+                        onChange={(e) => setNewClientData({ ...newClientData, address: e.target.value })}
+                        crossOrigin={undefined}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Ciudad</label>
+                      <Input
+                        className="!border-white/10 !bg-white/5 text-white focus:!border-blue-500 rounded-xl font-bold uppercase h-12"
+                        labelProps={{ className: "hidden" }}
+                        value={newClientData.city}
+                        onChange={(e) => setNewClientData({ ...newClientData, city: e.target.value })}
+                        crossOrigin={undefined}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-1">Fecha Registro</label>
+                      <Input
+                        type="date"
+                        className="!border-white/10 !bg-white/5 text-white focus:!border-blue-500 rounded-xl font-bold h-12"
+                        labelProps={{ className: "hidden" }}
+                        value={saleDate}
+                        onChange={(e) => setSaleDate(e.target.value)}
+                        crossOrigin={undefined}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
 
@@ -422,7 +551,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
                         labelProps={{ className: "hidden" }}
                         value={quantityToAdd}
                         onChange={(e) => setQuantityToAdd(e.target.value)}
-                         crossOrigin={undefined}
+                        crossOrigin={undefined}
                       />
                     </div>
                     <div className="md:col-span-3 space-y-2">
@@ -433,7 +562,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
                         labelProps={{ className: "hidden" }}
                         value={unitPriceToAdd}
                         onChange={(e) => setUnitPriceToAdd(e.target.value)}
-                         crossOrigin={undefined}
+                        crossOrigin={undefined}
                       />
                     </div>
 
@@ -463,7 +592,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
                         fullWidth
                         onClick={handleAddItem}
                         className="rounded-xl h-12 p-0 flex items-center justify-center"
-                        placeholder=""  
+                        placeholder=""
                       >
                         <Plus className="w-6 h-6" />
                       </Button>
@@ -537,7 +666,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
               rows={5}
               value={observations}
               onChange={(e) => setObservations(e.target.value)}
-              
+
             />
           </Card>
 
@@ -560,7 +689,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
               <div className="flex justify-between items-center py-2 border-b border-white/5">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Afecto IVA</span>
-                  <Chip value="19%" size="sm" className="bg-blue-500/10 text-blue-400 text-[8px] font-black rounded px-1"  />
+                  <Chip value="19%" size="sm" className="bg-blue-500/10 text-blue-400 text-[8px] font-black rounded px-1" />
                 </div>
                 <span className="text-sm font-bold text-slate-300">{formatCurrencyChilean(totalVatAmount)}</span>
               </div>
@@ -585,7 +714,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
                 loading={isSubmitting}
                 onClick={handleSubmit}
                 className="flex items-center justify-center gap-3 rounded-2xl font-black uppercase tracking-widest text-sm py-5 shadow-xl shadow-blue-500/20 h-16"
-                placeholder=""  
+                placeholder=""
               >
                 <Save className="w-6 h-6" />
                 {isEditing ? 'Actualizar Orden' : 'Emitir Orden'}
@@ -596,7 +725,7 @@ const SaleForm: React.FC<SaleFormProps> = ({ saleData, onSave, onCancel }) => {
                 fullWidth
                 onClick={onCancel}
                 className="rounded-2xl font-black uppercase tracking-widest text-xs py-4 opacity-50 hover:opacity-100 transition-opacity"
-                placeholder=""  
+                placeholder=""
               >
                 Descartar Cambios
               </Button>

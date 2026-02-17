@@ -4,12 +4,14 @@ import { Order, OrderStatus, Prisma } from '@prisma/client'
 import { CreateSaleDto } from './dto/create-sale.dto'
 import { UpdateSaleDto } from './dto/update-sale.dto'
 import { ProductsService } from '../products/products.service'
+import { InvoicesService } from '../invoices/invoices.service'
 
 @Injectable()
 export class SalesService {
   constructor(
     private prisma: PrismaService,
-    private productsService: ProductsService
+    private productsService: ProductsService,
+    private invoicesService: InvoicesService
   ) { }
 
   async create(tenantId: string, createSaleDto: CreateSaleDto): Promise<Order> {
@@ -17,9 +19,23 @@ export class SalesService {
     await this.ensureCompanyBelongsToTenant(tenantId, companyId)
     await this.ensureUserBelongsToTenant(tenantId, userId)
 
+    if (orderData.externalOrderId) {
+      const existingOrder = await this.prisma.order.findFirst({
+        where: {
+          tenantId,
+          externalOrderId: orderData.externalOrderId,
+          source: orderData.source,
+        },
+      })
+      if (existingOrder) {
+        return existingOrder
+      }
+    }
+
     return this.prisma.$transaction(async (tx) => {
       // 1. Process items (Reserve Stock)
       const orderItemsData = []
+      const allAllocations: { lotId: string; quantity: number }[] = []
 
       for (const item of items) {
         const allocations = await this.productsService.reserveStock(
@@ -29,12 +45,14 @@ export class SalesService {
           tx
         )
 
+        allAllocations.push(...allocations)
+
         orderItemsData.push({
           quantity: item.quantity,
-          unitPrice: item.unitPrice,
-          totalPrice: item.totalPrice,
-          itemVatAmount: item.itemVatAmount,
-          totalPriceWithVat: item.totalPriceWithVat,
+          unitPrice: new Prisma.Decimal(item.unitPrice),
+          totalPrice: new Prisma.Decimal(item.totalPrice),
+          itemVatAmount: new Prisma.Decimal(item.itemVatAmount),
+          totalPriceWithVat: new Prisma.Decimal(item.totalPriceWithVat),
           product: { connect: { id: item.productId } },
           orderItemLots: {
             create: allocations.map(alloc => ({
@@ -60,7 +78,31 @@ export class SalesService {
         },
         include: { company: true, orderItems: { include: { product: true } } },
       })
+
+      // 3. Fulfill Reservation if status is DELIVERED or COMPLETED (Immediate Stock Deduction)
+      if (newOrder.status === 'DELIVERED' || newOrder.status === 'COMPLETED') {
+        await this.productsService.fulfillReservation(tenantId, allAllocations, tx)
+      }
+
+      // 4. Automated DTE Generation
+      // For POS: always generate Boleta (39)
+      // For ADMIN: if status is COMPLETED/DELIVERED, generate Factura (33) by default
+      // For WEB: usually triggered after payment confirmation (separate flow)
+      try {
+        if (newOrder.source === 'POS') {
+          await this.invoicesService.createFromOrder(tenantId, newOrder.id, 39);
+        } else if (newOrder.source === 'ADMIN' && (newOrder.status === 'COMPLETED' || newOrder.status === 'DELIVERED')) {
+          await this.invoicesService.createFromOrder(tenantId, newOrder.id, 33);
+        }
+      } catch (dteError) {
+        console.error(`[SalesService] Failed to auto-generate DTE for order ${newOrder.id}:`, dteError.message);
+        // We don't fail the transaction because of DTE error, but we log it.
+        // The user can manually retry from the invoice module.
+      }
+
       return newOrder
+    }, {
+      timeout: 15000 // 15 seconds timeout
     })
   }
 
@@ -226,9 +268,11 @@ export class SalesService {
     const { items, customer } = guestData
 
     // 1. Find a Default User (Admin) to assign this sale to
-    // Since Order requires userId, we assign it to the tenant owner/admin
     const defaultUser = await this.prisma.user.findFirst({
-      where: { tenantId, roles: { some: { name: { in: ['SUPERADMIN', 'ADMIN'] } } } }
+      where: {
+        tenantId,
+        roles: { some: { name: { in: ['SUPERADMIN', 'ADMIN'] } } }
+      }
     });
 
     if (!defaultUser) {
@@ -244,7 +288,7 @@ export class SalesService {
       client = await this.prisma.company.create({
         data: {
           tenant: { connect: { id: tenantId } },
-          user: { connect: { id: defaultUser.id } }, // Managed by Admin
+          user: { connect: { id: defaultUser.id } },
           name: customer.name || 'Invitado Web',
           email: customer.email,
           rut: customer.rut,
@@ -255,54 +299,52 @@ export class SalesService {
       });
     }
 
-    // 3. Prepare Order Data
-    return this.prisma.$transaction(async (tx) => {
-      const orderItemsData = []
+    // 3. Map guest items to CreateSaleDto items and calculate totals
+    const saleItems = [];
+    let subTotal = new Prisma.Decimal(0);
 
-      for (const item of items) {
-        const product = await tx.product.findUnique({ where: { id: item.id } });
-        if (!product) continue;
+    for (const item of items) {
+      const product = await this.prisma.product.findUnique({ where: { id: item.id } });
+      if (!product) continue;
 
-        orderItemsData.push({
-          quantity: item.quantity,
-          unitPrice: product.price,
-          totalPrice: product.price.mul(item.quantity),
-          itemVatAmount: product.price.mul(item.quantity).mul(0.19),
-          totalPriceWithVat: product.price.mul(item.quantity).mul(1.19),
-          product: { connect: { id: product.id } }
-        });
-      }
+      const quantity = item.quantity;
+      const unitPrice = product.price;
+      const totalPrice = unitPrice.mul(quantity);
+      const itemVatAmount = totalPrice.mul(0.19);
+      const totalPriceWithVat = totalPrice.add(itemVatAmount);
 
-      const subTotal = orderItemsData.reduce((sum, i) => sum.add(i.totalPrice), new Prisma.Decimal(0));
-      const vatAmount = subTotal.mul(0.19);
-      const grandTotal = subTotal.add(vatAmount);
-
-      // 4. Create Order
-      const newOrder = await tx.order.create({
-        data: {
-          tenant: { connect: { id: tenantId } },
-          company: { connect: { id: client!.id } },
-          user: { connect: { id: defaultUser.id } },
-          status: 'PENDING_PAYMENT',
-          paymentStatus: 'PENDING',
-          subTotalAmount: subTotal,
-          vatAmount: vatAmount,
-          grandTotalAmount: grandTotal,
-          shippingAddress: customer.address + ', ' + customer.city,
-          customerNotes: `Venta Web - Documento: ${customer.documentType}`,
-          orderItems: {
-            create: orderItemsData
-          }
-        },
-        include: { company: true, orderItems: { include: { product: true } } }
+      saleItems.push({
+        productId: product.id,
+        quantity,
+        unitPrice: Number(unitPrice),
+        totalPrice: Number(totalPrice),
+        itemVatAmount: Number(itemVatAmount),
+        totalPriceWithVat: Number(totalPriceWithVat)
       });
 
-      // TODO: Generate Payment Link Here if needed
+      subTotal = subTotal.add(totalPrice);
+    }
 
-      return newOrder;
-    }, {
-      maxWait: 5000, // default: 2000
-      timeout: 20000 // default: 5000
-    });
+    const vatAmount = subTotal.mul(0.19);
+    const grandTotal = subTotal.add(vatAmount);
+
+    // 4. Call unified create method
+    const createSaleDto: CreateSaleDto = {
+      userId: defaultUser.id,
+      companyId: client.id,
+      source: 'WEB',
+      status: 'PENDING_PAYMENT',
+      paymentStatus: 'PENDING',
+      subTotalAmount: Number(subTotal),
+      vatAmount: Number(vatAmount),
+      grandTotalAmount: Number(grandTotal),
+      vatRatePercent: 19,
+      currency: 'CLP',
+      shippingAddress: `${customer.address}, ${customer.city}`,
+      customerNotes: `Venta Web - Documento: ${customer.documentType}`,
+      items: saleItems
+    };
+
+    return this.create(tenantId, createSaleDto);
   }
 }

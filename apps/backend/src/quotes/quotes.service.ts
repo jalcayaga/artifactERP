@@ -11,7 +11,7 @@ import { Prisma, ProductType, Quote, QuoteStatus } from '@prisma/client'
 
 @Injectable()
 export class QuotesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(
     tenantId: string,
@@ -51,6 +51,7 @@ export class QuotesService {
         }
         quoteItemsCreateData.push({
           productId: itemDto.productId,
+          lotId: itemDto.lotId,
           quantity: itemDto.quantity,
           unitPrice: new Prisma.Decimal(itemDto.unitPrice),
           totalPrice: new Prisma.Decimal(itemDto.totalPrice),
@@ -138,6 +139,7 @@ export class QuotesService {
             deleteMany: {},
             create: items.map((item) => ({
               productId: item.productId,
+              lotId: item.lotId,
               quantity: item.quantity,
               unitPrice: new Prisma.Decimal(item.unitPrice),
               totalPrice: new Prisma.Decimal(item.totalPrice),

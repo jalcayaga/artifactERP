@@ -37,7 +37,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}-${{ matrix.service }}
+          images: ${{ env.REGISTRY }}/jalcayaga/artifacterp-${{ matrix.service }}
           tags: |
             type=raw,value=latest
             type=sha

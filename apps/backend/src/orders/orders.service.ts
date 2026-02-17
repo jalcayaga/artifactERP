@@ -4,13 +4,19 @@ import {
   ForbiddenException,
 } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
+import { ProductsService } from '../products/products.service'
+import { SalesService } from '../sales/sales.service'
 import { Order, Prisma } from '@prisma/client'
 import { CreateOrderDto } from './dto/create-order.dto'
 import { UpdateOrderDto } from './dto/update-order.dto'
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private productsService: ProductsService,
+    private salesService: SalesService
+  ) { }
 
   async create(
     tenantId: string,

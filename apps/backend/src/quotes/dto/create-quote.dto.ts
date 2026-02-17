@@ -15,6 +15,10 @@ export class CreateQuoteItemDto {
   @IsString()
   productId: string
 
+  @IsString()
+  @IsOptional()
+  lotId?: string
+
   @IsNumber()
   @Min(1)
   quantity: number

@@ -187,6 +187,49 @@ export interface Product {
   technicalSheetUrl?: string | null // Add technicalSheetUrl property
 }
 
+export interface ProductIntelligence {
+  lots: {
+    id: string;
+    lotNumber: string;
+    currentQuantity: number;
+    purchasePrice: number;
+    entryDate: string;
+    expirationDate?: string;
+    warehouseName: string;
+  }[];
+  averagePurchasePrice: number;
+  suggestedPrice: number;
+  branchPrices?: {
+    price: number;
+    name: string;
+  }[];
+}
+
+export interface ChannelOffer {
+  id: string
+  tenantId: string
+  channel: OrderSource
+  productId: string
+  price: number
+  isActive: boolean
+  metadata?: any
+  allowedLotIds: string[]
+  product?: Product
+  createdAt?: string
+  updatedAt?: string
+}
+
+export interface CreateChannelOfferDto {
+  channel: OrderSource
+  productId: string
+  price: number
+  isActive?: boolean
+  metadata?: any
+  allowedLotIds?: string[]
+}
+
+export interface UpdateChannelOfferDto extends Partial<CreateChannelOfferDto> { }
+
 export interface CreateProductDto {
   name: string
   productType: ProductType
@@ -286,6 +329,13 @@ export enum OrderSource {
   WEB = 'WEB',
   POS = 'POS',
   ADMIN = 'ADMIN',
+  MERCADO_LIBRE = 'MERCADO_LIBRE',
+  UBER_EATS = 'UBER_EATS',
+  PEDIDOS_YA = 'PEDIDOS_YA',
+  WHATSAPP = 'WHATSAPP',
+  INSTAGRAM = 'INSTAGRAM',
+  FACEBOOK = 'FACEBOOK',
+  TIKTOK = 'TIKTOK',
 }
 
 export enum OrderStatus {
@@ -414,6 +464,8 @@ export interface QuoteItem {
   id: string
   quoteId: string
   productId: string
+  lotId?: string | null
+  lot?: Lot | null
   quantity: number
   unitPrice: number
   totalPrice: number

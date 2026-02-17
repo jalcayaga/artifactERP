@@ -27,7 +27,7 @@ import { TenantId } from '../common/decorators/tenant.decorator'
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(private readonly productsService: ProductsService) { }
 
   @Post()
   create(
@@ -144,7 +144,11 @@ export class ProductsController {
     return this.productsService.getAverageCost(tenantId, id)
   }
 
-  @Public()
+  @Get(':id/intelligence')
+  async getIntelligence(@TenantId() tenantId: string, @Param('id') id: string) {
+    return this.productsService.getIntelligence(tenantId, id);
+  }
+
   @Get(':id')
   findOne(@TenantId() tenantId: string, @Param('id') id: string) {
     return this.productsService.findOne(tenantId, id)

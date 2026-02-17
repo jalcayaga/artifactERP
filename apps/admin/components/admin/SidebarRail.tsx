@@ -13,11 +13,13 @@ import {
     Settings,
     ChevronLeft,
     ChevronRight,
+    Zap,
+    MessageSquare,
 } from "lucide-react";
 import { IconButton, Tooltip, Avatar } from "@material-tailwind/react";
 import Image from 'next/image';
 
-export type SidebarCategory = 'overview' | 'commerce' | 'inventory' | 'logistics' | 'admin';
+export type SidebarCategory = 'overview' | 'commerce' | 'social' | 'inventory' | 'logistics' | 'integrations' | 'admin';
 
 interface SidebarRailProps {
     activeCategory: SidebarCategory;
@@ -50,9 +52,11 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
 
     const categories = [
         { id: 'overview' as const, icon: LayoutGrid, label: 'Dashboard' },
-        { id: 'commerce' as const, icon: Banknote, label: 'Commerce' },
-        { id: 'inventory' as const, icon: Package, label: 'Inventory' },
-        { id: 'logistics' as const, icon: Truck, label: 'Logistics' },
+        { id: 'commerce' as const, icon: Banknote, label: 'Comercio' },
+        { id: 'social' as const, icon: MessageSquare, label: 'Social Inbox' },
+        { id: 'inventory' as const, icon: Package, label: 'Inventario' },
+        { id: 'logistics' as const, icon: Truck, label: 'Logística' },
+        { id: 'integrations' as const, icon: Zap, label: 'Integraciones' },
         { id: 'admin' as const, icon: ShieldCheck, label: 'Admin' },
     ];
 

@@ -1,4 +1,4 @@
-import { Product, CreateProductDto, UpdateProductDto, Lot } from '../types'
+import { Product, CreateProductDto, UpdateProductDto, Lot, ProductIntelligence } from '../types'
 import { api } from '../api'
 
 export const ProductService = {
@@ -128,6 +128,17 @@ export const ProductService = {
         headers: { Authorization: `Bearer ${token}` },
       }
     )
+    return response.data
+  },
+
+  // Get product intelligence (lots, price analysis)
+  async getProductIntelligence(
+    productId: string,
+    token: string
+  ): Promise<ProductIntelligence> {
+    const response = await api.get(`/products/${productId}/intelligence`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
     return response.data
   },
 }
