@@ -148,6 +148,7 @@ The following specialized skills are available in `.agent/skills/`. Use them to 
 
 ### UI & UX
 - [artifact_ui_patterns](file:///home/astrodev/artifactERP/.agent/skills/artifact_ui_patterns/SKILL.md): Project-specific design tokens (Glassmorphism, Brand colors).
+- [storefront_design](file:///home/astrodev/artifactERP/.agent/skills/storefront_design/SKILL.md): Estándares de diseño premium y patterns UI para el Storefront.
 - [ui_ux_refinement](file:///home/astrodev/artifactERP/.agent/skills/ui_ux_refinement/SKILL.md): General premium dark-mode principles.
 - [admin_branding](file:///home/astrodev/artifactERP/.agent/skills/admin_branding/SKILL.md): Specific Slate 900/800 patterns for the Admin app.
 - [erp_forms](file:///home/astrodev/artifactERP/.agent/skills/erp_forms/SKILL.md): High-density form standards.
