@@ -41,6 +41,7 @@ import { PosModule } from './pos/pos.module'
 import { DispatchesModule } from './dispatches/dispatches.module'
 import { IntegrationsModule } from './integrations/integrations.module'
 import { SocialModule } from './social/social.module'
+import { AutomationModule } from './automation/automation.module'
 
 @Module({
   imports: [
@@ -86,6 +87,7 @@ import { SocialModule } from './social/social.module'
     PosModule,
     IntegrationsModule,
     SocialModule,
+    AutomationModule,
   ],
   controllers: [],
   providers: [

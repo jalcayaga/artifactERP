@@ -185,6 +185,7 @@ export interface Product {
   updatedAt?: string
   totalStock?: number // Add totalStock property
   technicalSheetUrl?: string | null // Add technicalSheetUrl property
+  thumbnail?: string | null // Add thumbnail property
 }
 
 export interface ProductIntelligence {

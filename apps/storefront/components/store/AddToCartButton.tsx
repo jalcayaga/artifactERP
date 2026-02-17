@@ -24,6 +24,7 @@ const AddToCartButton: React.FC<AddToCartButtonProps> = ({
       name: product.name,
       price: product.price,
       quantity: quantity,
+      image: product.thumbnail,
     });
 
     // Trigger success state
