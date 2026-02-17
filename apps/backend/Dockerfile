@@ -9,11 +9,15 @@ RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json turbo.json tsconfig.base.json ./
 # Copy workspace packages
 COPY packages/ packages/
-# Copy application source
-COPY apps/backend/ apps/backend/
+COPY apps/backend/package.json apps/backend/
+COPY apps/admin/package.json apps/admin/
+COPY apps/storefront/package.json apps/storefront/
 
 # Install dependencies
 RUN npm ci
+
+# Copy application source
+COPY apps/backend/ apps/backend/
 
 # Build the application
 RUN npx turbo run build --filter=@artifact/backend... --force

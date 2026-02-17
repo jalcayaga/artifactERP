@@ -5,8 +5,12 @@ WORKDIR /app
 # Updated: 2026-02-09 - Fixed core package exports
 COPY package.json package-lock.json turbo.json tsconfig.base.json ./
 COPY packages/ packages/
-COPY apps/storefront/ apps/storefront/
+COPY apps/storefront/package.json apps/storefront/
+COPY apps/admin/package.json apps/admin/
+COPY apps/backend/package.json apps/backend/
 RUN npm ci
+
+COPY apps/storefront/ apps/storefront/
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_ADMIN_URL
 ARG NEXT_PUBLIC_API_BASE_URL

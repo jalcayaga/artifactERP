@@ -267,7 +267,7 @@ model Company {
   email       String?
   isClient    Boolean  @default(false)
   isSupplier  Boolean  @default(false)
-  createdAt   DateTime @now()
+  createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   tenant        Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
