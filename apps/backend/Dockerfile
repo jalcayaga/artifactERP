@@ -3,7 +3,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Install Python and build tools for native modules (bcrypt)
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ openssl
 
 # Copy root manifests
 COPY package.json package-lock.json turbo.json tsconfig.base.json ./
@@ -24,7 +24,7 @@ RUN npm ci
 
 # Copy Prisma schema for generation
 COPY apps/backend/prisma/ ./apps/backend/prisma/
-RUN npx prisma generate
+RUN npx prisma generate --schema ./apps/backend/prisma/schema.prisma
 
 # Copy shared source code
 COPY packages/ packages/
@@ -49,6 +49,6 @@ COPY --from=builder /app/apps/backend/prisma ./prisma
 COPY --from=builder /app/packages ./packages
 
 # Generate Prisma Client in runner
-RUN npx prisma generate
+RUN npx prisma generate --schema ./prisma/schema.prisma
 
 CMD ["node", "dist/main.js"]
