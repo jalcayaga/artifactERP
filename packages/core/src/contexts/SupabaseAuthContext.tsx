@@ -146,11 +146,22 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.artifact.cl';
 
+            // Resolve tenant from subdomain or use default
             let tenantSlug = 'artifactspa';  // Default tenant
             if (typeof window !== 'undefined') {
-                const parts = window.location.hostname.split('.');
-                if (parts.length > 1 && parts[0] !== 'www') {
-                    tenantSlug = parts[0];
+                const hostname = window.location.hostname;
+                const parts = hostname.split('.');
+
+                // If subdomain exists and is not a reserved keyword, use it as tenant
+                if (parts.length > 1) {
+                    const subdomain = parts[0];
+                    const reservedSubdomains = ['app', 'admin', 'www', 'api', 'localhost'];
+
+                    if (!reservedSubdomains.includes(subdomain)) {
+                        // Custom tenant subdomain (e.g., cliente1.artifact.cl)
+                        tenantSlug = subdomain;
+                    }
+                    // else: use default 'artifactspa' for app.artifact.cl, admin.artifact.cl, etc.
                 }
             }
 
