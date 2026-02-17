@@ -136,14 +136,36 @@ npx turbo run build
 4. Fix and verify
 5. Deploy
 
-## Skills to Use
+## Skills Index
 
-When working on this project, consider using these skills:
-- `ui_ux_refinement` - For UI/UX improvements
-- `api_architect` - For API design
-- `automated_qa_engineer` - For testing
-- `documentation_keeper` - For docs updates
+The following specialized skills are available in `.agent/skills/`. Use them to ensure consistent and high-quality results:
+
+### Core Engineering
+- [api_architect](file:///home/astrodev/artifactERP/.agent/skills/api_architect/SKILL.md): Best practices for REST/GraphQL API design.
+- [automated_qa_engineer](file:///home/astrodev/artifactERP/.agent/skills/automated_qa_engineer/SKILL.md): Expert in NestJS/React testing.
+- [security_quality_auditor](file:///home/astrodev/artifactERP/.agent/skills/security_quality_auditor/SKILL.md): Security audits and code quality.
+- [react_performance_master](file:///home/astrodev/artifactERP/.agent/skills/react_performance_master/SKILL.md): Optimization techniques for React.
+
+### UI & UX
+- [artifact_ui_patterns](file:///home/astrodev/artifactERP/.agent/skills/artifact_ui_patterns/SKILL.md): Project-specific design tokens (Glassmorphism, Brand colors).
+- [ui_ux_refinement](file:///home/astrodev/artifactERP/.agent/skills/ui_ux_refinement/SKILL.md): General premium dark-mode principles.
+- [admin_branding](file:///home/astrodev/artifactERP/.agent/skills/admin_branding/SKILL.md): Specific Slate 900/800 patterns for the Admin app.
+- [erp_forms](file:///home/astrodev/artifactERP/.agent/skills/erp_forms/SKILL.md): High-density form standards.
+- [printable_documents](file:///home/astrodev/artifactERP/.agent/skills/printable_documents/SKILL.md): Printer-friendly layout standards.
+
+### Business & Domain
+- [chilean_compliance](file:///home/astrodev/artifactERP/.agent/skills/chilean_compliance/SKILL.md): SII, RUT, IVA, and CLP standards.
+- [multi_tenant_patterns](file:///home/astrodev/artifactERP/.agent/skills/multi_tenant_patterns/SKILL.md): Tenant-aware logic and isolation.
+
+### Workflow & Productivity
+- [github_management](file:///home/astrodev/artifactERP/.agent/skills/github_management/SKILL.md): Git branch/commit conventions (Conventional Commits).
+- [production_mode](file:///home/astrodev/artifactERP/.agent/skills/production_mode/SKILL.md): Quality checklist before finalizing any task.
+- [systematic_troubleshooter](file:///home/astrodev/artifactERP/.agent/skills/systematic_troubleshooter/SKILL.md): Deep debugging and root cause analysis.
+- [brainstorming_strategist](file:///home/astrodev/artifactERP/.agent/skills/brainstorming_strategist/SKILL.md): Feature planning and requirement gathering.
+- [documentation_keeper](file:///home/astrodev/artifactERP/.agent/skills/documentation_keeper/SKILL.md): Standards for keeping docs and code in sync.
+- [skill_factory](file:///home/astrodev/artifactERP/.agent/skills/skill_factory/SKILL.md): Meta-skill for creating new standardized skills.
 
 ## Contact
 - Repository: https://github.com/jalcayaga/artifactERP
 - Production: https://app.artifact.cl
+
