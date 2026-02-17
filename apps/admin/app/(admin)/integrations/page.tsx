@@ -318,6 +318,7 @@ const IntegrationsPage = () => {
                                                 checked={settings.marketplaces?.meli?.enabled}
                                                 onChange={(e) => updateMarketplace('meli', 'enabled', e.target.checked)}
                                                 className="h-full w-full checked:bg-[#2ec946]"
+                                                crossOrigin={undefined}
                                             />
                                         </div>
                                     </div>
