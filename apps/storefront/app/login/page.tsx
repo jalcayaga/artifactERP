@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSupabaseAuth } from '@artifact/core/client';
-import { Button, Card, CardHeader, CardTitle, CardContent } from '@artifact/ui';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { Button, Loader2 } from '@artifact/ui';
+import { LayoutGrid, Globe, ShieldCheck } from 'lucide-react';
+import SpaceInvadersBackground from '@/components/SpaceInvadersBackground';
+import { LoginChoiceCard } from '@/components/LoginChoiceCard';
 
 const GoogleIcon = () => (
-    <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
+    <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
         <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -16,7 +18,7 @@ const GoogleIcon = () => (
 );
 
 const MicrosoftIcon = () => (
-    <svg className="w-5 h-5 mr-2" viewBox="0 0 23 23">
+    <svg className="w-5 h-5 mr-3" viewBox="0 0 23 23">
         <path fill="#f3f3f3" d="M0 0h23v23H0z" />
         <path fill="#f35325" d="M1 1h10v10H1z" />
         <path fill="#81bc06" d="M12 1h10v10H12z" />
@@ -25,9 +27,10 @@ const MicrosoftIcon = () => (
     </svg>
 );
 
-export default function StorefrontLoginPage() {
+export default function UnifiedLoginPage() {
     const router = useRouter();
     const { loginWithGoogle, loginWithMicrosoft, isLoading, user } = useSupabaseAuth();
+    const [view, setView] = useState<'selection' | 'storefront_auth'>('selection');
 
     useEffect(() => {
         if (!isLoading && user) {
@@ -43,79 +46,115 @@ export default function StorefrontLoginPage() {
         await loginWithMicrosoft();
     };
 
+    const handleERPSelect = () => {
+        // Redirigir al login del Admin/ERP
+        window.location.href = '/admin/login';
+    };
+
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-                <Loader2 className="w-8 h-8 animate-spin text-cyan-500" />
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <svg className="animate-spin h-10 w-10 text-[#00E074]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 relative overflow-hidden">
-            {/* Animated Background */}
-            <div className="absolute inset-0 overflow-hidden">
-                <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
+        <div className="min-h-screen bg-black relative flex flex-col items-center justify-center overflow-hidden font-inter">
+            <SpaceInvadersBackground />
+
+            {/* Header / Logo */}
+            <div className="absolute top-12 flex flex-col items-center z-20 animate-in fade-in slide-in-from-top duration-1000">
+                <div className="relative mb-4">
+                    <div className="absolute -inset-4 bg-[#00E074]/20 blur-xl rounded-full animate-pulse" />
+                    <LayoutGrid className="w-12 h-12 text-[#00E074] relative" />
+                </div>
+                <h1 className="text-3xl font-bold font-space-grotesk tracking-widest text-white uppercase">
+                    Artifact <span className="text-[#00E074]">ERP</span>
+                </h1>
+                <p className="text-slate-500 text-sm mt-2 tracking-widest uppercase font-medium">Gateway Services</p>
             </div>
 
-            {/* Back Button */}
-            <div className="absolute top-6 left-6 z-20">
-                <Button
-                    variant="outline"
-                    className="border-white/10 hover:bg-white/5 text-slate-200"
-                    onClick={() => router.push('/login')}
-                >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Volver
-                </Button>
+            <div className="w-full max-w-5xl px-6 relative z-10">
+                {view === 'selection' ? (
+                    <div className="grid md:grid-cols-2 gap-8 animate-in zoom-in-95 fade-in duration-500">
+                        {/* Option: Storefront */}
+                        <LoginChoiceCard
+                            title="Tienda Online"
+                            description="Accede a tu cuenta de cliente para gestionar pedidos y favoritos."
+                            icon={Globe}
+                            features={[
+                                "Catálogo interactivo",
+                                "Historial de pedidos",
+                                "Gestión de perfil",
+                                "Soporte exclusivo"
+                            ]}
+                            buttonText="Ir a la Tienda"
+                            onClick={() => setView('storefront_auth')}
+                            variant="primary"
+                        />
+
+                        {/* Option: ERP / Admin */}
+                        <LoginChoiceCard
+                            title="Panel Administración"
+                            description="Acceso exclusivo para personal administrativo y gestión operativa."
+                            icon={ShieldCheck}
+                            features={[
+                                "Control de Inventario",
+                                "Facturación SII",
+                                "Punto de Venta (POS)",
+                                "Reportes en Tiempo Real"
+                            ]}
+                            buttonText="Acceso ERP"
+                            onClick={handleERPSelect}
+                            variant="secondary"
+                        />
+                    </div>
+                ) : (
+                    <div className="max-w-md mx-auto animate-in slide-in-from-right-8 fade-in duration-500">
+                        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 text-center">
+                            <div className="mb-8">
+                                <h2 className="text-2xl font-bold text-white font-space-grotesk mb-2">Login Clientes</h2>
+                                <p className="text-slate-400">Selecciona tu proveedor de identidad</p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-14 text-base font-medium border-white/10 hover:bg-white/10 bg-white/5 text-white transition-all"
+                                    onClick={handleGoogleLogin}
+                                >
+                                    <GoogleIcon />
+                                    Continuar con Google
+                                </Button>
+
+                                <Button
+                                    variant="outline"
+                                    className="w-full h-14 text-base font-medium border-white/10 hover:bg-white/10 bg-white/5 text-white transition-all"
+                                    onClick={handleMicrosoftLogin}
+                                >
+                                    <MicrosoftIcon />
+                                    Continuar con Microsoft
+                                </Button>
+                            </div>
+
+                            <button
+                                onClick={() => setView('selection')}
+                                className="mt-8 text-slate-500 hover:text-[#00E074] transition-colors text-sm font-medium uppercase tracking-widest"
+                            >
+                                ← Volver a la selección
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            <div className="flex items-center justify-center min-h-screen p-6 relative z-10">
-                <Card className="w-full max-w-md bg-black/60 border border-white/10 backdrop-blur-xl shadow-2xl">
-                    <CardHeader className="text-center pb-8">
-                        <div className="w-16 h-16 bg-blue-500/10 border border-blue-500/20 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                            <span className="text-2xl">🛒</span>
-                        </div>
-                        <CardTitle className="text-2xl font-bold mb-2 text-white">Tienda Online</CardTitle>
-                        <p className="text-slate-400">Accede con tu cuenta</p>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        {/* OAuth Buttons */}
-                        <Button
-                            variant="outline"
-                            className="w-full h-12 text-base font-medium border-white/10 hover:bg-white/5 hover:text-white bg-transparent text-slate-200"
-                            onClick={handleGoogleLogin}
-                            disabled={isLoading}
-                        >
-                            <GoogleIcon />
-                            Continuar con Google
-                        </Button>
-
-                        <Button
-                            variant="outline"
-                            className="w-full h-12 text-base font-medium border-white/10 hover:bg-white/5 hover:text-white bg-transparent text-slate-200"
-                            onClick={handleMicrosoftLogin}
-                            disabled={isLoading}
-                        >
-                            <MicrosoftIcon />
-                            Continuar con Microsoft
-                        </Button>
-
-                        <div className="pt-4 text-center">
-                            <p className="text-xs text-slate-500">
-                                Al continuar, aceptas nuestros{' '}
-                                <a href="/terms" className="text-blue-400 hover:underline">
-                                    Términos de Servicio
-                                </a>{' '}
-                                y{' '}
-                                <a href="/privacy" className="text-blue-400 hover:underline">
-                                    Política de Privacidad
-                                </a>
-                            </p>
-                        </div>
-                    </CardContent>
-                </Card>
+            {/* Footer */}
+            <div className="absolute bottom-8 text-slate-600 text-[10px] uppercase tracking-[0.2em] font-medium z-20">
+                Powered by Artifact Technologies • System v2.0
             </div>
         </div>
     );
