@@ -36,7 +36,7 @@ import { toast } from "sonner";
 // Removed unused imports: FactoSettings, MarketplaceSettings, WebpaySettings, EmailSettings, POSSettings, SocialSettings
 // These components don't exist and all settings are handled inline in this file
 import WorkflowSettings from '@/components/sales/WorkflowSettings';
-import { FactoProvider, useFacto } from '@/context/FactoContext'; // Assuming this path for FactoProvider and useFacto
+// Removed unused import: FactoProvider, useFacto from '@/context/FactoContext' - not used in this file
 import { useAuth } from '@artifact/core/client';
 import Link from 'next/link';
 
