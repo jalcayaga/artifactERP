@@ -5,17 +5,24 @@ WORKDIR /app
 # Install Python and build tools for native modules (bcrypt)
 RUN apk add --no-cache python3 make g++
 
-# Copy shared files
+# Copy root manifests
 COPY package.json package-lock.json turbo.json tsconfig.base.json ./
-# Copy workspace packages
-COPY packages/ packages/
-COPY apps/backend/package.json apps/backend/
-COPY apps/admin/package.json apps/admin/
-COPY apps/storefront/package.json apps/storefront/
+
+# Copy all workspace manifests for npm ci
+COPY apps/admin/package.json ./apps/admin/
+COPY apps/backend/package.json ./apps/backend/
+COPY apps/storefront/package.json ./apps/storefront/
+COPY packages/config/package.json ./packages/config/
+COPY packages/core/package.json ./packages/core/
+COPY packages/types/package.json ./packages/types/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/utils/package.json ./packages/utils/
 
 # Install dependencies
 RUN npm ci
 
+# Copy shared source code
+COPY packages/ packages/
 # Copy application source
 COPY apps/backend/ apps/backend/
 

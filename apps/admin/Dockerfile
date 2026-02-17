@@ -2,14 +2,25 @@
 
 FROM node:20-alpine AS builder
 WORKDIR /app
-# Updated: 2026-02-09 - Fixed core package exports
+# Copy root manifests
 COPY package.json package-lock.json turbo.json tsconfig.base.json ./
-COPY packages/ packages/
-COPY apps/admin/package.json apps/admin/
-COPY apps/backend/package.json apps/backend/
-COPY apps/storefront/package.json apps/storefront/
+
+# Copy all workspace manifests for npm ci
+COPY apps/admin/package.json ./apps/admin/
+COPY apps/backend/package.json ./apps/backend/
+COPY apps/storefront/package.json ./apps/storefront/
+COPY packages/config/package.json ./packages/config/
+COPY packages/core/package.json ./packages/core/
+COPY packages/types/package.json ./packages/types/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/utils/package.json ./packages/utils/
+
+# Install dependencies
 RUN npm ci
 
+# Copy shared source code
+COPY packages/ packages/
+# Copy application source
 COPY apps/admin/ apps/admin/
 ARG NEXT_PUBLIC_API_URL
 ARG NEXT_PUBLIC_ADMIN_URL

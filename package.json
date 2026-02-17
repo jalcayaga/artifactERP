@@ -9,7 +9,9 @@
     "lint": "turbo run lint"
   },
   "workspaces": [
-    "apps/*",
+    "apps/admin",
+    "apps/backend",
+    "apps/storefront",
     "packages/*"
   ],
   "devDependencies": {
