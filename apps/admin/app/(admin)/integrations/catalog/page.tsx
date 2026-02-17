@@ -6,6 +6,10 @@ import { Typography } from "@material-tailwind/react";
 import { ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 
+// Force dynamic rendering to avoid build-time errors
+export const dynamic = 'force-dynamic';
+
+
 export default function ChannelCatalogPage() {
     return (
         <div className="flex flex-col gap-4">
