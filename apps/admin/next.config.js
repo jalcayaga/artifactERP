@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   transpilePackages: ['@artifact/ui', '@artifact/core'],
   images: {
     domains: ['igscuchfztqvzwtehqag.supabase.co', 'artifact.cl', 'lh3.googleusercontent.com'],
