@@ -16,6 +16,7 @@ COPY packages/ui/package.json ./packages/ui/
 COPY packages/utils/package.json ./packages/utils/
 
 # Install dependencies
+ENV PRISMA_SKIP_POSTINSTALL_GENERATE=1
 RUN npm ci
 
 # Copy shared source code

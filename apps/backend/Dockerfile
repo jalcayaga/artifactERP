@@ -19,7 +19,12 @@ COPY packages/ui/package.json ./packages/ui/
 COPY packages/utils/package.json ./packages/utils/
 
 # Install dependencies
+ENV PRISMA_SKIP_POSTINSTALL_GENERATE=1
 RUN npm ci
+
+# Copy Prisma schema for generation
+COPY apps/backend/prisma/ ./apps/backend/prisma/
+RUN npx prisma generate
 
 # Copy shared source code
 COPY packages/ packages/
