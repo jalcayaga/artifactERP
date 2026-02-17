@@ -144,77 +144,39 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
 
     const loginWithPassword = async (email: string, password: string) => {
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.artifact.cl';
-
-            // Resolve tenant from subdomain or use default
-            let tenantSlug = 'artifactspa';  // Default tenant
-            if (typeof window !== 'undefined') {
-                const hostname = window.location.hostname;
-                const parts = hostname.split('.');
-
-                // If subdomain exists and is not a reserved keyword, use it as tenant
-                if (parts.length > 1) {
-                    const subdomain = parts[0];
-                    const reservedSubdomains = ['app', 'admin', 'www', 'api', 'localhost'];
-
-                    if (!reservedSubdomains.includes(subdomain)) {
-                        // Custom tenant subdomain (e.g., cliente1.artifact.cl)
-                        tenantSlug = subdomain;
-                    }
-                    // else: use default 'artifactspa' for app.artifact.cl, admin.artifact.cl, etc.
-                }
-            }
-
-            const response = await fetch(`${API_URL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-tenant-slug': tenantSlug
-                },
-                body: JSON.stringify({ email, password }),
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Error al iniciar sesión');
-            }
+            if (error) throw error;
 
-            const data = await response.json();
+            setSession(data.session);
+            setUser(data.user);
 
-            localStorage.setItem('wolfflow_token', data.access_token);
-            localStorage.setItem('artifact_token', data.access_token);
+            // Fetch additional profile data (ERP roles) if needed
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', data.user.id)
+                .single();
 
-            // Decode token to set user state
-            try {
-                const parts = data.access_token.split('.');
-                const payload = JSON.parse(atob(parts[1]));
-                const userData = {
-                    id: payload.sub || 'local-user',
-                    email: payload.email,
-                    firstName: payload.firstName,
-                    lastName: payload.lastName,
-                    role: payload.role || 'user',
-                    roles: payload.roles || [],
+            if (profile) {
+                // Merge profile data with user metadata
+                const enrichedUser = {
+                    ...data.user,
                     user_metadata: {
-                        name: payload.firstName,
-                        firstName: payload.firstName,
-                        lastName: payload.lastName,
-                        hasErpAccess: payload.hasErpAccess || false
+                        ...data.user.user_metadata,
+                        ...profile
                     }
                 };
-                setUser(userData as any);
-                // Sync for old AuthContext
-                localStorage.setItem('wolfflow_user', JSON.stringify(userData));
-            } catch (e) {
-                setUser({ email, id: 'local-user' } as User);
+                setUser(enrichedUser as any);
             }
-
-            setIsLoading(false);
 
             return data;
         } catch (error: any) {
-            console.error('Error logging in with backend:', error.message);
-            throw new Error(error.message || 'Error de conexión');
+            console.error('Error logging in with Supabase:', error.message);
+            throw new Error(error.message || 'Error de autenticación');
         }
     };
 
