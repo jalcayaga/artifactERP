@@ -33,14 +33,8 @@ import {
     Badge
 } from "@material-tailwind/react";
 import { toast } from "sonner";
-import {
-    FactoSettings,
-    MarketplaceSettings,
-    WebpaySettings,
-    EmailSettings,
-    POSSettings,
-    SocialSettings
-} from '@/components/integrations';
+// Removed unused imports: FactoSettings, MarketplaceSettings, WebpaySettings, EmailSettings, POSSettings, SocialSettings
+// These components don't exist and all settings are handled inline in this file
 import WorkflowSettings from '@/components/sales/WorkflowSettings';
 import { FactoProvider, useFacto } from '@/context/FactoContext'; // Assuming this path for FactoProvider and useFacto
 import { useAuth } from '@artifact/core/client';
