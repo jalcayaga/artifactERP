@@ -146,7 +146,7 @@ export const SupabaseAuthProvider: React.FC<{ children: ReactNode }> = ({ childr
         try {
             const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.artifact.cl';
 
-            let tenantSlug = 'artifact';
+            let tenantSlug = 'artifactspa';  // Default tenant
             if (typeof window !== 'undefined') {
                 const parts = window.location.hostname.split('.');
                 if (parts.length > 1 && parts[0] !== 'www') {
