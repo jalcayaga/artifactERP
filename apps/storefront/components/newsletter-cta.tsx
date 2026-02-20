@@ -18,7 +18,7 @@ export function NewsletterCta() {
     <section className="relative overflow-hidden py-20">
       <div className="absolute inset-0 bg-gradient-to-br from-brand/10 via-emerald-100/20 to-white" />
       <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
-        <Card className="mx-auto max-w-4xl border border-white/60 bg-white/90 shadow-xl shadow-slate-200/70">
+        <Card className="mx-auto max-w-4xl border border-white/60 bg-white/90">
           <CardHeader className="text-center">
             <span className="text-sm font-semibold uppercase tracking-[0.4em] text-brand">
               Crece sin límites
@@ -42,7 +42,7 @@ export function NewsletterCta() {
               />
               <Button
                 type="submit"
-                className="h-12 shrink-0 rounded-full bg-brand px-6 text-sm font-semibold text-white shadow-lg shadow-brand/30 hover:bg-brand/90"
+                className="h-12 shrink-0 rounded-full bg-brand px-6 text-sm font-semibold text-white hover:bg-brand/90"
               >
                 {submitted ? "¡Estás dentro!" : "Quiero recibir novedades"}
               </Button>

@@ -40,10 +40,10 @@ export default function FeaturesSection() {
         <section className="py-20 relative z-10">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                    <h2 className="text-4xl md:text-5xl font-bold text-[rgb(var(--text-primary))] mb-4">
                         Todo lo que necesitas para vender online
                     </h2>
-                    <p className="text-xl text-neutral-400 max-w-3xl mx-auto">
+                    <p className="text-xl text-[rgb(var(--text-secondary))] max-w-3xl mx-auto">
                         Artifact ERP combina e-commerce, gestión administrativa y facturación electrónica en una sola plataforma.
                     </p>
                 </div>
@@ -54,13 +54,13 @@ export default function FeaturesSection() {
                         return (
                             <div
                                 key={index}
-                                className="group p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand/30 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(0,224,116,0.15)] transition-all duration-300"
+                                className="group p-6 rounded-2xl bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border-color))] hover:border-brand/30 hover:bg-[rgb(var(--bg-secondary))]/80 transition-all duration-300"
                             >
                                 <div className="w-12 h-12 rounded-xl bg-brand/10 border border-brand/20 flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-brand/20 transition-all duration-300">
                                     <ClientIcon icon={Icon} className="w-6 h-6 text-brand" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-                                <p className="text-neutral-400 leading-relaxed">{feature.description}</p>
+                                <h3 className="text-xl font-bold text-[rgb(var(--text-primary))] mb-2">{feature.title}</h3>
+                                <p className="text-[rgb(var(--text-secondary))] leading-relaxed">{feature.description}</p>
                             </div>
                         );
                     })}

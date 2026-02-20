@@ -41,7 +41,7 @@ const Drawer: React.FC<DrawerProps> = ({
         aria-hidden="true"
       />
       <aside
-        className={`fixed top-0 z-[60] h-full w-full max-w-sm shadow-xl transition-transform duration-300 ease-in-out ${side === "right" ? "right-0" : "left-0"
+        className={`fixed top-0 z-[60] h-full w-full max-w-sm transition-transform duration-300 ease-in-out ${side === "right" ? "right-0" : "left-0"
           } ${isOpen
             ? "translate-x-0"
             : side === "right"

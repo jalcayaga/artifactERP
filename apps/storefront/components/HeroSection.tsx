@@ -9,26 +9,26 @@ export default function HeroSection() {
     return (
         <div className="py-20 md:py-32 flex flex-col items-center text-center space-y-8">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border-color))]">
                 <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-2 w-2 bg-brand"></span>
                 </span>
-                <span className="text-xs font-bold tracking-widest uppercase text-neutral-300">
+                <span className="text-xs font-bold tracking-widest uppercase text-[rgb(var(--text-secondary))]">
                     Plataforma E-commerce Chilena
                 </span>
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-white max-w-5xl leading-tight">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight text-[rgb(var(--text-primary))] max-w-5xl leading-tight">
                 Vende online con{" "}
-                <span className="text-brand drop-shadow-[0_0_30px_rgba(0,224,116,0.5)]">
+                <span className="text-brand">
                     Artifact ERP
                 </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-xl md:text-2xl text-neutral-400 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-[rgb(var(--text-secondary))] max-w-3xl mx-auto leading-relaxed">
                 E-commerce + Admin + Facturación SII.
                 <br />
                 La plataforma completa para tu negocio en Chile.
@@ -40,7 +40,7 @@ export default function HeroSection() {
                     <Button
                         size="lg"
                         suppressHydrationWarning
-                        className="bg-brand text-black font-bold px-10 h-14 text-lg rounded-full shadow-[0_0_20px_rgba(0,224,116,0.3)] hover:shadow-[0_0_40px_rgba(0,224,116,0.6)] hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group"
+                        className="bg-brand text-black font-bold px-10 h-14 text-lg rounded-full hover:scale-105 active:scale-95 transition-all duration-300 relative overflow-hidden group"
                     >
                         <span className="relative z-10 flex items-center gap-2">
                             Ver Planes
@@ -54,7 +54,7 @@ export default function HeroSection() {
                     <Button
                         size="lg"
                         variant="ghost"
-                        className="border-2 border-white/20 text-white hover:bg-white/10 font-semibold px-10 h-14 text-lg rounded-full transition-all hover:scale-105 flex items-center gap-2"
+                        className="border-2 border-[rgb(var(--border-color))] text-[rgb(var(--text-primary))] hover:bg-[rgb(var(--bg-secondary))] font-semibold px-10 h-14 text-lg rounded-full transition-all hover:scale-105 flex items-center gap-2"
                     >
                         <ClientIcon icon={Play} className="w-5 h-5" />
                         Solicitar Demo
@@ -63,7 +63,7 @@ export default function HeroSection() {
             </div>
 
             {/* Trust indicators */}
-            <div className="flex flex-wrap justify-center gap-6 pt-8 text-sm text-neutral-500">
+            <div className="flex flex-wrap justify-center gap-6 pt-8 text-sm text-[rgb(var(--text-secondary))]">
                 {[
                     "Facturación SII incluida",
                     "Configuración en minutos",

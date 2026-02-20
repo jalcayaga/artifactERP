@@ -32,14 +32,10 @@ Artifact ERP is a modern, multi-tenant ERP system built for Chilean businesses, 
 
 ## Authentication Flows
 
-### Admin (ERP)
-- Method: Email + Password (Backend Custom Auth)
-- Endpoint: `POST /auth/login`
-- Route: `/login/admin`
-
-### Storefront (Customers)
-- Method: Supabase OAuth (Google, Microsoft)
-- Route: `/login` (storefront app)
+### Unified Authentication (Gateway)
+- Method: Supabase Auth (OAuth + Email/Password)
+- Route: `/login` (Storefront Gateway) acts as the unified entry point for both Storefront customers and Admin ERP personnel.
+- Implementation: `@artifact/core/client` (`useSupabaseAuth`) handles session state globally.
 
 ## Key Conventions
 
@@ -114,7 +110,7 @@ npx turbo run build
 > **Tenant Context**: Always ensure tenant context is properly set via `x-tenant-slug` header or subdomain resolution.
 
 > [!WARNING]
-> **Authentication**: Admin and Storefront use different auth methods. Never mix them.
+> **Authentication**: Admin and Storefront now use a unified Supabase Auth strategy. Ensure role-based access control (RBAC) securely limits ERP access to authorized personnel only.
 
 > [!CAUTION]
 > **Database Migrations**: Always test migrations on a branch before merging to main.

@@ -37,7 +37,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <Link
       href={`/products/${product.handle}`}
-      className="group relative block rounded-2xl border border-white/10 bg-white/5 overflow-hidden backdrop-blur-sm transition-all duration-300 hover:border-brand/30 hover:bg-white/10 hover:shadow-[0_0_30px_rgba(0,224,116,0.15)]"
+      className="group relative block rounded-2xl border border-white/10 bg-white/5 overflow-hidden transition-all duration-300 hover:border-brand/30 hover:bg-white/10"
     >
       <div className="relative aspect-square w-full overflow-hidden bg-neutral-800">
         <Image

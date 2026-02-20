@@ -9,6 +9,7 @@ import { Footer } from '@/components/footer';
 import { getTenantTheme } from '@/lib/storefront';
 import { defaultTheme } from '@/lib/theme';
 import { headers } from 'next/headers';
+import { ThemeProvider } from '@/components/theme/ThemeContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -57,19 +58,20 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body className="min-h-screen bg-black text-white antialiased">
-        {/* Dynamic Background */}
-        <div className="fixed inset-0 -z-10 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,224,116,0.03),transparent_70%)]" />
-          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-cyan-500/5 rounded-full blur-3xl" />
+      <body className="antialiased font-inter">
+        {/* Dynamic Background (Only in Dark Mode or subtle on light) */}
+        <div className="fixed inset-0 -z-10 overflow-hidden opacity-50 dark:opacity-100 theme-dark-only">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand/5 rounded-full opacity-50" />
+          <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand/5 rounded-full opacity-50" />
         </div>
 
         <Providers>
-          <TenantProvider tenant={tenantTheme}>
-            {children}
-            <Toaster />
-          </TenantProvider>
+          <ThemeProvider>
+            <TenantProvider tenant={tenantTheme}>
+              {children as any}
+              <Toaster />
+            </TenantProvider>
+          </ThemeProvider>
         </Providers>
       </body>
     </html>

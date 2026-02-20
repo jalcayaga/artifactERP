@@ -34,10 +34,10 @@ export default function HowItWorksSection() {
         <section className="py-20 relative z-10">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                    <h2 className="text-4xl md:text-5xl font-bold text-[rgb(var(--text-primary))] mb-4">
                         Comienza en 4 pasos simples
                     </h2>
-                    <p className="text-xl text-neutral-400 max-w-2xl mx-auto">
+                    <p className="text-xl text-[rgb(var(--text-secondary))] max-w-2xl mx-auto">
                         Lanza tu tienda online en minutos, no en semanas. Sin complicaciones técnicas.
                     </p>
                 </div>
@@ -59,8 +59,8 @@ export default function HowItWorksSection() {
                                             {step.number}
                                         </span>
                                     </div>
-                                    <h3 className="text-xl font-bold text-white mb-2">{step.title}</h3>
-                                    <p className="text-neutral-400 leading-relaxed">{step.description}</p>
+                                    <h3 className="text-xl font-bold text-[rgb(var(--text-primary))] mb-2">{step.title}</h3>
+                                    <p className="text-[rgb(var(--text-secondary))] leading-relaxed">{step.description}</p>
                                 </div>
                             </div>
                         );

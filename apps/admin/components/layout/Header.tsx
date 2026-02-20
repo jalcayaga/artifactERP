@@ -10,11 +10,13 @@ import {
     IconButton,
     Badge,
 } from "@material-tailwind/react";
+import { useTheme } from '@artifact/core/client';
 import {
     Bars3Icon,
     Squares2X2Icon,
     MagnifyingGlassIcon,
     SunIcon,
+    MoonIcon,
     ChatBubbleOvalLeftEllipsisIcon,
     BellIcon,
 } from "@heroicons/react/24/outline";
@@ -28,8 +30,11 @@ export const Header: React.FC<HeaderProps> = ({ mobileMenuOpen, setMobileMenuOpe
     const pathname = usePathname();
     const pathSegments = pathname.split('/').filter(Boolean);
 
+    const { theme, setTheme } = useTheme();
+
     return (
         <Navbar
+            onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} placeholder={undefined}
             className="sticky top-0 z-40 w-full max-w-full rounded-none px-4 py-2.5 transition-all bg-transparent shadow-none border-none backdrop-blur-none"
             fullWidth
             blurred={false}
@@ -38,6 +43,7 @@ export const Header: React.FC<HeaderProps> = ({ mobileMenuOpen, setMobileMenuOpe
                 {/* Left: Icons (Menu, Grid, Search) to match reference */}
                 <div className="flex items-center gap-2 px-3 py-1.5 bg-[#161D2B] rounded-xl border border-white/5">
                     <IconButton
+                        placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
                         variant="text"
                         color="white"
                         className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5 w-8 h-8"
@@ -47,12 +53,12 @@ export const Header: React.FC<HeaderProps> = ({ mobileMenuOpen, setMobileMenuOpe
                     </IconButton>
 
                     <Link href="/dashboard">
-                        <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5 w-8 h-8">
+                        <IconButton placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5 w-8 h-8">
                             <Squares2X2Icon className="h-4 w-4" />
                         </IconButton>
                     </Link>
 
-                    <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5 w-8 h-8">
+                    <IconButton placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5 w-8 h-8">
                         <MagnifyingGlassIcon className="h-4 w-4" />
                     </IconButton>
                 </div>
@@ -60,8 +66,14 @@ export const Header: React.FC<HeaderProps> = ({ mobileMenuOpen, setMobileMenuOpe
                 {/* Right: Actions + User */}
                 <div className="flex items-center gap-1 md:gap-2">
 
-                    <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">
-                        <SunIcon className="h-5 w-5" />
+                    <IconButton
+                        placeholder={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}
+                        variant="text"
+                        color="white"
+                        className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5"
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    >
+                        {theme === 'dark' ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
                     </IconButton>
 
                     <IconButton variant="text" color="white" className="grid place-items-center text-blue-gray-200 hover:text-white hover:bg-white/5">

@@ -169,11 +169,11 @@ const UserManagementView: React.FC<UserManagementViewProps> = ({
   }
 
   return (
-    <Dialog onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} open={isModalOpen} onOpenChange={setIsModalOpen}>
+    <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <div className='space-y-6 lg:space-y-8'>
         <div className='flex justify-between items-center'>
           <h1 className='text-2xl font-bold'>Gestión de Usuarios</h1>
-          <Dialog onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined} Trigger asChild>
+          <DialogTrigger asChild>
             <Button
               className='w-full sm:w-auto'
               onClick={() => handleOpenModal()}
@@ -253,7 +253,7 @@ const UserManagementView: React.FC<UserManagementViewProps> = ({
         </Card>
 
         <div className="p-0">
-          <DialogHeader onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+          <DialogHeader>
             <DialogTitle className='text-sm sm:text-base font-semibold text-foreground'>
               {editingUser ? 'Editar Usuario' : 'Añadir Nuevo Usuario'}
             </DialogTitle>
@@ -339,7 +339,7 @@ const UserManagementView: React.FC<UserManagementViewProps> = ({
               </div>
             )}
           </form>
-          <DialogFooter onResize={undefined} onResizeCapture={undefined} onPointerEnterCapture={undefined} onPointerLeaveCapture={undefined}>
+          <DialogFooter>
             <Button type='submit' onClick={handleSubmit}>
               {editingUser ? 'Guardar Cambios' : 'Añadir Usuario'}
             </Button>

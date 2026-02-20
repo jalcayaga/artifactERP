@@ -45,7 +45,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
               {items.map((item) => (
                 <div
                   key={item.id}
-                  className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-brand/30 hover:shadow-[0_0_20px_rgba(0,224,116,0.1)] transition-all duration-300"
+                  className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-brand/30 transition-all duration-300"
                 >
                   <div className="flex gap-3">
                     {/* Product Thumbnail */}
@@ -130,7 +130,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
             {/* Action Buttons */}
             <div className="space-y-2">
               <Link href="/checkout" onClick={onClose}>
-                <button className="w-full px-6 py-3 rounded-xl bg-brand text-black font-semibold hover:shadow-[0_0_20px_rgba(0,224,116,0.4)] transition-all">
+                <button className="w-full px-6 py-3 rounded-xl bg-brand text-black font-semibold transition-all">
                   Proceder al Pago
                 </button>
               </Link>

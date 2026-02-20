@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
+  darkMode: 'class',
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -9,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: '#00E074', // Neon Green
+        brand: '#00E074', // Emerald-500
         primary: '#00E074',
       },
       borderRadius: {

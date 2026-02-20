@@ -29,7 +29,7 @@ export function HeroSection() {
 
         <div className="flex flex-col items-center gap-4 sm:flex-row">
           <Link href="#products-grid">
-            <Button className="rounded-full bg-brand px-10 py-7 text-lg font-semibold text-white shadow-xl shadow-brand/20 hover:bg-brand/90 hover:-translate-y-1 transition-all">
+            <Button className="rounded-full bg-brand px-10 py-7 text-lg font-semibold text-white hover:bg-brand/90 hover:-translate-y-1 transition-all">
               Ver Catálogo
             </Button>
           </Link>

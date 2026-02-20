@@ -191,14 +191,14 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({
     const current = categoryData[activeCategory];
 
     return (
-        <div className="flex-1 flex flex-col bg-[#1a2537] overflow-hidden w-[240px]">
+        <div className="flex-1 flex flex-col bg-slate-900 border-r border-white/5 overflow-hidden w-[240px]">
             {/* Header Section - Branding Text restored with Toggle control */}
             <div className="px-5 h-[64px] flex items-center border-b border-[#ffffff08] justify-between">
                 <div className="flex items-center gap-2">
-                    <Typography color="white" className="font-extrabold tracking-tight text-white leading-none text-[20px] bg-clip-text text-transparent bg-gradient-to-r from-white to-blue-gray-400">
+                    <Typography color="white" className="font-black tracking-tighter text-white leading-none text-[22px]">
                         ARTIFACT
                     </Typography>
-                    <Typography className="text-[12px] font-bold text-blue-400 tracking-widest ml-1 opacity-80">
+                    <Typography className="text-[10px] font-black text-emerald-500 tracking-[0.3em] ml-0.5 opacity-90">
                         ERP
                     </Typography>
                 </div>
@@ -228,20 +228,20 @@ export const SidebarPanel: React.FC<SidebarPanelProps> = ({
                                     >
                                         <ListItem
                                             ripple={!disabled}
-                                            className={`group py-[12px] px-[16px] rounded-[2500px] w-[208px] mx-auto transition-all duration-300 flex items-center gap-3 ${active
-                                                ? "bg-[rgba(0,161,255,0.12)] text-[#00a1ff]"
-                                                : "text-[#7b8893] hover:bg-[rgba(0,161,255,0.12)] hover:text-[#00a1ff]"
+                                            className={`group py-2.5 px-4 rounded-xl w-[200px] mx-auto transition-all duration-300 flex items-center gap-3 ${active
+                                                ? "bg-emerald-500/10 text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                                                : "text-slate-400 hover:bg-emerald-500/5 hover:text-emerald-500"
                                                 }`}
                                         >
                                             <ListItemPrefix className="m-0">
-                                                <item.icon className={`h-[20px] w-[20px] transition-colors ${active ? "text-[#00a1ff]" : "text-[#7b8893] group-hover:text-[#00a1ff]"}`} strokeWidth={active ? 2 : 1.5} />
+                                                <item.icon className={`h-5 w-5 transition-colors ${active ? "text-emerald-500" : "text-slate-400 group-hover:text-emerald-500"}`} strokeWidth={active ? 2.5 : 1.5} />
                                             </ListItemPrefix>
-                                            <span className={`text-[15px] font-normal leading-normal transition-all duration-300 ${active ? "text-[#00a1ff]" : "group-hover:text-[#00a1ff]"}`}>
+                                            <span className={`text-sm font-medium tracking-tight transition-all duration-300 ${active ? "text-emerald-500" : "group-hover:text-emerald-500"}`}>
                                                 {item.name}
                                             </span>
                                             {item.badge && (
                                                 <ListItemSuffix {...({} as any)}>
-                                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#00a1ff] text-white">
+                                                    <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-500 border border-emerald-500/20">
                                                         {item.badge}
                                                     </span>
                                                 </ListItemSuffix>

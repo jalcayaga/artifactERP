@@ -8,7 +8,7 @@ export default function Hero() {
                     {/* Left: Content */}
                     <div className="space-y-8">
                         {/* Badge */}
-                        <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-4 py-2 backdrop-blur-sm">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-brand/5 px-4 py-2">
                             <svg className="h-4 w-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                             </svg>
@@ -25,7 +25,7 @@ export default function Hero() {
                                     <span className="relative z-10 bg-gradient-to-r from-brand via-emerald-400 to-brand bg-clip-text text-transparent">
                                         Crece
                                     </span>
-                                    <span className="absolute -inset-1 -z-10 blur-xl bg-gradient-to-r from-brand/50 to-emerald-400/50" />
+                                    <span className="absolute -inset-1 -z-10 bg-gradient-to-r from-brand/30 to-emerald-400/30 dark:from-brand/50 dark:to-emerald-400/50" />
                                 </span>{' '}
                                 con Artifact
                             </h1>
@@ -36,7 +36,7 @@ export default function Hero() {
                         </div>
 
                         {/* Stats terminal */}
-                        <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/50 p-6 backdrop-blur-sm transition-all hover:border-brand/30">
+                        <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/50 p-6 transition-all hover:border-brand/30">
                             <div className="mb-4 flex items-center gap-2">
                                 <div className="h-3 w-3 rounded-full bg-red-500" />
                                 <div className="h-3 w-3 rounded-full bg-yellow-500" />
@@ -62,7 +62,7 @@ export default function Hero() {
                         {/* CTA Buttons */}
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                             <Link href="#planes">
-                                <button className="group relative overflow-hidden rounded-full bg-brand px-8 py-4 text-lg font-semibold text-black transition-all hover:scale-105 hover:shadow-[0_0_30px_rgba(0,224,116,0.5)]">
+                                <button className="group relative overflow-hidden rounded-full bg-brand px-8 py-4 text-lg font-semibold text-black transition-all hover:scale-105">
                                     <span className="relative z-10 flex items-center gap-2">
                                         Ver Planes
                                         <svg className="h-5 w-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
@@ -72,7 +72,7 @@ export default function Hero() {
                             </Link>
 
                             <Link href="#contacto">
-                                <button className="rounded-full border border-white/10 bg-white/5 px-8 py-4 text-lg font-medium text-white backdrop-blur-sm transition-all hover:border-brand/50 hover:bg-white/10">
+                                <button className="rounded-full border border-white/10 bg-white/5 px-8 py-4 text-lg font-medium text-white transition-all hover:border-brand/50 hover:bg-white/10">
                                     Diagnóstico Gratis
                                 </button>
                             </Link>
@@ -99,7 +99,7 @@ export default function Hero() {
                     <div className="relative hidden lg:block">
                         <div className="relative aspect-square flex items-center justify-center">
                             {/* Floating card - Neutral background, no slate blue */}
-                            <div className="relative z-10 w-96 animate-float rounded-2xl border border-white/10 bg-neutral-900/90 p-6 shadow-2xl shadow-brand/20 backdrop-blur-xl">
+                            <div className="relative z-10 w-96 animate-float rounded-2xl border border-white/10 bg-neutral-900/90 p-6">
                                 <div className="mb-4 flex items-center gap-3">
                                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand/10">
                                         <svg
@@ -138,8 +138,8 @@ export default function Hero() {
                                 </div>
                             </div>
 
-                            {/* Subtle individual glow for the card itself */}
-                            <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/20 blur-[80px]" />
+                            {/* Subtle individual glow for the card itself - Blur removed */}
+                            <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand/10 dark:bg-brand/20" />
                         </div>
                     </div>
                 </div>

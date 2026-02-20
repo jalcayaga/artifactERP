@@ -37,10 +37,10 @@ export default function SocialProofSection() {
         <section className="py-20 relative z-10">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                    <h2 className="text-4xl md:text-5xl font-bold text-[rgb(var(--text-primary))] mb-4">
                         Negocios reales, resultados reales
                     </h2>
-                    <p className="text-xl text-neutral-400 max-w-2xl mx-auto">
+                    <p className="text-xl text-[rgb(var(--text-secondary))] max-w-2xl mx-auto">
                         Más de 100 negocios chilenos ya confían en Artifact ERP para vender online.
                     </p>
                 </div>
@@ -49,7 +49,7 @@ export default function SocialProofSection() {
                     {testimonials.map((testimonial, index) => (
                         <div
                             key={index}
-                            className="p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-brand/30 hover:shadow-[0_0_30px_rgba(0,224,116,0.15)] transition-all duration-300 flex flex-col"
+                            className="p-6 rounded-2xl bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border-color))] hover:border-brand/30 transition-all duration-300 flex flex-col"
                         >
                             {/* Rating */}
                             <div className="flex gap-1 mb-4">
@@ -59,26 +59,26 @@ export default function SocialProofSection() {
                             </div>
 
                             {/* Testimonial text */}
-                            <p className="text-neutral-300 leading-relaxed mb-6 flex-grow">
+                            <p className="text-[rgb(var(--text-secondary))] leading-relaxed mb-6 flex-grow">
                                 &ldquo;{testimonial.text}&rdquo;
                             </p>
 
                             {/* Metric */}
                             <div className="p-4 rounded-xl bg-brand/10 border border-brand/20 mb-4">
                                 <div className="text-3xl font-bold text-brand">{testimonial.metric}</div>
-                                <div className="text-sm text-neutral-400">{testimonial.metricLabel}</div>
+                                <div className="text-sm text-[rgb(var(--text-secondary))]">{testimonial.metricLabel}</div>
                             </div>
 
                             {/* Author */}
-                            <div className="flex items-center gap-3 pt-4 border-t border-white/10">
+                            <div className="flex items-center gap-3 pt-4 border-t border-[rgb(var(--border-color))]">
                                 <div className="w-12 h-12 rounded-full bg-brand/20 border border-brand/30 flex items-center justify-center">
                                     <span className="text-lg font-bold text-brand">
                                         {testimonial.name.charAt(0)}
                                     </span>
                                 </div>
                                 <div>
-                                    <div className="font-semibold text-white">{testimonial.name}</div>
-                                    <div className="text-sm text-neutral-400">
+                                    <div className="font-semibold text-[rgb(var(--text-primary))]">{testimonial.name}</div>
+                                    <div className="text-sm text-[rgb(var(--text-secondary))]">
                                         {testimonial.business} • {testimonial.location}
                                     </div>
                                 </div>

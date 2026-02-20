@@ -30,8 +30,8 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ product }) => {
                 {/* Badge */}
                 <div className="mb-6 flex">
                     <span className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-medium ${isSubscription
-                            ? 'border-[#00E074]/30 bg-[#00E074]/10 text-[#00E074]'
-                            : 'border-blue-500/30 bg-blue-500/10 text-blue-400'
+                        ? 'border-[#00E074]/30 bg-[#00E074]/10 text-[#00E074]'
+                        : 'border-blue-500/30 bg-blue-500/10 text-blue-400'
                         }`}>
                         {isSubscription ? 'Suscripción Mensual' : 'Pago Único'}
                     </span>
@@ -57,7 +57,7 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({ product }) => {
                 <div className="mt-auto">
                     <Link href={`/cart/add/${product.id}`} className="w-full">
                         <Button
-                            className="w-full rounded-full bg-white/5 border border-white/10 py-6 text-white transition-all hover:bg-[#00E074] hover:border-[#00E074] hover:text-black hover:font-bold group-hover:shadow-lg group-hover:shadow-[#00E074]/20"
+                            className="w-full rounded-full bg-white/5 border border-white/10 py-6 text-white transition-all hover:bg-[#00E074] hover:border-[#00E074] hover:text-black hover:font-bold"
                         >
                             <span className="flex items-center gap-2">
                                 Contratar Ahora

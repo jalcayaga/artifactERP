@@ -70,10 +70,10 @@ export default function DigitalServicesCarousel() {
         <section className="py-24 relative overflow-hidden">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">
-                        Potencia tu Negocio con <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00E074] to-emerald-500">IA + Humano</span>
+                    <h2 className="text-3xl md:text-5xl font-bold text-[rgb(var(--text-primary))] mb-6">
+                        Potencia tu Negocio con <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand to-emerald-500">IA + Humano</span>
                     </h2>
-                    <p className="text-lg text-neutral-400 max-w-2xl mx-auto">
+                    <p className="text-lg text-[rgb(var(--text-secondary))] max-w-2xl mx-auto">
                         Servicios digitales diseñados para liberar tu tiempo. La eficiencia de la Inteligencia Artificial con la dirección creativa de expertos.
                     </p>
                 </div>
@@ -82,35 +82,35 @@ export default function DigitalServicesCarousel() {
                     {services.map((service, index) => (
                         <div
                             key={service.id}
-                            className="group relative rounded-3xl border border-white/5 bg-neutral-900/40 p-1 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-white/10"
+                            className="group relative rounded-3xl border border-[rgb(var(--border-color))] bg-[rgb(var(--bg-secondary))] p-1 transition-all hover:-translate-y-2 hover:border-brand/30"
                         >
                             <div className={`absolute inset-0 rounded-3xl bg-gradient-to-b ${service.gradient} opacity-0 transition-opacity group-hover:opacity-100`} />
 
-                            <div className="relative h-full flex flex-col p-6 rounded-[20px] bg-[#0A0A0A]/80">
-                                <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/5 border border-white/5 group-hover:scale-110 transition-transform duration-300">
+                            <div className="relative h-full flex flex-col p-6 rounded-[20px] bg-[rgb(var(--bg-primary))]/80">
+                                <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[rgb(var(--bg-secondary))] border border-[rgb(var(--border-color))] group-hover:scale-110 transition-transform duration-300">
                                     {service.icon}
                                 </div>
 
-                                <h3 className="text-xl font-bold text-white mb-1">{service.name}</h3>
-                                <p className="text-sm font-medium text-[#00E074] mb-4">{service.subtitle}</p>
+                                <h3 className="text-xl font-bold text-[rgb(var(--text-primary))] mb-1">{service.name}</h3>
+                                <p className="text-sm font-medium text-brand mb-4">{service.subtitle}</p>
 
-                                <p className="text-sm text-neutral-400 leading-relaxed mb-6 flex-grow">
+                                <p className="text-sm text-[rgb(var(--text-secondary))] leading-relaxed mb-6 flex-grow">
                                     {service.description}
                                 </p>
 
-                                <div className="mt-auto pt-6 border-t border-white/5">
+                                <div className="mt-auto pt-6 border-t border-[rgb(var(--border-color))]">
                                     <div className="flex items-end justify-between mb-4">
                                         <div className="flex flex-col">
-                                            <span className="text-xs text-neutral-500 uppercase tracking-wider">Desde</span>
+                                            <span className="text-xs text-[rgb(var(--text-secondary))] uppercase tracking-wider">Desde</span>
                                             <div className="flex items-baseline gap-1">
-                                                <span className="text-2xl font-bold text-white">{service.price}</span>
-                                                <span className="text-xs text-neutral-500">{service.period}</span>
+                                                <span className="text-2xl font-bold text-[rgb(var(--text-primary))]">{service.price}</span>
+                                                <span className="text-xs text-[rgb(var(--text-secondary))]">{service.period}</span>
                                             </div>
                                         </div>
                                     </div>
 
                                     <Button
-                                        className="w-full rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 transition-all text-sm h-10"
+                                        className="w-full rounded-xl bg-brand/10 hover:bg-brand/20 text-brand border border-brand/20 transition-all text-sm h-10"
                                     >
                                         Ver Detalles
                                     </Button>

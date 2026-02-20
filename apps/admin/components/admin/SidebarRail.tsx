@@ -61,7 +61,7 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
     ];
 
     return (
-        <div className="w-[80px] bg-[#111c2d] border-r border-[#ffffff08] flex flex-col items-center pt-0 pb-6 gap-6 z-[70] relative">
+        <div className="w-[80px] bg-slate-950 border-r border-white/5 flex flex-col items-center pt-0 pb-6 gap-6 z-[70] relative">
             {/* Brand Logo - Integrated with SidebarPanel header height (64px) */}
             <div className="h-[64px] flex items-center justify-center w-full border-b border-[#ffffff08]">
                 <div className="w-[48px] h-[48px] flex items-center justify-center group cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95">
@@ -92,8 +92,8 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
                                     variant="text"
                                     onClick={() => setActiveCategory(cat.id)}
                                     className={`w-[48px] h-[48px] max-w-none max-h-none rounded-full transition-all duration-300 flex items-center justify-center ${isActive
-                                        ? "bg-[rgba(0,161,255,0.12)] text-[#00a1ff]"
-                                        : "text-[#7b8893] hover:bg-[rgba(0,161,255,0.12)] hover:text-[#00a1ff]"
+                                        ? "bg-emerald-500/10 text-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                                        : "text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-500"
                                         }`}
                                 >
                                     <cat.icon
@@ -118,7 +118,7 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
                         <Link href="/settings">
                             <IconButton
                                 variant="text"
-                                className="w-[48px] h-[48px] max-w-none max-h-none rounded-full transition-all duration-300 flex items-center justify-center text-[#7b8893] bg-white/5 border border-white/5 hover:bg-[rgba(0,161,255,0.12)] hover:text-[#00a1ff] hover:border-[#00a1ff20] hover:scale-105 shadow-lg group"
+                                className="w-[48px] h-[48px] max-w-none max-h-none rounded-full transition-all duration-300 flex items-center justify-center text-slate-400 bg-white/5 border border-white/5 hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/20 hover:scale-105 shadow-lg group"
                             >
                                 <Settings
                                     className="h-6 w-6 transition-transform duration-300 group-hover:rotate-45"

@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Sidebar } from '../admin/sidebar';
 import AuthGuard from '../auth/AuthGuard';
 import AuthStatus from '../auth/AuthStatus';
-import ThemeSwitcher from '../theme/ThemeSwitcher';
 import { Toaster, toast } from 'sonner';
 import {
   Navbar,
@@ -67,7 +66,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
   const pathSegments = pathname.split('/').filter(Boolean);
 
   return (
-    <div className="min-h-screen flex bg-[#0f172a] text-white font-sans selection:bg-[#00a1ff] selection:text-white">
+    <div className="min-h-screen flex bg-slate-950 text-white font-sans selection:bg-emerald-500 selection:text-black">
       <Toaster richColors position="bottom-right" />
       {/* Sidebar - Controlled by collapse state */}
       <Sidebar
@@ -83,7 +82,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
         {/* Top Header/Navbar */}
         <Navbar
           {...({} as any)}
-          className={`sticky top-0 z-40 w-full rounded-none bg-[#0f172a] border-b border-white/5 px-4 py-2.5 transition-all duration-300 shadow-none ${showHeader ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          className={`sticky top-0 z-40 w-full rounded-none bg-slate-950/80 backdrop-blur-md border-b border-white/5 px-4 py-2.5 transition-all duration-300 shadow-none ${showHeader ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
             }`}
           fullWidth
           blurred={false}
@@ -127,10 +126,6 @@ export const AppShell: React.FC<AppShellProps> = ({ children }) => {
             {/* Right: Actions + User */}
             <div className="flex items-center gap-2">
 
-              {/* Theme Switcher Unified */}
-              <div className="flex items-center px-2 py-1 rounded-xl bg-white/5 border border-blue-gray-100/5">
-                <ThemeSwitcher />
-              </div>
 
               <IconButton
                 variant="text"

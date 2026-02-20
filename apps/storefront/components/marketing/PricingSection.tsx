@@ -65,10 +65,10 @@ export default function PricingSection() {
         <section className="py-20 relative z-10" id="pricing">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
+                    <h2 className="text-4xl md:text-5xl font-bold text-[rgb(var(--text-primary))] mb-4">
                         Planes para cada etapa de tu negocio
                     </h2>
-                    <p className="text-xl text-neutral-400 max-w-2xl mx-auto">
+                    <p className="text-xl text-[rgb(var(--text-secondary))] max-w-2xl mx-auto">
                         Precios transparentes que incluyen facturación electrónica SII. Sin costos ocultos.
                     </p>
                 </div>
@@ -78,8 +78,8 @@ export default function PricingSection() {
                         <div
                             key={index}
                             className={`relative p-8 rounded-3xl border-2 transition-all duration-300 ${plan.popular
-                                ? 'border-brand bg-brand/5 scale-105 shadow-[0_0_40px_rgba(0,224,116,0.2)]'
-                                : 'border-white/10 bg-white/5 hover:border-brand/30 hover:shadow-[0_0_30px_rgba(0,224,116,0.1)]'
+                                ? 'border-brand bg-brand/5 scale-105'
+                                : 'border-[rgb(var(--border-color))] bg-[rgb(var(--bg-secondary))] hover:border-brand/30'
                                 }`}
                         >
                             {plan.popular && (
@@ -90,19 +90,19 @@ export default function PricingSection() {
                             )}
 
                             <div className="text-center mb-6">
-                                <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                                <h3 className="text-2xl font-bold text-[rgb(var(--text-primary))] mb-2">{plan.name}</h3>
                                 <div className="mb-2">
-                                    <span className="text-4xl font-bold text-white">{plan.price}</span>
-                                    {plan.period && <span className="text-neutral-400 ml-2">{plan.period}</span>}
+                                    <span className="text-4xl font-bold text-[rgb(var(--text-primary))]">{plan.price}</span>
+                                    {plan.period && <span className="text-[rgb(var(--text-secondary))] ml-2">{plan.period}</span>}
                                 </div>
-                                <p className="text-neutral-400 text-sm">{plan.description}</p>
+                                <p className="text-[rgb(var(--text-secondary))] text-sm">{plan.description}</p>
                             </div>
 
                             <ul className="space-y-3 mb-8">
                                 {plan.features.map((feature, i) => (
                                     <li key={i} className="flex items-start gap-3">
                                         <ClientIcon icon={Check} className="w-5 h-5 text-brand flex-shrink-0 mt-0.5" />
-                                        <span className="text-neutral-300">{feature}</span>
+                                        <span className="text-[rgb(var(--text-secondary))]">{feature}</span>
                                     </li>
                                 ))}
                             </ul>
@@ -111,7 +111,7 @@ export default function PricingSection() {
                                 <Button
                                     className={`w-full h-12 rounded-xl font-semibold transition-all ${plan.popular
                                         ? 'bg-brand text-black hover:bg-brand/90'
-                                        : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+                                        : 'bg-[rgb(var(--bg-secondary))] text-[rgb(var(--text-primary))] hover:bg-[rgb(var(--bg-secondary))]/80 border border-[rgb(var(--border-color))]'
                                         }`}
                                 >
                                     {plan.cta}
@@ -122,7 +122,7 @@ export default function PricingSection() {
                 </div>
 
                 <div className="text-center mt-12">
-                    <p className="text-neutral-400">
+                    <p className="text-[rgb(var(--text-secondary))]">
                         ¿Necesitas ayuda para elegir?{' '}
                         <Link href="/contacto" className="text-brand hover:text-brand/80 font-semibold">
                             Habla con nuestro equipo →

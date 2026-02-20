@@ -31,7 +31,7 @@ export function LoginChoiceCard({
         <div
             className={cn(
                 "relative group overflow-hidden rounded-2xl border transition-all duration-500",
-                "bg-white/5 backdrop-blur-xl border-white/10 hover:border-white/20",
+                "bg-white dark:bg-white/5 backdrop-blur-xl border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-sm",
                 "p-8 flex flex-col items-center text-center",
                 className
             )}
@@ -45,8 +45,8 @@ export function LoginChoiceCard({
             {/* Icon Section */}
             <div className={cn(
                 "mb-6 w-20 h-20 rounded-2xl flex items-center justify-center transition-transform duration-500 group-hover:scale-110",
-                "bg-white/5 border border-white/10",
-                isNeon ? "text-[#00E074] shadow-[0_0_20px_rgba(0,224,116,0.1)]" : "text-blue-400"
+                "bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10",
+                isNeon ? "text-[#00E074] shadow-[0_0_20px_rgba(0,224,116,0.1)]" : "text-blue-500 dark:text-blue-400"
             )}>
                 {typeof Icon === 'string' ? (
                     <span className="text-4xl">{Icon}</span>
@@ -56,17 +56,17 @@ export function LoginChoiceCard({
             </div>
 
             {/* Content */}
-            <h3 className="text-2xl font-bold text-white mb-2 font-space-grotesk tracking-tight">
+            <h3 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 font-space-grotesk tracking-tight">
                 {title}
             </h3>
-            <p className="text-slate-400 text-sm mb-6 max-w-[240px]">
+            <p className="text-slate-500 dark:text-slate-400 text-sm mb-6 max-w-[240px]">
                 {description}
             </p>
 
             {/* Features List */}
             <ul className="space-y-3 mb-10 w-full text-left">
                 {features.map((feature, idx) => (
-                    <li key={idx} className="flex items-center text-sm text-slate-300">
+                    <li key={idx} className="flex items-center text-sm text-slate-600 dark:text-slate-300">
                         <div className={cn(
                             "w-1.5 h-1.5 rounded-full mr-3",
                             isNeon ? "bg-[#00E074]" : "bg-blue-500"
